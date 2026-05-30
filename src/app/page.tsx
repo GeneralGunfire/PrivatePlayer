@@ -1,103 +1,137 @@
 "use client";
 
 import Link from "next/link";
-import { Play } from "lucide-react";
-import { PLAYLISTS, getPlaylistTracks } from "@/lib/playlists";
+import { Play, Pause, Search } from "lucide-react";
+import { PLAYLISTS, ALL_TRACKS, getPlaylistTracks } from "@/lib/playlists";
 import { usePlayer } from "@/lib/player-context";
+import { cn } from "@/lib/utils";
 
-export default function Home() {
+function greet() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+/* ── Horizontal playlist card ── */
+function PlaylistCard({ playlist }: { playlist: typeof PLAYLISTS[0] }) {
   const { play, toggle, playing, activeTrack } = usePlayer();
-
-  const greet = () => {
-    const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 18) return "Good afternoon";
-    return "Good evening";
-  };
+  const tracks = getPlaylistTracks(playlist);
+  const isActive = tracks.some(t => t.id === activeTrack?.id);
 
   return (
-    <div className="px-4 md:px-8 pt-8 pb-32 md:pb-10 max-w-5xl mx-auto">
+    <Link href={`/playlist/${playlist.id}`} className="shrink-0 flex flex-col gap-2 w-32 group">
+      <div className="relative w-32 h-32 rounded-xl overflow-hidden bg-white/5">
+        <img src={playlist.cover} alt={playlist.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        {/* Colour tint */}
+        <div className="absolute inset-0 opacity-30" style={{ background: `linear-gradient(135deg, ${playlist.color}99, transparent)` }} />
+        {/* Play button on hover */}
+        <button
+          onClick={e => {
+            e.preventDefault();
+            if (!tracks.length) return;
+            isActive ? toggle() : play(tracks[0], tracks);
+          }}
+          className="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 hover:scale-105 active:scale-95"
+        >
+          {isActive && playing
+            ? <Pause className="w-4 h-4 text-black fill-black" />
+            : <Play  className="w-4 h-4 text-black fill-black translate-x-px" />
+          }
+        </button>
+      </div>
+      <p className="text-[13px] font-medium text-white truncate">{playlist.name}</p>
+    </Link>
+  );
+}
 
-      <h1 className="text-2xl md:text-3xl font-black text-white mb-6">{greet()}</h1>
+/* ── Recommended track row ── */
+function TrackRow({ track, rank }: { track: typeof ALL_TRACKS[0]; rank: number }) {
+  const { play, toggle, playing, activeTrack, queue } = usePlayer();
+  const isActive = activeTrack?.id === track.id;
 
-      {/* Quick-access grid — top 4 playlists */}
-      <div className="grid grid-cols-2 gap-2 md:gap-3 mb-10">
-        {PLAYLISTS.slice(0, 6).map(pl => {
-          const tracks = getPlaylistTracks(pl);
-          const isActive = tracks.some(t => t.id === activeTrack?.id);
-
-          return (
-            <Link
-              key={pl.id}
-              href={`/playlist/${pl.id}`}
-              className="group flex items-center gap-3 rounded-md bg-white/5 hover:bg-white/10 transition-colors overflow-hidden pr-3"
-            >
-              <div className="w-14 h-14 md:w-16 md:h-16 shrink-0 overflow-hidden">
-                <img src={pl.cover} alt={pl.name} className="w-full h-full object-cover" />
-              </div>
-              <span className="font-semibold text-[13px] md:text-sm text-white truncate flex-1">{pl.name}</span>
-              <button
-                onClick={e => {
-                  e.preventDefault();
-                  if (!tracks.length) return;
-                  isActive ? toggle() : play(tracks[0], tracks);
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-all w-8 h-8 rounded-full bg-[#1ed760] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 shrink-0"
-              >
-                {isActive && playing
-                  ? <span className="w-3 h-3 border-l-2 border-r-2 border-black" />
-                  : <Play className="w-4 h-4 text-black fill-black translate-x-[1px]" />
-                }
-              </button>
-            </Link>
-          );
-        })}
+  return (
+    <button
+      onClick={() => isActive ? toggle() : play(track, ALL_TRACKS)}
+      className="flex items-center gap-4 w-full text-left py-2.5 px-1 rounded-xl hover:bg-white/5 active:bg-white/8 transition-colors group"
+    >
+      {/* Art */}
+      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-white/5 shrink-0">
+        {track.image && <img src={track.image} alt={track.album} className="w-full h-full object-cover" />}
+        {isActive && playing && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <EqBars />
+          </div>
+        )}
       </div>
 
-      {/* All playlists */}
-      <h2 className="text-lg font-bold text-white mb-4">Your playlists</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {PLAYLISTS.map(pl => {
-          const tracks = getPlaylistTracks(pl);
-          const isActive = tracks.some(t => t.id === activeTrack?.id);
-
-          return (
-            <Link
-              key={pl.id}
-              href={`/playlist/${pl.id}`}
-              className="group relative rounded-lg overflow-hidden bg-white/[0.04] hover:bg-white/[0.08] transition-colors p-4 flex flex-col gap-3"
-            >
-              {/* Cover */}
-              <div className="aspect-square w-full rounded-md overflow-hidden shadow-xl relative">
-                <img src={pl.cover} alt={pl.name} className="w-full h-full object-cover" />
-                <div
-                  className="absolute inset-0 opacity-20"
-                  style={{ background: `linear-gradient(135deg, ${pl.color}66, transparent)` }}
-                />
-                {/* Hover play */}
-                <button
-                  onClick={e => {
-                    e.preventDefault();
-                    if (!tracks.length) return;
-                    isActive ? toggle() : play(tracks[0], tracks);
-                  }}
-                  className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#1ed760] flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 hover:scale-105 active:scale-95"
-                >
-                  {isActive && playing
-                    ? <span className="w-3 h-3 border-l-2 border-r-2 border-black" />
-                    : <Play className="w-4 h-4 text-black fill-black translate-x-[1px]" />
-                  }
-                </button>
-              </div>
-
-              <div>
-                <p className="font-semibold text-[13px] text-white truncate">{pl.name}</p>
-                <p className="text-[11px] text-white/45 truncate mt-0.5 leading-snug">{pl.description}</p>
-              </div>
-            </Link>
-          );
-        })}
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className={cn("text-[14px] font-semibold truncate", isActive ? "text-[#a78bfa]" : "text-white")}>{track.album}</p>
+        <p className="text-[12px] text-white/45 truncate mt-0.5">{track.artist}</p>
       </div>
+
+      {/* Play icon on hover */}
+      <div className={cn("shrink-0 transition-opacity", isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+        {isActive && playing
+          ? <Pause className="w-4 h-4 text-white/60" />
+          : <Play  className="w-4 h-4 text-white/60" />
+        }
+      </div>
+    </button>
+  );
+}
+
+function EqBars() {
+  return (
+    <span className="flex items-end gap-[2px] h-4 w-4">
+      {[
+        { anim: "eq1 0.8s ease-in-out infinite" },
+        { anim: "eq2 0.8s ease-in-out 0.15s infinite" },
+        { anim: "eq3 0.8s ease-in-out 0.07s infinite" },
+      ].map((s, i) => (
+        <span key={i} className="flex-1 rounded-sm bg-white origin-bottom" style={{ animation: s.anim }} />
+      ))}
+    </span>
+  );
+}
+
+export default function Home() {
+  return (
+    <div className="px-5 pt-8 pb-6 max-w-xl mx-auto md:max-w-3xl">
+
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between mb-7">
+        <div>
+          <p className="text-[13px] text-white/40 mb-0.5">Welcome back</p>
+          <h1 className="text-[26px] font-black text-white leading-tight">{greet()}</h1>
+        </div>
+        <Link href="/browse" className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/12 transition-colors mt-1">
+          <Search className="w-4 h-4" />
+        </Link>
+      </div>
+
+      {/* ── Recently played / playlists horizontal scroll ── */}
+      <section className="mb-8">
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="text-[17px] font-bold text-white">Your Playlists</h2>
+          <Link href="/browse" className="text-[12px] text-white/35 hover:text-white/70 transition-colors">See all</Link>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-5 px-5">
+          {PLAYLISTS.map(pl => <PlaylistCard key={pl.id} playlist={pl} />)}
+        </div>
+      </section>
+
+      {/* ── Recommended / all tracks ── */}
+      <section>
+        <h2 className="text-[17px] font-bold text-white mb-4">All Tracks</h2>
+        <div className="space-y-1">
+          {ALL_TRACKS.map((track, i) => (
+            <TrackRow key={track.id} track={track} rank={i + 1} />
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 }
