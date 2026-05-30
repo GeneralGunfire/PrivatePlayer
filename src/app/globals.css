@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -14,54 +13,63 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
+  /* Prevent scroll chaining on mobile */
+  overscroll-behavior: none;
 }
 
 /* Selection */
 ::selection { background: white; color: black; }
 
-/* Glassmorphism */
+/* Remove tap flash on mobile */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Glassmorphism — reduced blur values for better mobile perf */
 .glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.8);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.7);
 }
 .glass-light {
   background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255,255,255,0.05);
 }
 .glass-heavy {
-  background: rgba(255,255,255,0.10);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid rgba(255,255,255,0.20);
+  background: rgba(255,255,255,0.09);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.18);
 }
 
 /* Hide scrollbars */
 * { scrollbar-width: none; }
 *::-webkit-scrollbar { display: none; }
-html, body { height: 100%; overscroll-behavior: none; }
+html, body { height: 100%; }
 
-/* EQ bars */
-@keyframes eq1 { 0%,100%{height:30%} 50%{height:100%} }
-@keyframes eq2 { 0%,100%{height:80%} 50%{height:20%} }
-@keyframes eq3 { 0%,100%{height:50%} 50%{height:90%} }
+/* EQ bars — smaller height range, smoother feel */
+@keyframes eq1 { 0%,100%{height:25%} 50%{height:100%} }
+@keyframes eq2 { 0%,100%{height:70%} 50%{height:15%} }
+@keyframes eq3 { 0%,100%{height:45%} 50%{height:85%} }
 
-/* Disc spin — used in PlayerView so pause state holds the angle */
-@keyframes spin-disc { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* Smooth all transitions globally */
-*, *::before, *::after {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* GPU-hint for animated elements */
-.will-animate {
-  will-change: transform, opacity;
+/* Disc spin — CSS animation preserves rotation angle when paused */
+@keyframes spin-disc {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 /* Safe area */
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom,0px), 8px); }
+
+/* Track rows — browser skips painting off-screen items entirely */
+.track-row {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 60px;
+}
+
+/* Framer Motion exit animations — force GPU layer */
+[data-framer-portal-host] { isolation: isolate; }

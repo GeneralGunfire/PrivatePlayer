@@ -3,19 +3,19 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import type { Track } from "@/lib/data";
 import { ALL_TRACKS } from "@/lib/data";
-import { findBestFile } from "@/lib/resolve-track";
+import { TRACK_SRC_MAP } from "@/lib/track-src-map";
 
 interface PlayerCtx {
   queue: Track[];
   currentTrack: Track | null;
   isPlaying: boolean;
-  progress: number;       // 0-100
+  isLoading: boolean;
+  progress: number;
   currentTime: number;
   duration: number;
   shuffle: boolean;
   repeat: boolean;
   isPlayerOpen: boolean;
-  // Actions
   selectTrack: (track: Track, queue?: Track[]) => void;
   togglePlay: () => void;
   next: () => void;
@@ -29,74 +29,90 @@ interface PlayerCtx {
 
 const Ctx = createContext<PlayerCtx | null>(null);
 
-// ── Cached music file list ────────────────────────────────
-let _cachedFiles: string[] | null = null;
-let _fetchPromise: Promise<string[]> | null = null;
-
-async function getMusicFiles(): Promise<string[]> {
-  if (_cachedFiles) return _cachedFiles;
-  if (_fetchPromise) return _fetchPromise;
-  _fetchPromise = fetch("/api/music-files")
-    .then(r => r.json())
-    .then(d => { _cachedFiles = d.files ?? []; return _cachedFiles!; })
-    .catch(() => { _cachedFiles = []; return []; });
-  return _fetchPromise;
+/** Resolve the best playable URL for a track — static map first, then fallback to data.ts src */
+function resolveUrl(track: Track): string {
+  const mapped = TRACK_SRC_MAP[track.id];
+  if (mapped) return mapped;
+  // Fallback: use the src from data.ts directly (already URL-encoded paths)
+  return track.src;
 }
 
-async function resolveTrackSrc(track: Track): Promise<string> {
-  const files = await getMusicFiles();
-  const match = findBestFile(files, track.title, track.artist);
-  return match ? `/music/${encodeURIComponent(match)}` : track.src;
+/** Preload the next track into a hidden audio element so it's buffered */
+let _preloadAudio: HTMLAudioElement | null = null;
+function preloadTrack(track: Track) {
+  if (typeof window === "undefined") return;
+  if (!_preloadAudio) _preloadAudio = new Audio();
+  _preloadAudio.preload = "auto";
+  _preloadAudio.src = resolveUrl(track);
+  _preloadAudio.load();
 }
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [queue,         setQueue]         = useState<Track[]>(ALL_TRACKS);
-  const [currentTrack,  setCurrentTrack]  = useState<Track | null>(null);
-  const [isPlaying,     setIsPlaying]     = useState(false);
-  const [progress,      setProgress]      = useState(0);
-  const [currentTime,   setCurrentTime]   = useState(0);
-  const [duration,      setDuration]      = useState(0);
-  const [shuffle,       setShuffle]       = useState(false);
-  const [repeat,        setRepeat]        = useState(false);
-  const [isPlayerOpen,  setIsPlayerOpen]  = useState(false);
+  const [queue,        setQueue]        = useState<Track[]>(ALL_TRACKS);
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [isPlaying,    setIsPlaying]    = useState(false);
+  const [isLoading,    setIsLoading]    = useState(false);
+  const [progress,     setProgress]     = useState(0);
+  const [currentTime,  setCurrentTime]  = useState(0);
+  const [duration,     setDuration]     = useState(0);
+  const [shuffle,      setShuffle]      = useState(false);
+  const [repeat,       setRepeat]       = useState(false);
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
-  const shuffleRef = useRef(shuffle);
-  shuffleRef.current = shuffle;
-  const repeatRef = useRef(repeat);
-  repeatRef.current = repeat;
-  const queueRef = useRef(queue);
-  queueRef.current = queue;
-  const currentTrackRef = useRef(currentTrack);
-  currentTrackRef.current = currentTrack;
+  // Refs so event callbacks always have fresh values
+  const shuffleRef      = useRef(shuffle);     shuffleRef.current = shuffle;
+  const repeatRef       = useRef(repeat);      repeatRef.current  = repeat;
+  const queueRef        = useRef(queue);        queueRef.current   = queue;
+  const currentTrackRef = useRef(currentTrack); currentTrackRef.current = currentTrack;
 
-  // Create audio element once
   useEffect(() => {
-    audioRef.current = new Audio();
-    const a = audioRef.current;
+    const a = new Audio();
+    a.preload = "auto";
+    audioRef.current = a;
 
     a.ontimeupdate = () => {
       if (!a.duration) return;
       setCurrentTime(a.currentTime);
       setProgress((a.currentTime / a.duration) * 100);
     };
-    a.onloadedmetadata = () => setDuration(a.duration);
-    a.onplay  = () => setIsPlaying(true);
-    a.onpause = () => setIsPlaying(false);
-    a.onended = () => {
-      if (repeatRef.current && audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play();
+    a.onloadedmetadata = () => {
+      setDuration(a.duration);
+      setIsLoading(false);
+    };
+    a.onwaiting  = () => setIsLoading(true);
+    a.oncanplay  = () => setIsLoading(false);
+    a.onplay     = () => { setIsPlaying(true);  setIsLoading(false); };
+    a.onpause    = () => setIsPlaying(false);
+    a.onerror    = () => setIsLoading(false);
+    a.onended    = () => {
+      if (repeatRef.current) {
+        a.currentTime = 0;
+        a.play().catch(() => {});
         return;
       }
       advanceQueue(1);
     };
 
-    // Pre-warm the file list
-    getMusicFiles();
-
     return () => { a.pause(); a.src = ""; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const playTrack = useCallback((track: Track) => {
+    const a = audioRef.current;
+    if (!a) return;
+    setCurrentTrack(track);
+    currentTrackRef.current = track;
+    setIsLoading(true);
+    setProgress(0);
+    setCurrentTime(0);
+
+    const url = resolveUrl(track);
+    // If the preload audio already buffered this track, swap buffers instantly
+    a.src = url;
+    a.load();
+    a.play().catch(() => {});
   }, []);
 
   const advanceQueue = useCallback((dir: 1 | -1) => {
@@ -111,32 +127,26 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       ? Math.floor(Math.random() * q.length)
       : (idx + dir + q.length) % q.length;
 
-    const next = q[ni];
-    setCurrentTrack(next);
-    resolveTrackSrc(next).then(src => {
-      const a = audioRef.current;
-      if (!a) return;
-      a.src = src;
-      a.load();
-      a.play().catch(() => {});
-    });
-  }, []);
+    playTrack(q[ni]);
+
+    // Preload track after next
+    const preloadIdx = (ni + 1) % q.length;
+    if (q[preloadIdx]) preloadTrack(q[preloadIdx]);
+  }, [playTrack]);
 
   const selectTrack = useCallback((track: Track, newQueue?: Track[]) => {
     if (newQueue) {
       setQueue(newQueue);
       queueRef.current = newQueue;
     }
-    setCurrentTrack(track);
-    currentTrackRef.current = track;
-    resolveTrackSrc(track).then(src => {
-      const a = audioRef.current;
-      if (!a) return;
-      a.src = src;
-      a.load();
-      a.play().catch(() => {});
-    });
-  }, []);
+    playTrack(track);
+
+    // Preload next in queue
+    const q = newQueue ?? queueRef.current;
+    const idx = q.findIndex(t => t.id === track.id);
+    const nextIdx = (idx + 1) % q.length;
+    if (q[nextIdx] && q[nextIdx].id !== track.id) preloadTrack(q[nextIdx]);
+  }, [playTrack]);
 
   const togglePlay = useCallback(() => {
     const a = audioRef.current;
@@ -157,11 +167,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (!a?.duration) return;
     a.currentTime = (pct / 100) * a.duration;
     setProgress(pct);
+    setCurrentTime(a.currentTime);
   }, []);
 
   return (
     <Ctx.Provider value={{
-      queue, currentTrack, isPlaying, progress, currentTime, duration,
+      queue, currentTrack, isPlaying, isLoading, progress, currentTime, duration,
       shuffle, repeat, isPlayerOpen,
       selectTrack, togglePlay, next, prev, seek,
       toggleShuffle: () => { const v = !shuffleRef.current; shuffleRef.current = v; setShuffle(v); },

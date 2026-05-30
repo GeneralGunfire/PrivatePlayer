@@ -16,45 +16,61 @@ export default function TrackMenu({ trackId }: Props) {
   const menuRef               = useRef<HTMLDivElement>(null);
   const { playlists, toggleTrack } = usePlaylists();
 
-  // Close on outside click / scroll
+  // Close on outside click / touch
   useEffect(() => {
     if (!open) return;
-    const close = (e: MouseEvent) => {
+    const close = (e: MouseEvent | TouchEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
+    document.addEventListener("touchstart", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("touchstart", close);
+    };
   }, [open]);
 
   const handle = async (playlistId: string) => {
     setPending(playlistId);
     await toggleTrack(playlistId, trackId);
     setPending(null);
-    // don't auto-close so user can multi-add
   };
 
   return (
     <div ref={menuRef} className="relative" onClick={e => e.stopPropagation()}>
-      {/* 3-dot trigger */}
+      {/* 3-dot trigger — always visible on mobile, hover-reveal on desktop */}
       <button
         onClick={() => setOpen(o => !o)}
         className={cn(
           "w-8 h-8 flex items-center justify-center rounded-full transition-all",
           open
             ? "bg-white/15 text-white"
-            : "text-white/25 hover:text-white/70 hover:bg-white/10 opacity-0 group-hover:opacity-100 focus:opacity-100"
+            : "text-white/40 hover:text-white/70 hover:bg-white/10 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
         )}
         aria-label="Song options"
       >
         <MoreHorizontal size={17} />
       </button>
 
-      {/* Popup */}
+      {/* Popup — rendered in a portal-like fashion via fixed positioning */}
       {open && (
-        <div className="absolute right-0 bottom-full mb-2 w-56 rounded-2xl border border-white/12 bg-[#111]/95 backdrop-blur-xl shadow-2xl overflow-hidden z-[200]">
-          <p className="px-4 pt-3 pb-2 text-[9px] font-bold uppercase tracking-[0.25em] text-white/30">
-            Playlists
-          </p>
+        <div
+          className="fixed right-4 w-56 rounded-2xl border border-white/12 bg-[#111]/95 backdrop-blur-xl shadow-2xl overflow-hidden z-500"
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom, 0px) + 100px)",
+          }}
+        >
+          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+            <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-white/30">
+              Add to Playlist
+            </p>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-white/30 hover:text-white text-xs font-bold px-1"
+            >
+              ✕
+            </button>
+          </div>
           {playlists.map(pl => {
             const inPlaylist = pl.tracks.some(t => t.id === trackId);
             const loading    = pending === pl.id;
@@ -63,7 +79,7 @@ export default function TrackMenu({ trackId }: Props) {
                 key={pl.id}
                 onClick={() => handle(pl.id)}
                 disabled={loading}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/8 transition-colors text-left group/item disabled:opacity-40"
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/8 active:bg-white/12 transition-colors text-left group/item disabled:opacity-40"
               >
                 <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 bg-white/5">
                   <img src={pl.coverUrl} alt={pl.name} className="w-full h-full object-cover" />
@@ -81,7 +97,7 @@ export default function TrackMenu({ trackId }: Props) {
               </button>
             );
           })}
-          <div className="h-1" />
+          <div className="h-2" />
         </div>
       )}
     </div>
