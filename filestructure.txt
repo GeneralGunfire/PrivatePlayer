@@ -247,6 +247,9 @@
         |-- ＂Suite＂ - Pirates of the Caribbean (Klaus Badelt) - Film Symphony Orchestra.mp3
     |-- playlists.json
 |-- README.md
+|-- scripts
+    |-- audit-covers.js
+    |-- gen-src-map.js
 |-- src
     |-- app
         |-- api

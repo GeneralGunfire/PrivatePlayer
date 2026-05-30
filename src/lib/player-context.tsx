@@ -6,45 +6,43 @@ import { ALL_TRACKS } from "@/lib/data";
 import { TRACK_SRC_MAP } from "@/lib/track-src-map";
 
 interface PlayerCtx {
-  queue: Track[];
-  currentTrack: Track | null;
-  isPlaying: boolean;
-  isLoading: boolean;
-  progress: number;
-  currentTime: number;
-  duration: number;
-  shuffle: boolean;
-  repeat: boolean;
-  isPlayerOpen: boolean;
-  selectTrack: (track: Track, queue?: Track[]) => void;
-  togglePlay: () => void;
-  next: () => void;
-  prev: () => void;
-  seek: (pct: number) => void;
+  queue:         Track[];
+  currentTrack:  Track | null;
+  isPlaying:     boolean;
+  isLoading:     boolean;
+  progress:      number;
+  currentTime:   number;
+  duration:      number;
+  shuffle:       boolean;
+  repeat:        boolean;
+  isPlayerOpen:  boolean;
+  selectTrack:   (track: Track, queue?: Track[]) => void;
+  togglePlay:    () => void;
+  next:          () => void;
+  prev:          () => void;
+  seek:          (pct: number) => void;
   toggleShuffle: () => void;
-  toggleRepeat: () => void;
-  openPlayer: () => void;
-  closePlayer: () => void;
+  toggleRepeat:  () => void;
+  openPlayer:    () => void;
+  closePlayer:   () => void;
 }
 
 const Ctx = createContext<PlayerCtx | null>(null);
 
-/** Resolve the best playable URL for a track — static map first, then fallback to data.ts src */
+/** Get the exact /music/ URL for a track — map first, then track.src */
 function resolveUrl(track: Track): string {
-  const mapped = TRACK_SRC_MAP[track.id];
-  if (mapped) return mapped;
-  // Fallback: use the src from data.ts directly (already URL-encoded paths)
-  return track.src;
+  return TRACK_SRC_MAP[track.id] ?? track.src;
 }
 
-/** Preload the next track into a hidden audio element so it's buffered */
-let _preloadAudio: HTMLAudioElement | null = null;
-function preloadTrack(track: Track) {
-  if (typeof window === "undefined") return;
-  if (!_preloadAudio) _preloadAudio = new Audio();
-  _preloadAudio.preload = "auto";
-  _preloadAudio.src = resolveUrl(track);
-  _preloadAudio.load();
+/** Silent background preload into a shared Audio element */
+const preloadEl = typeof window !== "undefined" ? new Audio() : null;
+function preload(track: Track) {
+  if (!preloadEl) return;
+  const url = resolveUrl(track);
+  if (preloadEl.src === window.location.origin + url) return; // already loaded
+  preloadEl.src = url;
+  preloadEl.preload = "auto";
+  preloadEl.load();
 }
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
@@ -61,10 +59,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [repeat,       setRepeat]       = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
-  // Refs so event callbacks always have fresh values
-  const shuffleRef      = useRef(shuffle);     shuffleRef.current = shuffle;
-  const repeatRef       = useRef(repeat);      repeatRef.current  = repeat;
-  const queueRef        = useRef(queue);        queueRef.current   = queue;
+  // Stable refs so closures always see current values
+  const shuffleRef      = useRef(shuffle);     shuffleRef.current      = shuffle;
+  const repeatRef       = useRef(repeat);      repeatRef.current       = repeat;
+  const queueRef        = useRef(queue);        queueRef.current        = queue;
   const currentTrackRef = useRef(currentTrack); currentTrackRef.current = currentTrack;
 
   useEffect(() => {
@@ -72,48 +70,62 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     a.preload = "auto";
     audioRef.current = a;
 
-    a.ontimeupdate = () => {
+    a.addEventListener("timeupdate",     () => {
       if (!a.duration) return;
       setCurrentTime(a.currentTime);
       setProgress((a.currentTime / a.duration) * 100);
-    };
-    a.onloadedmetadata = () => {
-      setDuration(a.duration);
-      setIsLoading(false);
-    };
-    a.onwaiting  = () => setIsLoading(true);
-    a.oncanplay  = () => setIsLoading(false);
-    a.onplay     = () => { setIsPlaying(true);  setIsLoading(false); };
-    a.onpause    = () => setIsPlaying(false);
-    a.onerror    = () => setIsLoading(false);
-    a.onended    = () => {
-      if (repeatRef.current) {
-        a.currentTime = 0;
-        a.play().catch(() => {});
-        return;
-      }
+    });
+    a.addEventListener("loadedmetadata", () => { setDuration(a.duration); });
+    a.addEventListener("canplay",        () => { setIsLoading(false); });
+    a.addEventListener("waiting",        () => { setIsLoading(true);  });
+    a.addEventListener("playing",        () => { setIsPlaying(true);  setIsLoading(false); });
+    a.addEventListener("pause",          () => { setIsPlaying(false); });
+    a.addEventListener("ended",          () => {
+      if (repeatRef.current) { a.currentTime = 0; a.play().catch(() => {}); return; }
       advanceQueue(1);
-    };
+    });
+    a.addEventListener("error",          () => { setIsLoading(false); setIsPlaying(false); });
 
     return () => { a.pause(); a.src = ""; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const playTrack = useCallback((track: Track) => {
+  const loadAndPlay = useCallback((url: string) => {
     const a = audioRef.current;
     if (!a) return;
-    setCurrentTrack(track);
-    currentTrackRef.current = track;
     setIsLoading(true);
     setProgress(0);
     setCurrentTime(0);
 
-    const url = resolveUrl(track);
-    // If the preload audio already buffered this track, swap buffers instantly
+    // If preloader already buffered this exact URL, grab its buffer by swapping
+    const absUrl = window.location.origin + url;
+    if (preloadEl && preloadEl.readyState >= 3 &&
+        preloadEl.src === absUrl) {
+      // Same URL, already buffered — just set src and play immediately
+      a.src = url;
+      a.play().catch(() => {});
+      return;
+    }
+
+    // Otherwise load fresh
     a.src = url;
-    a.load();
-    a.play().catch(() => {});
+    // Don't call a.load() — setting src already triggers load in most browsers.
+    // Calling load() resets buffering and causes delays.
+    a.play().catch(() => {
+      // Autoplay blocked — wait for canplay then play
+      const onCan = () => {
+        a.removeEventListener("canplay", onCan);
+        a.play().catch(() => {});
+      };
+      a.addEventListener("canplay", onCan);
+    });
   }, []);
+
+  const playTrack = useCallback((track: Track) => {
+    setCurrentTrack(track);
+    currentTrackRef.current = track;
+    loadAndPlay(resolveUrl(track));
+  }, [loadAndPlay]);
 
   const advanceQueue = useCallback((dir: 1 | -1) => {
     const q   = queueRef.current;
@@ -129,9 +141,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     playTrack(q[ni]);
 
-    // Preload track after next
-    const preloadIdx = (ni + 1) % q.length;
-    if (q[preloadIdx]) preloadTrack(q[preloadIdx]);
+    // Preload two tracks ahead
+    const pi = (ni + 1) % q.length;
+    if (q[pi]) preload(q[pi]);
   }, [playTrack]);
 
   const selectTrack = useCallback((track: Track, newQueue?: Track[]) => {
@@ -141,17 +153,21 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
     playTrack(track);
 
-    // Preload next in queue
-    const q = newQueue ?? queueRef.current;
+    // Preload next
+    const q   = newQueue ?? queueRef.current;
     const idx = q.findIndex(t => t.id === track.id);
-    const nextIdx = (idx + 1) % q.length;
-    if (q[nextIdx] && q[nextIdx].id !== track.id) preloadTrack(q[nextIdx]);
+    const ni  = (idx + 1) % q.length;
+    if (q[ni] && q[ni].id !== track.id) preload(q[ni]);
   }, [playTrack]);
 
   const togglePlay = useCallback(() => {
     const a = audioRef.current;
     if (!a || !currentTrackRef.current) return;
-    a.paused ? a.play().catch(() => {}) : a.pause();
+    if (a.paused) {
+      a.play().catch(() => {});
+    } else {
+      a.pause();
+    }
   }, []);
 
   const next = useCallback(() => advanceQueue(1),  [advanceQueue]);
