@@ -20,6 +20,10 @@ html, body {
   0%, 100% { transform: scaleY(0.4); }
   50%       { transform: scaleY(1); }
 }
+@keyframes eqbar {
+  from { height: 20%;  }
+  to   { height: 100%; }
+}
 
 /* ── Audio Player Panel ── */
 .player-panel {

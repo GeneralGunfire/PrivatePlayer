@@ -24,8 +24,8 @@ export const TRACKS: Track[] = [
     label: "PARLOPHONE",
     year: "2011",
     src: "/music/paradise-coldplay.mp3",
-    // Dreamy hot air balloon over golden fields — matches the Paradise video
+    // Coldplay — colourful confetti/lights atmosphere matching their visual identity
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80",
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&q=80",
   },
 ];

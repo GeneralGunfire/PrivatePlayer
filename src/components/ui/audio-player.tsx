@@ -1,49 +1,71 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Track } from "@/lib/tracks";
 
-// ── Helpers ──────────────────────────────────────────────
-const formatTime = (seconds: number = 0) => {
-  if (!isFinite(seconds)) return "0:00";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
+const fmt = (s: number = 0) => {
+  if (!isFinite(s)) return "0:00";
+  return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, "0")}`;
 };
 
-// ── Progress / Volume Slider ─────────────────────────────
-const Slider = ({
-  value,
-  onChange,
-  className,
+// ── Slim scrub/volume bar ────────────────────────────────
+const Rail = ({
+  value, onChange, green = false, className,
 }: {
-  value: number;
-  onChange: (v: number) => void;
-  className?: string;
+  value: number; onChange: (v: number) => void; green?: boolean; className?: string;
 }) => (
   <div
-    className={cn("relative w-full h-[3px] bg-white/10 rounded-full cursor-pointer group", className)}
-    onClick={(e) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      onChange(Math.min(Math.max(((e.clientX - rect.left) / rect.width) * 100, 0), 100));
+    className={cn("relative h-1 rounded-full cursor-pointer group", className)}
+    style={{ background: "rgba(255,255,255,0.12)" }}
+    onClick={e => {
+      const r = e.currentTarget.getBoundingClientRect();
+      onChange(Math.min(Math.max(((e.clientX - r.left) / r.width) * 100, 0), 100));
     }}
   >
     <div
-      className="absolute top-0 left-0 h-full bg-white/70 rounded-full group-hover:bg-white transition-colors duration-150"
-      style={{ width: `${value}%` }}
+      className="absolute inset-y-0 left-0 rounded-full transition-colors duration-150"
+      style={{
+        width: `${value}%`,
+        background: green ? "#1ed760" : "rgba(255,255,255,0.75)",
+      }}
     />
+    {/* Thumb — only visible on hover */}
     <div
-      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+      className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white opacity-0 group-hover:opacity-100 transition-opacity shadow pointer-events-none"
       style={{ left: `calc(${value}% - 6px)` }}
     />
   </div>
 );
 
-// ── Main Component ────────────────────────────────────────
+// ── Icon button helper ───────────────────────────────────
+const Btn = ({
+  onClick, active = false, accent = false, size = "md", children, className,
+}: {
+  onClick?: () => void; active?: boolean; accent?: boolean;
+  size?: "sm" | "md" | "lg"; children: React.ReactNode; className?: string;
+}) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "flex items-center justify-center rounded-full transition-all duration-100 shrink-0",
+      size === "sm" && "w-7 h-7",
+      size === "md" && "w-8 h-8",
+      size === "lg" && "w-10 h-10",
+      accent
+        ? "bg-[#1ed760] hover:bg-[#1fdf64] hover:scale-105 active:scale-95"
+        : "hover:text-white text-white/60 active:scale-90",
+      active && !accent && "text-[#1ed760] hover:text-[#1ed760]",
+      className
+    )}
+  >
+    {children}
+  </button>
+);
+
+// ── Main ─────────────────────────────────────────────────
 interface AudioPlayerProps {
   track: Track | null;
   tracks: Track[];
@@ -54,199 +76,156 @@ interface AudioPlayerProps {
 }
 
 const AudioPlayer = ({ track, tracks, onNext, onPrev, isVisible, onClose }: AudioPlayerProps) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef  = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying]   = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isShuffle, setIsShuffle] = useState(false);
-  const [isRepeat, setIsRepeat] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
+  const [current, setCurrent]   = useState(0);
+  const [dur, setDur]           = useState(0);
+  const [shuffle, setShuffle]   = useState(false);
+  const [repeat, setRepeat]     = useState(false);
+  const [vol, setVol]           = useState(1);
+  const [muted, setMuted]       = useState(false);
 
-  // Load new track when it changes
+  // Swap src when track changes
   useEffect(() => {
     if (!audioRef.current || !track) return;
-    const wasPlaying = isPlaying;
+    const wasPlaying = playing;
     audioRef.current.src = track.src;
     audioRef.current.load();
+    setProgress(0); setCurrent(0);
     if (wasPlaying) audioRef.current.play().catch(() => {});
-    setProgress(0);
-    setCurrentTime(0);
   }, [track?.id]);
 
   const togglePlay = () => {
     if (!audioRef.current || !track) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => {});
-    }
-    setIsPlaying(!isPlaying);
+    playing ? audioRef.current.pause() : audioRef.current.play().catch(() => {});
+    setPlaying(!playing);
   };
 
   const handleTimeUpdate = () => {
     if (!audioRef.current) return;
     const pct = (audioRef.current.currentTime / audioRef.current.duration) * 100;
     setProgress(isFinite(pct) ? pct : 0);
-    setCurrentTime(audioRef.current.currentTime);
-    setDuration(audioRef.current.duration || 0);
+    setCurrent(audioRef.current.currentTime);
+    setDur(audioRef.current.duration || 0);
   };
 
-  const handleSeek = (value: number) => {
+  const handleSeek = (v: number) => {
     if (!audioRef.current?.duration) return;
-    const time = (value / 100) * audioRef.current.duration;
-    if (isFinite(time)) {
-      audioRef.current.currentTime = time;
-      setProgress(value);
-    }
+    const t = (v / 100) * audioRef.current.duration;
+    if (isFinite(t)) { audioRef.current.currentTime = t; setProgress(v); }
   };
 
-  const handleVolumeChange = (value: number) => {
-    const v = value / 100;
-    setVolume(v);
-    setIsMuted(v === 0);
-    if (audioRef.current) audioRef.current.volume = v;
+  const changeVol = (v: number) => {
+    const n = v / 100;
+    setVol(n); setMuted(n === 0);
+    if (audioRef.current) audioRef.current.volume = n;
   };
 
   const toggleMute = () => {
     if (!audioRef.current) return;
-    const next = !isMuted;
-    setIsMuted(next);
-    audioRef.current.volume = next ? 0 : volume;
+    const next = !muted;
+    setMuted(next);
+    audioRef.current.volume = next ? 0 : vol;
   };
 
-  const handleEnded = () => {
-    if (isRepeat && audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
-    } else {
-      onNext();
-    }
-  };
+  const next = () => { onNext(); setPlaying(true); };
 
-  const handleNext = () => {
-    if (isShuffle && tracks.length > 1) {
-      // pick random track (not current)
-      const others = tracks.filter((t) => t.id !== track?.id);
-      const random = others[Math.floor(Math.random() * others.length)];
-      const idx = tracks.findIndex((t) => t.id === random.id);
-      // bubble up via index difference — simplest: just call onNext and accept order
-    }
-    onNext();
-    setIsPlaying(true);
-  };
-
-  const handlePrev = () => {
-    // If > 3 seconds in, restart; else go to previous
+  const prev = () => {
     if (audioRef.current && audioRef.current.currentTime > 3) {
       audioRef.current.currentTime = 0;
-    } else {
-      onPrev();
-      setIsPlaying(true);
-    }
+    } else { onPrev(); setPlaying(true); }
+  };
+
+  const ended = () => {
+    if (repeat && audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play().catch(() => {}); }
+    else next();
   };
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          key="player"
-          className="player-panel"
+          key="bar"
+          className="fixed bottom-0 inset-x-0 z-50 bg-[#181818] border-t border-white/[0.06]"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
-          transition={{ type: "spring", stiffness: 380, damping: 38 }}
+          transition={{ type: "spring", stiffness: 420, damping: 42 }}
         >
           <audio
             ref={audioRef}
             onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
-            onEnded={handleEnded}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
+            onLoadedMetadata={() => setDur(audioRef.current?.duration || 0)}
+            onEnded={ended}
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
           />
 
-          {/* Progress bar — full width at top */}
-          <Slider value={progress} onChange={handleSeek} className="rounded-none" />
+          {/* Full-width scrub rail */}
+          <Rail value={progress} onChange={handleSeek} green className="mx-0 rounded-none" />
 
-          <div className="flex items-center gap-4 px-6 py-3">
-            {/* Cover + info */}
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="flex items-center px-4 py-2.5 gap-3">
+
+            {/* ── Left: art + track info ── */}
+            <div className="flex items-center gap-3 min-w-0 w-[220px] shrink-0">
               {track?.image && (
-                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
+                <div className="w-10 h-10 rounded shrink-0 overflow-hidden bg-white/5 shadow">
                   <img src={track.image} alt={track.album} className="w-full h-full object-cover" />
                 </div>
               )}
               <div className="min-w-0">
-                <p className="text-white text-xs font-semibold uppercase tracking-widest truncate">
+                <p className="text-white text-[13px] font-medium truncate leading-snug">
                   {track?.album ?? "—"}
                 </p>
-                <p className="text-white/40 text-[10px] uppercase tracking-widest truncate">
+                <p className="text-white/50 text-[11px] truncate mt-[1px]">
                   {track?.artist ?? ""}
                 </p>
               </div>
             </div>
 
-            {/* Centre controls */}
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsShuffle(!isShuffle)}
-                className={cn("text-white/40 hover:text-white h-8 w-8", isShuffle && "text-yellow-300")}
-              >
-                <Shuffle className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handlePrev}
-                className="text-white/70 hover:text-white h-8 w-8"
-              >
-                <SkipBack className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={togglePlay}
-                className="text-white hover:text-yellow-300 h-10 w-10 border border-white/10 rounded-full"
-              >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleNext}
-                className="text-white/70 hover:text-white h-8 w-8"
-              >
-                <SkipForward className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsRepeat(!isRepeat)}
-                className={cn("text-white/40 hover:text-white h-8 w-8", isRepeat && "text-yellow-300")}
-              >
-                <Repeat className="h-3.5 w-3.5" />
-              </Button>
+            {/* ── Centre: transport ── */}
+            <div className="flex-1 flex flex-col items-center gap-1.5">
+              <div className="flex items-center gap-2">
+                <Btn onClick={() => setShuffle(s => !s)} active={shuffle} size="sm">
+                  <Shuffle className="w-3.5 h-3.5" />
+                </Btn>
+                <Btn onClick={prev} size="md">
+                  <SkipBack className="w-4 h-4 fill-current" />
+                </Btn>
+                <Btn onClick={togglePlay} accent size="lg">
+                  {playing
+                    ? <Pause className="w-5 h-5 text-black fill-black" />
+                    : <Play  className="w-5 h-5 text-black fill-black translate-x-[1px]" />
+                  }
+                </Btn>
+                <Btn onClick={next} size="md">
+                  <SkipForward className="w-4 h-4 fill-current" />
+                </Btn>
+                <Btn onClick={() => setRepeat(r => !r)} active={repeat} size="sm">
+                  <Repeat className="w-3.5 h-3.5" />
+                </Btn>
+              </div>
+
+              {/* Timestamps + progress */}
+              <div className="hidden sm:flex items-center gap-2 w-full max-w-sm">
+                <span className="text-[10px] text-white/40 tabular-nums w-8 text-right shrink-0">{fmt(current)}</span>
+                <Rail value={progress} onChange={handleSeek} className="flex-1" />
+                <span className="text-[10px] text-white/40 tabular-nums w-8 shrink-0">{fmt(dur)}</span>
+              </div>
             </div>
 
-            {/* Right — time + volume + close */}
-            <div className="flex items-center gap-3 flex-1 justify-end">
-              <span className="text-white/30 text-[10px] tabular-nums hidden sm:block">
-                {formatTime(currentTime)} / {formatTime(duration)}
-              </span>
-              <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white/40 hover:text-white h-7 w-7">
-                {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-              </Button>
-              <div className="w-20 hidden sm:block">
-                <Slider value={isMuted ? 0 : volume * 100} onChange={handleVolumeChange} />
-              </div>
-              <Button variant="ghost" size="icon" onClick={onClose} className="text-white/30 hover:text-white h-7 w-7">
-                <ChevronDown className="h-4 w-4" />
-              </Button>
+            {/* ── Right: volume + close ── */}
+            <div className="hidden sm:flex items-center gap-2 w-[220px] justify-end shrink-0">
+              <Btn onClick={toggleMute} size="sm">
+                {muted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+              </Btn>
+              <Rail value={muted ? 0 : vol * 100} onChange={changeVol} className="w-24" />
+              <Btn onClick={onClose} size="sm" className="ml-2 text-white/30">
+                <ChevronDown className="w-4 h-4" />
+              </Btn>
             </div>
+
           </div>
         </motion.div>
       )}
