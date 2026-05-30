@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import type { Track } from "@/lib/data";
 import { ALL_TRACKS } from "@/lib/data";
+import { findBestFile } from "@/lib/resolve-track";
 
 interface PlayerCtx {
   queue: Track[];
@@ -28,18 +29,47 @@ interface PlayerCtx {
 
 const Ctx = createContext<PlayerCtx | null>(null);
 
+// ── Cached music file list ────────────────────────────────
+let _cachedFiles: string[] | null = null;
+let _fetchPromise: Promise<string[]> | null = null;
+
+async function getMusicFiles(): Promise<string[]> {
+  if (_cachedFiles) return _cachedFiles;
+  if (_fetchPromise) return _fetchPromise;
+  _fetchPromise = fetch("/api/music-files")
+    .then(r => r.json())
+    .then(d => { _cachedFiles = d.files ?? []; return _cachedFiles!; })
+    .catch(() => { _cachedFiles = []; return []; });
+  return _fetchPromise;
+}
+
+async function resolveTrackSrc(track: Track): Promise<string> {
+  const files = await getMusicFiles();
+  const match = findBestFile(files, track.title, track.artist);
+  return match ? `/music/${encodeURIComponent(match)}` : track.src;
+}
+
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [queue,       setQueue]       = useState<Track[]>(ALL_TRACKS);
-  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
-  const [isPlaying,   setIsPlaying]   = useState(false);
-  const [progress,    setProgress]    = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration,    setDuration]    = useState(0);
-  const [shuffle,     setShuffle]     = useState(false);
-  const [repeat,      setRepeat]      = useState(false);
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  const [queue,         setQueue]         = useState<Track[]>(ALL_TRACKS);
+  const [currentTrack,  setCurrentTrack]  = useState<Track | null>(null);
+  const [isPlaying,     setIsPlaying]     = useState(false);
+  const [progress,      setProgress]      = useState(0);
+  const [currentTime,   setCurrentTime]   = useState(0);
+  const [duration,      setDuration]      = useState(0);
+  const [shuffle,       setShuffle]       = useState(false);
+  const [repeat,        setRepeat]        = useState(false);
+  const [isPlayerOpen,  setIsPlayerOpen]  = useState(false);
+
+  const shuffleRef = useRef(shuffle);
+  shuffleRef.current = shuffle;
+  const repeatRef = useRef(repeat);
+  repeatRef.current = repeat;
+  const queueRef = useRef(queue);
+  queueRef.current = queue;
+  const currentTrackRef = useRef(currentTrack);
+  currentTrackRef.current = currentTrack;
 
   // Create audio element once
   useEffect(() => {
@@ -55,70 +85,72 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     a.onplay  = () => setIsPlaying(true);
     a.onpause = () => setIsPlaying(false);
     a.onended = () => {
-      if (repeat) { a.currentTime = 0; a.play(); return; }
-      nextTrack();
+      if (repeatRef.current && audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+        return;
+      }
+      advanceQueue(1);
     };
+
+    // Pre-warm the file list
+    getMusicFiles();
 
     return () => { a.pause(); a.src = ""; };
   }, []);
 
-  // Keep repeat ref fresh for onended closure
-  const repeatRef = useRef(repeat);
-  repeatRef.current = repeat;
+  const advanceQueue = useCallback((dir: 1 | -1) => {
+    const q   = queueRef.current;
+    const cur = currentTrackRef.current;
+    if (!cur || !q.length) return;
 
-  const nextTrack = useCallback(() => {
-    setQueue(q => {
-      setCurrentTrack(cur => {
-        if (!cur || !q.length) return cur;
-        const idx = q.findIndex(t => t.id === cur.id);
-        const ni  = shuffle
-          ? Math.floor(Math.random() * q.length)
-          : (idx + 1) % q.length;
-        const next = q[ni];
-        if (audioRef.current) {
-          audioRef.current.src = next.src;
-          audioRef.current.load();
-          audioRef.current.play().catch(() => {});
-        }
-        return next;
-      });
-      return q;
+    let idx = q.findIndex(t => t.id === cur.id);
+    if (idx === -1) idx = 0;
+
+    const ni = shuffleRef.current
+      ? Math.floor(Math.random() * q.length)
+      : (idx + dir + q.length) % q.length;
+
+    const next = q[ni];
+    setCurrentTrack(next);
+    resolveTrackSrc(next).then(src => {
+      const a = audioRef.current;
+      if (!a) return;
+      a.src = src;
+      a.load();
+      a.play().catch(() => {});
     });
-  }, [shuffle]);
+  }, []);
 
   const selectTrack = useCallback((track: Track, newQueue?: Track[]) => {
-    if (newQueue) setQueue(newQueue);
-    setCurrentTrack(track);
-    if (audioRef.current) {
-      audioRef.current.src = track.src;
-      audioRef.current.load();
-      audioRef.current.play().catch(() => {});
+    if (newQueue) {
+      setQueue(newQueue);
+      queueRef.current = newQueue;
     }
+    setCurrentTrack(track);
+    currentTrackRef.current = track;
+    resolveTrackSrc(track).then(src => {
+      const a = audioRef.current;
+      if (!a) return;
+      a.src = src;
+      a.load();
+      a.play().catch(() => {});
+    });
   }, []);
 
   const togglePlay = useCallback(() => {
-    if (!audioRef.current || !currentTrack) return;
-    isPlaying ? audioRef.current.pause() : audioRef.current.play().catch(() => {});
-  }, [isPlaying, currentTrack]);
+    const a = audioRef.current;
+    if (!a || !currentTrackRef.current) return;
+    a.paused ? a.play().catch(() => {}) : a.pause();
+  }, []);
 
-  const next = useCallback(() => nextTrack(), [nextTrack]);
-
+  const next = useCallback(() => advanceQueue(1),  [advanceQueue]);
   const prev = useCallback(() => {
     const a = audioRef.current;
     if (!a) return;
     if (a.currentTime > 3) { a.currentTime = 0; return; }
-    setQueue(q => {
-      setCurrentTrack(cur => {
-        if (!cur || !q.length) return cur;
-        const idx = q.findIndex(t => t.id === cur.id);
-        const pi  = (idx - 1 + q.length) % q.length;
-        const prev = q[pi];
-        a.src = prev.src; a.load(); a.play().catch(() => {});
-        return prev;
-      });
-      return q;
-    });
-  }, []);
+    advanceQueue(-1);
+  }, [advanceQueue]);
 
   const seek = useCallback((pct: number) => {
     const a = audioRef.current;
@@ -132,8 +164,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       queue, currentTrack, isPlaying, progress, currentTime, duration,
       shuffle, repeat, isPlayerOpen,
       selectTrack, togglePlay, next, prev, seek,
-      toggleShuffle: () => setShuffle(s => !s),
-      toggleRepeat:  () => setRepeat(r => !r),
+      toggleShuffle: () => { const v = !shuffleRef.current; shuffleRef.current = v; setShuffle(v); },
+      toggleRepeat:  () => { const v = !repeatRef.current;  repeatRef.current  = v; setRepeat(v);  },
       openPlayer:    () => setIsPlayerOpen(true),
       closePlayer:   () => setIsPlayerOpen(false),
     }}>

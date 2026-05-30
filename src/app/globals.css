@@ -50,5 +50,18 @@ html, body { height: 100%; overscroll-behavior: none; }
 @keyframes eq2 { 0%,100%{height:80%} 50%{height:20%} }
 @keyframes eq3 { 0%,100%{height:50%} 50%{height:90%} }
 
+/* Disc spin — used in PlayerView so pause state holds the angle */
+@keyframes spin-disc { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Smooth all transitions globally */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* GPU-hint for animated elements */
+.will-animate {
+  will-change: transform, opacity;
+}
+
 /* Safe area */
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom,0px), 8px); }
