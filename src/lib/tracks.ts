@@ -7,6 +7,7 @@ export interface Track {
   year: string;
   image: string;          // background art URL
   src: string;            // audio file path, e.g. "/music/my-song.mp3"
+  duration?: number;      // seconds — optional, shows year if not set
 }
 
 // ─────────────────────────────────────────────────────────

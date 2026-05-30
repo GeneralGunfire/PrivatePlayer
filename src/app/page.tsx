@@ -39,17 +39,6 @@ export default function Home() {
         activeTrackIndex={activeIndex}
         isPlaying={isPlaying}
         onTrackSelect={handleTrackSelect}
-        config={{
-          timeZone: "Africa/Johannesburg",
-          idleDelay: 4000,
-        }}
-        socialLinks={{
-          // Fill these in when ready:
-          // spotify: "https://open.spotify.com/...",
-          // email: "mailto:you@example.com",
-          // x: "https://x.com/...",
-        }}
-        location="YOUR CITY"
       />
 
       <AudioPlayer

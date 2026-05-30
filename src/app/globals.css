@@ -1,20 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-:root {
-  --color-accent: rgb(255, 223, 0);
-  --font-primary: "PP Supply Mono", "JetBrains Mono", monospace;
-  --background: #080808;
-  --surface: #111111;
-  --border: #1e1e1e;
-  --text: #e0e0e0;
-  --muted: #555;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -23,142 +9,16 @@
 
 html, body {
   height: 100%;
-  background: var(--background);
-  color: var(--text);
-  font-family: var(--font-primary);
+  background: #121212;
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Music Portfolio Styles ── */
-.container {
-  position: relative;
-  width: 100vw;
-  min-height: 100vh;
-  overflow: hidden;
-  background: var(--background);
-}
-
-.portfolio-container {
-  position: relative;
-  z-index: 10;
-  padding: 2rem clamp(1.5rem, 5vw, 4rem);
-  padding-top: clamp(4rem, 8vw, 7rem);
-  padding-bottom: clamp(4rem, 8vw, 7rem);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-}
-
-.project-list {
-  list-style: none;
-  width: 100%;
-}
-
-.project-item {
-  display: grid;
-  grid-template-columns: 2fr 2fr 1fr 1.5fr 0.5fr;
-  gap: 1rem;
-  padding: 0.9rem 0;
-  border-bottom: 1px solid var(--border);
-  cursor: default;
-  transition: opacity 0.2s ease;
-  align-items: baseline;
-}
-
-.project-item:first-child {
-  border-top: 1px solid var(--border);
-}
-
-.project-item.active .project-data {
-  color: var(--color-accent);
-}
-
-.project-data {
-  font-size: clamp(0.7rem, 1.1vw, 0.95rem);
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--text);
-  transition: color 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.project-data.artist {
-  font-size: clamp(0.75rem, 1.2vw, 1rem);
-  font-weight: 600;
-}
-
-.project-data.year {
-  text-align: right;
-  color: var(--muted);
-}
-
-.project-data.label {
-  color: var(--muted);
-}
-
-/* ── Background image ── */
-.background-image {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 55vw;
-  height: 55vw;
-  max-width: 700px;
-  max-height: 700px;
-  border-radius: 50%;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 1;
-  filter: blur(60px) saturate(1.4);
-  transition: opacity 0.6s ease;
-}
-
-/* ── Corner elements ── */
-.corner-elements {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 20;
-  font-size: clamp(0.6rem, 0.8vw, 0.75rem);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.corner-item {
-  position: absolute;
-  padding: 1.5rem 2rem;
-}
-
-.corner-item.top-left { top: 0; left: 0; }
-.corner-item.top-right { top: 0; right: 0; pointer-events: auto; display: flex; align-items: center; gap: 0.5rem; }
-.corner-item.bottom-left { bottom: 0; left: 0; }
-.corner-item.bottom-right { bottom: 0; right: 0; font-variant-numeric: tabular-nums; }
-
-.corner-square {
-  width: 8px;
-  height: 8px;
-  border: 1px solid var(--muted);
-}
-
-.corner-item.top-right a {
-  color: var(--muted);
-  text-decoration: none;
-  pointer-events: auto;
-  transition: color 0.2s;
-}
-
-.corner-item.top-right a:hover {
-  color: var(--text);
-}
-
-.time-blink {
-  animation: blink 1s step-end infinite;
+/* ── Playing bars animation ── */
+@keyframes musicbar {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
 }
 
 /* ── Audio Player Panel ── */
@@ -168,8 +28,8 @@ html, body {
   left: 0;
   right: 0;
   z-index: 50;
-  background: rgba(10, 10, 10, 0.92);
-  border-top: 1px solid var(--border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(18, 18, 18, 0.95);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
