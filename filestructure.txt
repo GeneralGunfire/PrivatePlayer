@@ -249,6 +249,8 @@
 |-- README.md
 |-- scripts
     |-- audit-covers.js
+    |-- check-id.js
+    |-- fix-covers.js
     |-- gen-src-map.js
 |-- src
     |-- app

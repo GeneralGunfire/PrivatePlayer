@@ -106,7 +106,7 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
         </motion.button>
 
         <p className="text-[10px] text-white/18 font-bold uppercase tracking-widest ml-1">
-          Tap ··· to add or remove tracks
+          {playlist.tracks.length} {playlist.tracks.length === 1 ? "song" : "songs"}
         </p>
       </div>
 
