@@ -8,22 +8,21 @@ import { usePlayer } from "@/lib/player-context";
 import { PLAYLISTS } from "@/lib/playlists";
 import MiniPlayer from "@/components/mini-player";
 
-/* ── Bottom tab definition ── */
+/* Image 2 bottom nav: 4 icons, no labels, active = white */
 const TABS = [
-  { href: "/",        icon: Home,   label: "Home"    },
-  { href: "/browse",  icon: Music2, label: "Browse"  },
-  { href: "/liked",   icon: Heart,  label: "Liked"   },
-  { href: "/profile", icon: User,   label: "Profile" },
+  { href: "/",        icon: Home,   activeIcon: Home   },
+  { href: "/browse",  icon: Music2, activeIcon: Music2 },
+  { href: "/liked",   icon: Heart,  activeIcon: Heart  },
+  { href: "/profile", icon: User,   activeIcon: User   },
 ];
 
-/* ── Sidebar link (desktop) ── */
 function SideLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
   const path = usePathname();
   const active = href === "/" ? path === "/" : path.startsWith(href);
   return (
     <Link href={href} className={cn(
-      "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
-      active ? "bg-white/10 text-white" : "text-white/40 hover:text-white/80 hover:bg-white/5"
+      "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
+      active ? "bg-white/10 text-white" : "text-white/35 hover:text-white/70 hover:bg-white/5"
     )}>
       <Icon className="w-4 h-4 shrink-0" />
       {label}
@@ -37,78 +36,70 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const isNowPlaying = path === "/now-playing";
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-[#0d0d0d]">
+    <div className="flex h-[100dvh] overflow-hidden bg-[#080c14]">
 
-      {/* ══ Desktop sidebar ══ */}
-      <aside className="hidden md:flex flex-col w-60 shrink-0 bg-black/60 border-r border-white/[0.06] h-full">
-        {/* Wordmark */}
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex flex-col w-56 shrink-0 bg-black/50 border-r border-white/[0.05] h-full">
         <div className="px-6 py-7">
           <span className="text-[17px] font-black tracking-tight">
-            Private<span className="text-[#a78bfa]">Player</span>
+            Private<span className="text-[#6c8fff]">Player</span>
           </span>
         </div>
-
-        {/* Nav */}
         <nav className="px-3 space-y-0.5">
-          {TABS.map(t => <SideLink key={t.href} {...t} />)}
+          {TABS.map(t => <SideLink key={t.href} href={t.href} icon={t.icon} label={t.href === "/" ? "Home" : t.href.slice(1).charAt(0).toUpperCase() + t.href.slice(2)} />)}
         </nav>
-
-        {/* Playlist list */}
-        <div className="mt-6 px-6 flex-1 overflow-y-auto">
-          <p className="text-[10px] uppercase tracking-[0.18em] text-white/25 mb-3 font-semibold">
-            Playlists
-          </p>
-          <PlaylistLinks />
+        <div className="mt-6 px-5 flex-1 overflow-y-auto">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-white/20 mb-3 font-semibold">Playlists</p>
+          <ul className="space-y-0.5">
+            {PLAYLISTS.map(pl => (
+              <li key={pl.id}>
+                <Link href={`/playlist/${pl.id}`} className={cn(
+                  "block text-[13px] py-1.5 px-2 rounded-lg truncate transition-colors",
+                  path === `/playlist/${pl.id}` ? "text-white font-medium" : "text-white/30 hover:text-white/65"
+                )}>
+                  {pl.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </aside>
 
-      {/* ══ Main content ══ */}
+      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <main className="flex-1 overflow-y-auto" id="main-scroll">
           {children}
         </main>
 
-        {/* Mini player — shown when a track is active, hidden on now-playing page */}
+        {/* Mini player sits above bottom nav */}
         {activeTrack && !isNowPlaying && <MiniPlayer />}
 
-        {/* ══ Mobile bottom nav ══ */}
-        <nav className={cn(
-          "md:hidden flex items-center bg-[#0d0d0d] border-t border-white/[0.06] pb-safe",
-          isNowPlaying && "hidden"
-        )}>
-          {TABS.map(({ href, icon: Icon, label }) => {
-            const active = href === "/" ? path === "/" : path.startsWith(href);
-            return (
-              <Link key={href} href={href} className="flex flex-col items-center justify-center flex-1 pt-3 pb-1 gap-1">
-                <Icon className={cn("w-5 h-5 transition-colors", active ? "text-white" : "text-white/30")} />
-                <span className={cn("text-[9px] font-medium tracking-wide transition-colors", active ? "text-white" : "text-white/30")}>
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
+        {/* ── Bottom nav — image 2 exact ── */}
+        {!isNowPlaying && (
+          <nav className="md:hidden flex items-center justify-around bg-[#0d1120] border-t border-white/[0.06] pb-safe">
+            {TABS.map(({ href, icon: Icon }) => {
+              const active = href === "/" ? path === "/" : path.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center justify-center flex-1 py-4"
+                >
+                  <Icon
+                    className={cn(
+                      "w-6 h-6 transition-all",
+                      active
+                        ? "text-white fill-white stroke-white"
+                        : "text-white/30 fill-none"
+                    )}
+                    strokeWidth={active ? 2.5 : 1.8}
+                  />
+                </Link>
+              );
+            })}
+          </nav>
+        )}
       </div>
-
     </div>
-  );
-}
-
-/* ── Playlist links for sidebar ── */
-function PlaylistLinks() {
-  const path = usePathname();
-  return (
-    <ul className="space-y-0.5">
-      {PLAYLISTS.map((pl) => (
-        <li key={pl.id}>
-          <Link href={`/playlist/${pl.id}`} className={cn(
-            "block text-[13px] py-1.5 px-2 rounded-lg truncate transition-colors",
-            path === `/playlist/${pl.id}` ? "text-white font-medium" : "text-white/35 hover:text-white/70"
-          )}>
-            {pl.name}
-          </Link>
-        </li>
-      ))}
-    </ul>
   );
 }
