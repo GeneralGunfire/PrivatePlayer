@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, Plus, Check, Loader2 } from "lucide-react";
+import { MoreHorizontal, Plus, Check, Loader2, X } from "lucide-react";
 import { usePlaylists } from "@/lib/use-playlists";
 import { cn } from "@/lib/utils";
 
@@ -66,9 +66,9 @@ export default function TrackMenu({ trackId }: Props) {
             </p>
             <button
               onClick={() => setOpen(false)}
-              className="text-white/30 hover:text-white text-xs font-bold px-1"
+              className="text-white/30 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/8"
             >
-              ✕
+              <X size={12} />
             </button>
           </div>
           {playlists.map(pl => {
