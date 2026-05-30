@@ -17,35 +17,14 @@ export interface Track {
 export const TRACKS: Track[] = [
   {
     id: 1,
-    artist: "YOUR NAME",
-    album: "TRACK ONE",
+    artist: "COLDPLAY",
+    album: "PARADISE",
     category: "SINGLE",
-    label: "SELF RELEASED",
-    year: "2024",
-    src: "/music/track-one.mp3",
+    label: "PARLOPHONE",
+    year: "2011",
+    src: "/music/paradise-coldplay.mp3",
+    // Dreamy hot air balloon over golden fields — matches the Paradise video
     image:
-      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&q=80",
-  },
-  {
-    id: 2,
-    artist: "YOUR NAME",
-    album: "TRACK TWO",
-    category: "SINGLE",
-    label: "SELF RELEASED",
-    year: "2024",
-    src: "/music/track-two.mp3",
-    image:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80",
-  },
-  {
-    id: 3,
-    artist: "YOUR NAME",
-    album: "TRACK THREE",
-    category: "SINGLE",
-    label: "SELF RELEASED",
-    year: "2023",
-    src: "/music/track-three.mp3",
-    image:
-      "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1200&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80",
   },
 ];
