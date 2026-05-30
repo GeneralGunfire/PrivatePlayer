@@ -16,7 +16,7 @@ export default function BottomNav() {
   const path = usePathname();
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md" style={{ zIndex: 60 }}>
       <nav className="glass rounded-full px-6 py-3 flex items-center justify-between">
         {ITEMS.map(({ href, icon: Icon, label }) => {
           const active = href === "/" ? path === "/" : path.startsWith(href);

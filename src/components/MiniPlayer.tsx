@@ -13,7 +13,8 @@ export default function MiniPlayer() {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
-      className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-40"
+      className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-lg"
+      style={{ zIndex: 55 }}
     >
       <div
         onClick={openPlayer}
