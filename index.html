@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrivatePlayer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+    <header>
+      <h1>PrivatePlayer</h1>
+    </header>
+
+    <!-- Player controls -->
+    <div class="player" id="player">
+      <div class="track-info">
+        <span class="track-title" id="trackTitle">No track selected</span>
+        <span class="track-index" id="trackIndex"></span>
+      </div>
+
+      <audio id="audio" preload="metadata"></audio>
+
+      <div class="progress-wrap">
+        <span class="time" id="currentTime">0:00</span>
+        <input type="range" id="progressBar" value="0" min="0" step="0.1" />
+        <span class="time" id="duration">0:00</span>
+      </div>
+
+      <div class="controls">
+        <button id="prevBtn" title="Previous">&#9664;&#9664;</button>
+        <button id="playBtn" title="Play / Pause">&#9654;</button>
+        <button id="nextBtn" title="Next">&#9654;&#9654;</button>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" title="Volume" />
+      </div>
+    </div>
+
+    <!-- Track list -->
+    <ul class="track-list" id="trackList"></ul>
+
+    <p class="empty-msg" id="emptyMsg" style="display:none">
+      No tracks yet. Add MP3s to <code>/music</code> and list them in <code>tracks.js</code>.
+    </p>
+  </div>
+
+  <script src="tracks.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>
