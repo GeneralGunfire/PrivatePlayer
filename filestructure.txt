@@ -1,0 +1,73 @@
+|-- .claude
+    |-- settings.local.json
+|-- .gitignore
+|-- index.html
+|-- monotune.zip
+|-- monotune_extracted
+    |-- .env.example
+    |-- .gitignore
+    |-- assets
+        |-- .aistudio
+            |-- .gitignore
+    |-- index.html
+    |-- metadata.json
+    |-- package.json
+    |-- README.md
+    |-- src
+        |-- App.tsx
+        |-- components
+            |-- BottomNav.tsx
+            |-- HomeView.tsx
+            |-- LibraryView.tsx
+            |-- PlayerView.tsx
+            |-- SearchView.tsx
+        |-- data.ts
+        |-- index.css
+        |-- main.tsx
+        |-- types.ts
+    |-- tsconfig.json
+    |-- vite.config.ts
+|-- music
+    |-- In My Place Coldplay.mp3
+    |-- Paradise Coldplay.mp3
+|-- next-env.d.ts
+|-- next.config.ts
+|-- package-lock.json
+|-- package.json
+|-- player.js
+|-- postcss.config.mjs
+|-- public
+    |-- music
+        |-- .gitkeep
+        |-- in-my-place-coldplay.mp3
+        |-- paradise-coldplay.mp3
+|-- README.md
+|-- src
+    |-- app
+        |-- globals.css
+        |-- layout.tsx
+        |-- library
+            |-- page.tsx
+        |-- page.tsx
+        |-- playlist
+            |-- [id]
+                |-- page.tsx
+        |-- search
+            |-- page.tsx
+    |-- components
+        |-- BottomNav.tsx
+        |-- MiniPlayer.tsx
+        |-- PlayerView.tsx
+        |-- shell.tsx
+        |-- ui
+            |-- button.tsx
+    |-- lib
+        |-- data.ts
+        |-- player-context.tsx
+        |-- playlists.ts
+        |-- tracks.ts
+        |-- utils.ts
+|-- style.css
+|-- tracks.js
+|-- tsconfig.json
+|-- tsconfig.tsbuildinfo

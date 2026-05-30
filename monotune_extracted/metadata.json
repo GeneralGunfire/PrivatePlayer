@@ -1,0 +1,6 @@
+{
+  "name": "MonoTune",
+  "description": "A minimalist, black and white music player with elegant glassmorphism and smooth animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

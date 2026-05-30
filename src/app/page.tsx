@@ -1,133 +1,134 @@
 "use client";
 
-import Link from "next/link";
-import { Bell, Play, Pause, Search } from "lucide-react";
-import { PLAYLISTS, ALL_TRACKS, getPlaylistTracks } from "@/lib/playlists";
+import { motion } from "framer-motion";
+import { Play } from "lucide-react";
+import { ALL_TRACKS, PLAYLISTS } from "@/lib/data";
 import { usePlayer } from "@/lib/player-context";
-import { cn } from "@/lib/utils";
-
-/* ── EQ bars ── */
-function EqBars() {
-  return (
-    <span className="flex items-end gap-[2px] w-3.5 h-3.5">
-      <span className="flex-1 rounded-[1px] bg-white origin-bottom" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
-      <span className="flex-1 rounded-[1px] bg-white origin-bottom" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
-      <span className="flex-1 rounded-[1px] bg-white origin-bottom" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
-    </span>
-  );
-}
-
-/* ── Recently Played card — image 2 top section ── */
-function PlaylistCard({ playlist }: { playlist: typeof PLAYLISTS[0] }) {
-  const { play, toggle, playing, activeTrack } = usePlayer();
-  const tracks = getPlaylistTracks(playlist);
-  const isActive = tracks.some(t => t.id === activeTrack?.id);
-
-  return (
-    <Link href={`/playlist/${playlist.id}`} className="shrink-0 flex flex-col gap-2 w-[120px]">
-      <div className="w-[120px] h-[120px] rounded-xl overflow-hidden bg-white/5 relative">
-        <img src={playlist.cover} alt={playlist.name} className="w-full h-full object-cover" />
-      </div>
-      <p className="text-[13px] font-medium text-white/80 truncate">{playlist.name}</p>
-    </Link>
-  );
-}
-
-/* ── Recommend row — image 2 bottom section ── */
-function RecommendRow({ track, index }: { track: typeof ALL_TRACKS[0]; index: number }) {
-  const { play, toggle, playing, activeTrack } = usePlayer();
-  const isActive = activeTrack?.id === track.id;
-  const isPlaying = isActive && playing;
-
-  return (
-    <button
-      onClick={() => isActive ? toggle() : play(track, ALL_TRACKS)}
-      className="flex items-center gap-3 w-full text-left py-2 hover:bg-white/5 rounded-xl px-2 -mx-2 transition-colors group"
-    >
-      {/* Art */}
-      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-white/5 shrink-0">
-        {track.image && <img src={track.image} alt={track.album} className="w-full h-full object-cover" />}
-        {isPlaying && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <EqBars />
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className={cn("text-[14px] font-bold truncate leading-tight", isActive ? "text-[#6c8fff]" : "text-white")}>
-          {track.album}
-        </p>
-        <p className="text-[12px] text-white/45 truncate mt-0.5">{track.artist}</p>
-        {/* Stream count — image 2 style */}
-        <p className="text-[11px] text-white/25 mt-1">
-          {((index + 1) * 37 + 14).toString()}k / streams
-        </p>
-      </div>
-
-      {/* Chevron */}
-      <div className={cn("text-white/20 group-hover:text-white/50 transition-colors shrink-0", isActive && "text-[#6c8fff]")}>
-        <Play className={cn("w-4 h-4", isPlaying ? "hidden" : "fill-current")} />
-      </div>
-    </button>
-  );
-}
 
 export default function Home() {
+  const { selectTrack, openPlayer, currentTrack, isPlaying } = usePlayer();
+
+  const greet = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good Morning";
+    if (h < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
+  const handleTrack = (track: typeof ALL_TRACKS[0]) => {
+    selectTrack(track, ALL_TRACKS);
+    openPlayer();
+  };
+
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-[#080c14]">
-      <div className="flex-1 px-5 pt-12 pb-4 max-w-lg mx-auto w-full">
-
-        {/* ── Header — image 2: avatar + name + bell ── */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6c8fff] to-[#3d5afe] flex items-center justify-center shrink-0">
-              <span className="text-[14px] font-black text-white">P</span>
-            </div>
-            <div>
-              <p className="text-[13px] font-bold text-white leading-tight">PrivatePlayer</p>
-              <p className="text-[11px] text-white/40">Personal collection</p>
-            </div>
-          </div>
-          <button className="w-9 h-9 rounded-full bg-white/8 flex items-center justify-center text-white/60 hover:text-white transition-colors">
-            <Bell className="w-4 h-4" />
-          </button>
+    <div className="pb-32 pt-8 px-6 space-y-10 max-w-2xl mx-auto">
+      {/* Header */}
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold uppercase italic tracking-tighter mb-2">{greet()}</h1>
+          <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
+            Ready to dive into your next audio journey?
+          </p>
         </div>
+      </header>
 
-        {/* ── Big title + search — image 2 ── */}
-        <div className="flex items-start justify-between mb-6 gap-4">
-          <h1 className="text-[28px] font-black text-white leading-tight max-w-[200px]">
-            Listen The Latest Music
+      {/* Featured Banner */}
+      <section className="relative h-64 rounded-3xl overflow-hidden group glass">
+        <div className="absolute inset-0 bg-neutral-900 overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80"
+            alt="Featured"
+            className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-110"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/20 to-transparent z-10" />
+        <div className="absolute bottom-8 left-8 z-20">
+          <span className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] uppercase tracking-[0.2em] mb-4 inline-block font-bold">
+            Now Playing
+          </span>
+          <h1 className="text-5xl font-black uppercase italic tracking-tighter mb-2 leading-none">
+            Coldplay
           </h1>
-          <Link
-            href="/browse"
-            className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center text-white/60 hover:text-white transition-colors shrink-0 mt-1"
-          >
-            <Search className="w-4 h-4" />
-          </Link>
+          <p className="text-white/60 text-sm font-medium tracking-tight">
+            {PLAYLISTS[0].tracks.length} Tracks • British Rock
+          </p>
         </div>
+        <div className="absolute right-[-20px] top-[-20px] w-80 h-80 bg-white/10 rounded-full blur-[60px]" />
+      </section>
 
-        {/* ── Recently Played — horizontal scroll ── */}
-        <section className="mb-7">
-          <h2 className="text-[15px] font-bold text-white mb-4">Recently Played</h2>
-          <div className="flex gap-4 overflow-x-auto -mx-5 px-5 pb-2">
-            {PLAYLISTS.map(pl => <PlaylistCard key={pl.id} playlist={pl} />)}
-          </div>
-        </section>
+      {/* Quick Queue — playlists horizontal scroll */}
+      <section>
+        <div className="flex justify-between items-end mb-6">
+          <h2 className="text-xl font-bold uppercase tracking-tight">Quick Queue</h2>
+          <span className="text-[10px] text-white/40 uppercase tracking-widest cursor-pointer hover:text-white transition-colors font-bold">
+            View All
+          </span>
+        </div>
+        <div className="flex gap-6 overflow-x-auto pb-4 -mx-6 px-6">
+          {PLAYLISTS.map((playlist, idx) => (
+            <motion.div
+              key={playlist.id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.08 }}
+              className="flex-shrink-0 w-48 group cursor-pointer"
+            >
+              <div className="relative aspect-square rounded-2xl overflow-hidden mb-4 glass border-white/10">
+                <img
+                  src={playlist.coverUrl}
+                  alt={playlist.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    onClick={() => playlist.tracks[0] && handleTrack(playlist.tracks[0])}
+                    className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl"
+                  >
+                    <Play size={24} fill="currentColor" className="ml-1" />
+                  </button>
+                </div>
+              </div>
+              <h3 className="font-bold tracking-tight truncate uppercase text-sm">{playlist.name}</h3>
+              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1 truncate">
+                {playlist.tracks.length} tracks
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
-        {/* ── Recommend for you — vertical list ── */}
-        <section>
-          <h2 className="text-[15px] font-bold text-white mb-4">Recommend for you</h2>
-          <div className="space-y-1">
-            {ALL_TRACKS.map((track, i) => (
-              <RecommendRow key={track.id} track={track} index={i} />
-            ))}
-          </div>
-        </section>
-
-      </div>
+      {/* Recently Played — track list */}
+      <section>
+        <h2 className="text-xl font-bold uppercase tracking-tight mb-6">Recently Played</h2>
+        <div className="space-y-2">
+          {ALL_TRACKS.map((track, idx) => (
+            <motion.div
+              key={track.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              onClick={() => handleTrack(track)}
+              className="group p-3 bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 rounded-2xl flex items-center gap-4 cursor-pointer transition-all"
+            >
+              <span className="text-[10px] font-mono text-white/30 hidden md:block">
+                {String(idx + 1).padStart(2, "0")}
+              </span>
+              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 glass border-white/5">
+                <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-sm truncate uppercase tracking-tight">{track.title}</h4>
+                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest truncate">
+                  {track.artist}
+                </p>
+              </div>
+              <span className="text-[10px] font-mono tracking-widest text-white/40 group-hover:text-white transition-colors">
+                {track.duration}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
