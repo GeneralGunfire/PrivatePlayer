@@ -1,3 +1,12 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -7,5 +16,14 @@ Thumbs.db
 *.suo
 *.user
 
-# Planning (local only)
+# Planning
 .planning/
+
+# Env
+.env
+.env.local
+.env.production
+
+# Keep music folder but ignore actual mp3 files from git (they're large)
+# Comment the line below if you WANT to track your mp3s in git
+# public/music/*.mp3
