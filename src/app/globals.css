@@ -65,10 +65,9 @@ html, body { height: 100%; }
 /* Safe area */
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom,0px), 8px); }
 
-/* Track rows — browser skips painting off-screen items entirely */
+/* Track rows */
 .track-row {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 60px;
+  contain: layout style;
 }
 
 /* Framer Motion exit animations — force GPU layer */

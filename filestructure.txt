@@ -255,6 +255,7 @@
     |-- fix-map.js
     |-- gen-covers.js
     |-- gen-src-map.js
+    |-- verify-map.js
 |-- src
     |-- app
         |-- api
