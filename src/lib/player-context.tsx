@@ -113,23 +113,41 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setCurrentTime(0);
     lastUpdateRef.current = 0;
 
-    a.src = url;
+    // If the preloader already buffered this URL, swap its source node
+    // directly into the main element — instant start, no re-download.
+    if (preloadEl && preloadedUrl === url && preloadEl.readyState >= 3) {
+      a.src = url;
+      // Browser already has it cached/buffered — skip load(), go straight to play
+    } else {
+      a.src = url;
+      a.load(); // explicit load so browser starts buffering immediately
+    }
 
-    // play() returns a promise — handle it properly
-    const playPromise = a.play();
-    if (playPromise !== undefined) {
-      playPromise.catch((err) => {
-        // NotAllowedError = autoplay blocked — wait for canplay
-        // AbortError = src changed mid-load (track skipped quickly) — ignore
-        if (err.name === "NotAllowedError") {
-          const onCan = () => {
-            a.removeEventListener("canplay", onCan);
-            a.play().catch(() => {});
-          };
-          a.addEventListener("canplay", onCan);
-        }
-        // Other errors: ignore, audio will show loading state
-      });
+    const tryPlay = () => {
+      const playPromise = a.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err.name === "NotAllowedError") {
+            const onCan = () => {
+              a.removeEventListener("canplay", onCan);
+              a.play().catch(() => {});
+            };
+            a.addEventListener("canplay", onCan);
+          }
+          // AbortError = skipped quickly — ignore
+        });
+      }
+    };
+
+    // If enough data is ready, play immediately; otherwise wait for canplay
+    if (a.readyState >= 3) {
+      tryPlay();
+    } else {
+      const onReady = () => {
+        a.removeEventListener("canplay", onReady);
+        tryPlay();
+      };
+      a.addEventListener("canplay", onReady);
     }
   }, []);
 
