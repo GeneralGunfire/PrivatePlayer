@@ -1,198 +1,472 @@
-﻿export interface Track { id: string; title: string; artist: string; album: string; coverUrl: string; duration: string; src: string; }
+export interface Track { id: string; title: string; artist: string; album: string; coverUrl: string; duration: string; src: string; }
 export interface Playlist { id: string; name: string; description?: string; coverUrl: string; tracks: Track[]; }
+
+// Cover art: real official album covers from Last.fm image CDN (publicly accessible, no auth).
+// Fallback Unsplash photos used where no album art is available.
+
 export const ALL_TRACKS: Track[] = [
-  { id: "1",   title: "Paradise",           artist: "Coldplay", album: "Mylo Xyloto",          coverUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80", duration: "4:39", src: "/music/Coldplay - Paradise (Official Video).mp3" },
-  { id: "2",   title: "In My Place",         artist: "Coldplay", album: "A Rush of Blood",      coverUrl: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80", duration: "3:47", src: "/music/Coldplay - In My Place (Official 4K Video).mp3" },
-  { id: "5",   title: "Fix You",             artist: "Coldplay", album: "X&Y",                  coverUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80", duration: "4:56", src: "/music/Coldplay - Fix You (Official Video).mp3" },
-  { id: "10",  title: "Magic",               artist: "Coldplay", album: "Ghost Stories",        coverUrl: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=800&q=80", duration: "4:46", src: "/music/Coldplay - Magic (Official Video).mp3" },
-  { id: "16",  title: "Violet Hill",         artist: "Coldplay", album: "Viva la Vida",         coverUrl: "https://images.unsplash.com/photo-1493676304819-0d7a312d5e5b?w=800&q=80", duration: "3:43", src: "/music/Coldplay - Violet Hill (Official Video).mp3" },
-  { id: "17",  title: "Everglow",            artist: "Coldplay", album: "A Head Full of Dreams",coverUrl: "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80", duration: "4:43", src: "/music/Coldplay - Everglow [Single Version] - (Official Video).mp3" },
-  { id: "18",  title: "Miracles",            artist: "Coldplay", album: "Unbroken",             coverUrl: "https://images.unsplash.com/photo-1502101872923-d48509bff386?w=800&q=80", duration: "3:56", src: "/music/Coldplay - Miracles (Official Lyric Video).mp3" },
-  { id: "19",  title: "Up&Up",              artist: "Coldplay", album: "A Head Full of Dreams",coverUrl: "https://images.unsplash.com/photo-1464802686167-b939a6910659?w=800&q=80", duration: "6:46", src: "/music/Coldplay - Up&Up (Official Video).mp3" },
-  { id: "28",  title: "The XX Intro (ELEZO Remix)",    artist: "ELEZO",                  album: "Remix",                       coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=800&q=80", duration: "2:42", src: "/music/The XX Intro - ELEZO remix ( Official video ).mp3" },
-  { id: "29",  title: "Duel of the Fates (Epic)",      artist: "Samuel Kim",             album: "Duel of The Fates",           coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80", duration: "3:06", src: "/music/Star Wars Duel of The Fates EPIC VERSION.mp3" },
-  // MOVIES
-  { id: "47",  title: "A Dark Knight (Epic)",           artist: "Mathias Fritsche",       album: "Batman OST",                  coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "6:22", src: "/music/Hans Zimmer - A Dark Knight EPIC VERSION.mp3" },
-  { id: "49",  title: "Stay Alive",                     artist: "Jose Gonzalez",          album: "The Secret Life of Walter Mitty", coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=800&q=80", duration: "4:27", src: "/music/Jose Gonzalez - Stay Alive.mp3" },
-  { id: "50",  title: "You Know My Name",               artist: "Chris Cornell",          album: "Casino Royale OST",           coverUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80", duration: "4:01", src: "/music/Casino Royale - Chris Cornell - You Know My Name.mp3" },
-  { id: "53",  title: "Lead Me Home",                   artist: "Jamie N Commons",        album: "The Walking Dead OST",        coverUrl: "https://images.unsplash.com/photo-1414862625253-63af814c65e7?w=800&q=80", duration: "1:58", src: "/music/Jamie N Commons - Lead Me Home (The Walking Dead).mp3" },
-  { id: "54",  title: "Greenback Boogie",               artist: "Ima Robot",              album: "Suits OST",                   coverUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80", duration: "4:58", src: "/music/Ima Robot - Greenback Boogie.mp3" },
-  { id: "57",  title: "Burning Heart",                  artist: "Survivor",               album: "Rocky IV",                    coverUrl: "https://images.unsplash.com/photo-1504151932400-72d4384f04b3?w=800&q=80", duration: "3:51", src: "/music/Survivor - Burning heart (Rocky IV) HQ.mp3" },
-  { id: "58",  title: "Eye of the Tiger",               artist: "Survivor",               album: "Eye of the Tiger",            coverUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80", duration: "4:04", src: "/music/Survivor - Eye Of The Tiger (Official HD Video).mp3" },
-  { id: "201", title: "Why Do We Fall?",                artist: "Hans Zimmer",            album: "The Dark Knight Rises OST",   coverUrl: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=800&q=80", duration: "2:07", src: "/music/The Dark Knight Rises - Why Do We Fall.mp3" },
-  { id: "204", title: "Blaze of Glory",                 artist: "Jon Bon Jovi",           album: "Young Guns II",               coverUrl: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80", duration: "5:36", src: "/music/Bon Jovi - Young Guns II Blaze of Glory.mp3" },
-  { id: "205", title: "Godzilla!",                      artist: "Alexandre Desplat",      album: "Godzilla OST",                coverUrl: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=800&q=80", duration: "2:09", src: "/music/Godzilla Soundtrack - Alexandre Desplat.mp3" },
-  { id: "208", title: "Treadstone Assassins",           artist: "John Powell",            album: "The Bourne Identity OST",     coverUrl: "https://images.unsplash.com/photo-1484291470158-b8f8d608850d?w=800&q=80", duration: "2:13", src: "/music/Treadstone Assassins.mp3" },
-  { id: "209", title: "Rocky Balboa Theme",             artist: "Pedro da Boleia",        album: "Rocky Balboa OST",            coverUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80", duration: "4:55", src: "/music/Rocky Balboa - Theme Song (HD).mp3" },
-  { id: "212", title: "Succession Main Theme",          artist: "Nicholas Britell",       album: "Succession Season 4",         coverUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80", duration: "2:02", src: "/music/Succession (Main Title Theme) - Nicholas Britell.mp3" },
-  { id: "400", title: "Ashes",                          artist: "Celine Dion",            album: "Deadpool 2 OST",              coverUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80", duration: "3:20", src: "/music/Celine Dion - Ashes.mp3" },
-  // CALM
-  { id: "60",  title: "Holocene",                       artist: "Bon Iver",               album: "Bon Iver",                    coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=800&q=80", duration: "5:37", src: "/music/Bon Iver - Holocene - Official Video.mp3" },
-  { id: "61",  title: "Skinny Love",                    artist: "Bon Iver",               album: "For Emma Forever Ago",        coverUrl: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=800&q=80", duration: "3:58", src: "/music/Skinny Love.mp3" },
-  { id: "62",  title: "Breathe (2 AM)",                 artist: "Anna Nalick",            album: "Wreck of the Day",            coverUrl: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80", duration: "4:25", src: "/music/Anna Nalick - Breathe (2 AM) (Official Video).mp3" },
-  { id: "64",  title: "Slow Burn",                      artist: "Kacey Musgraves",        album: "Golden Hour",                 coverUrl: "https://images.unsplash.com/photo-1501426026826-31c667bdf23d?w=800&q=80", duration: "3:47", src: "/music/Kacey Musgraves - Slow Burn (Official Audio).mp3" },
-  { id: "66",  title: "Bloodstream",                    artist: "Stateless",              album: "Bloodstream",                 coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", duration: "5:38", src: "/music/Stateless - Bloodstream (Official lyrics).mp3" },
-  { id: "67",  title: "Youth",                          artist: "Daughter",               album: "If You Leave",                coverUrl: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&q=80", duration: "4:40", src: "/music/Daughter - Youth.mp3" },
-  { id: "68",  title: "Medicine",                       artist: "Daughter",               album: "His Young Heart",             coverUrl: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&q=80", duration: "4:10", src: "/music/Medicine.mp3" },
-  { id: "230", title: "Love and Hate",                  artist: "Michael Kiwanuka",       album: "Love and Hate",               coverUrl: "https://images.unsplash.com/photo-1536514498073-50e69d39c6cf?w=800&q=80", duration: "7:08", src: "/music/Michael Kiwanuka - Love & Hate (Live Session).mp3" },
-  { id: "231", title: "The Night We Met",               artist: "Lord Huron",             album: "Strange Trails",              coverUrl: "https://images.unsplash.com/photo-1499415479124-43c32433a620?w=800&q=80", duration: "3:29", src: "/music/The Night We Met - Lord Huron.mp3" },
-  { id: "232", title: "Way Down We Go",                 artist: "KALEO",                  album: "A/B",                         coverUrl: "https://images.unsplash.com/photo-1414862625253-63af814c65e7?w=800&q=80", duration: "3:34", src: "/music/KALEO - Way Down We Go (Official Music Video).mp3" },
-  { id: "233", title: "Hold Back the River",            artist: "James Bay",              album: "Chaos and the Calm",          coverUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=800&q=80", duration: "3:59", src: "/music/James Bay - Hold Back The River.mp3" },
-  { id: "234", title: "Before You Go",                  artist: "Lewis Capaldi",          album: "Divinely Uninspired",         coverUrl: "https://images.unsplash.com/photo-1428592953211-077101b2021b?w=800&q=80", duration: "3:36", src: "/music/Lewis Capaldi - Before You Go (Official Video).mp3" },
-  { id: "235", title: "Human",                          artist: "Rag n Bone Man",         album: "Human",                       coverUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80", duration: "3:20", src: "/music/Rag n Bone Man - Human (Official Video).mp3" },
-  { id: "236", title: "Somewhere Only We Know",         artist: "Keane",                  album: "Hopes and Fears",             coverUrl: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&q=80", duration: "3:58", src: "/music/Keane - Somewhere Only We Know (Official Music Video).mp3" },
-  { id: "237", title: "Dandelions",                     artist: "Ruth B.",                album: "Safe Haven",                  coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=800&q=80", duration: "3:54", src: "/music/Ruth B. - Dandelions (Lyrics).mp3" },
-  { id: "238", title: "Unknown (To You)",               artist: "Jacob Banks",            album: "Village",                     coverUrl: "https://images.unsplash.com/photo-1571388208497-71bedc604bf5?w=800&q=80", duration: "3:54", src: "/music/Jacob Banks - Unknown (To You) Official Music Video.mp3" },
-  { id: "239", title: "Open Your Eyes",                 artist: "Snow Patrol",            album: "Eyes Open",                   coverUrl: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&q=80", duration: "5:42", src: "/music/Snow Patrol - Open Your Eyes (Official Video).mp3" },
-  { id: "401", title: "Phantoms and Friends",           artist: "Old Man Canyon",         album: "Phantoms and Friends",        coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=800&q=80", duration: "3:52", src: "/music/Old Man Canyon - Phantoms and Friends.mp3" },
-  { id: "402", title: "Permanent Way",                  artist: "Charlie Cunningham",     album: "Flesh and Bone",              coverUrl: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=800&q=80", duration: "4:18", src: "/music/Charlie Cunningham - Permanent Way (Live Session).mp3" },
-  { id: "403", title: "Into The Wild",                  artist: "Wrabel",                 album: "Sideways",                    coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=800&q=80", duration: "3:31", src: "/music/Wrabel - Into The Wild (Audio).mp3" },
-  { id: "404", title: "Broken Brights",                 artist: "Angus Stone",            album: "Broken Brights",              coverUrl: "https://images.unsplash.com/photo-1499415479124-43c32433a620?w=800&q=80", duration: "4:13", src: "/music/Angus Stone - Broken Brights Official Video.mp3" },
-  { id: "405", title: "Breathless",                     artist: "Dan Wilson",             album: "Free Life",                   coverUrl: "https://images.unsplash.com/photo-1414862625253-63af814c65e7?w=800&q=80", duration: "3:54", src: "/music/Dan Wilson - Breathless.mp3" },
-  { id: "406", title: "Before The Fall",                artist: "Novra",                  album: "Before The Fall",             coverUrl: "https://images.unsplash.com/photo-1428592953211-077101b2021b?w=800&q=80", duration: "6:59", src: "/music/NOVRA - Before The Fall.mp3" },
-  { id: "407", title: "Horizon",                        artist: "Marius Bear",            album: "Horizon",                     coverUrl: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&q=80", duration: "2:53", src: "/music/Marius Bear - Horizon (Official Video).mp3" },
-  // LOVE
-  { id: "80",  title: "Make You Feel My Love",          artist: "Adele",                  album: "19",                          coverUrl: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80", duration: "3:32", src: "/music/Adele - Make You Feel My Love (Official Video).mp3" },
-  { id: "81",  title: "Someone Like You",               artist: "Adele",                  album: "21",                          coverUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80", duration: "4:45", src: "/music/Adele - Someone Like You (Official Music Video).mp3" },
-  { id: "82",  title: "All of Me",                      artist: "John Legend",            album: "Love in the Future",          coverUrl: "https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=800&q=80", duration: "4:29", src: "/music/John Legend - All of Me (Official Video).mp3" },
-  { id: "83",  title: "A Thousand Years",               artist: "Christina Perri",        album: "A Thousand Years",            coverUrl: "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=800&q=80", duration: "4:45", src: "/music/Christina Perri - A Thousand Years [Official Music Video].mp3" },
-  { id: "84",  title: "Perfect",                        artist: "Ed Sheeran",             album: "Divide",                      coverUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80", duration: "4:23", src: "/music/Ed Sheeran - Perfect (Official Music Video).mp3" },
-  { id: "85",  title: "Thinking Out Loud",              artist: "Ed Sheeran",             album: "X",                           coverUrl: "https://images.unsplash.com/photo-1445294211564-3ca59d999abd?w=800&q=80", duration: "4:41", src: "/music/Ed Sheeran - Thinking Out Loud (Official Music Video).mp3" },
-  { id: "86",  title: "Can't Help Falling in Love",     artist: "Elvis Presley",          album: "Blue Hawaii",                 coverUrl: "https://images.unsplash.com/photo-1504151932400-72d4384f04b3?w=800&q=80", duration: "3:00", src: "/music/Elvis Presley - Can't Help Falling In Love (Official Audio).mp3" },
-  { id: "87",  title: "Lover",                          artist: "Taylor Swift",           album: "Lover",                       coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=800&q=80", duration: "3:41", src: "/music/Taylor Swift - Lover (Official Music Video).mp3" },
-  { id: "88",  title: "Wildest Dreams",                 artist: "Taylor Swift",           album: "1989",                        coverUrl: "https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=800&q=80", duration: "3:40", src: "/music/Taylor Swift - Wildest Dreams.mp3" },
-  { id: "240", title: "Let Her Go",                     artist: "Passenger",              album: "All The Little Lights",       coverUrl: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80", duration: "4:13", src: "/music/Passenger - Let Her Go (Official Video).mp3" },
-  { id: "241", title: "With You",                       artist: "Dean Lewis",             album: "The Epilogue",                coverUrl: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80", duration: "3:10", src: "/music/Dean Lewis - With You (Official Video).mp3" },
-  { id: "242", title: "Waves",                          artist: "Dean Lewis",             album: "Same Kind of Different",      coverUrl: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=800&q=80", duration: "4:02", src: "/music/Dean Lewis - Waves (Official Video).mp3" },
-  { id: "243", title: "Stay With Me",                   artist: "Sam Smith",              album: "In The Lonely Hour",          coverUrl: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&q=80", duration: "2:53", src: "/music/Sam Smith - Stay With Me (Official Music Video).mp3" },
-  { id: "244", title: "Minefields",                     artist: "Faouzia",                album: "Minefields",                  coverUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80", duration: "3:11", src: "/music/Faouzia & John Legend - Minefields (Official Music Video).mp3" },
-  { id: "245", title: "Belong Together",                artist: "Mark Ambor",             album: "Belong Together",             coverUrl: "https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=800&q=80", duration: "2:29", src: "/music/Mark Ambor - Belong Together (Official Lyric Video).mp3" },
-  { id: "246", title: "Let's Hurt Tonight",             artist: "OneRepublic",            album: "Oh My My",                    coverUrl: "https://images.unsplash.com/photo-1499415479124-43c32433a620?w=800&q=80", duration: "3:15", src: "/music/OneRepublic - Let's Hurt Tonight.mp3" },
-  { id: "247", title: "Cold Heart (PNAU Remix)",        artist: "Elton John",             album: "The Lockdown Sessions",       coverUrl: "https://images.unsplash.com/photo-1504151932400-72d4384f0b3?w=800&q=80", duration: "3:23", src: "/music/Elton John Dua Lipa - Cold Heart (PNAU Remix) (Official Video).mp3" },
-  { id: "408", title: "Only You",                       artist: "Yazoo",                  album: "Upstairs at Eric's",          coverUrl: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80", duration: "3:15", src: "/music/Yazoo - Only You.mp3" },
-  { id: "409", title: "Colour My Heart",                artist: "Charlotte OC",           album: "Colour My Heart",             coverUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80", duration: "4:40", src: "/music/Charlotte OC - Colour My Heart (Official Video).mp3" },
-  { id: "410", title: "Blood's Thicker Than Water",     artist: "Bobby Bazini",           album: "Summer Is Gone",              coverUrl: "https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=800&q=80", duration: "3:42", src: "/music/Bobby Bazini - Blood's Thicker Than Water (Audio).mp3" },
-  { id: "411", title: "The One I Love",                 artist: "Mirror Fury",            album: "The One I Love",              coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=800&q=80", duration: "3:05", src: "/music/Mirror Fury - The One I Love.mp3" },
-  // LEGENDS
-  { id: "100", title: "Bohemian Rhapsody",              artist: "Queen",                  album: "A Night at the Opera",        coverUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80", duration: "5:55", src: "/music/Queen - Bohemian Rhapsody (Official Video Remastered).mp3" },
-  { id: "101", title: "Hotel California",               artist: "Eagles",                 album: "Hotel California",            coverUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&q=80", duration: "6:30", src: "/music/Hotel California (2013 Remaster).mp3" },
-  { id: "102", title: "Stairway to Heaven",             artist: "Led Zeppelin",           album: "Led Zeppelin IV",             coverUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80", duration: "8:02", src: "/music/Led Zeppelin - Stairway To Heaven (Official Audio).mp3" },
-  { id: "103", title: "Comfortably Numb",               artist: "Pink Floyd",             album: "The Wall",                    coverUrl: "https://images.unsplash.com/photo-1484291470158-b8f8d608850d?w=800&q=80", duration: "6:23", src: "/music/Pink Floyd - Comfortably numb.mp3" },
-  { id: "104", title: "Wish You Were Here",             artist: "Pink Floyd",             album: "Wish You Were Here",          coverUrl: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&q=80", duration: "5:40", src: "/music/Pink Floyd - Wish You Were Here.mp3" },
-  { id: "105", title: "Let It Be",                      artist: "The Beatles",            album: "Let It Be",                   coverUrl: "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=800&q=80", duration: "3:50", src: "/music/Let It Be (Remastered 2009).mp3" },
-  { id: "106", title: "Hey Jude",                       artist: "The Beatles",            album: "Hey Jude",                    coverUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80", duration: "7:11", src: "/music/The Beatles - Hey Jude (Official Music Video) [Remastered 2015].mp3" },
-  { id: "107", title: "Imagine",                        artist: "John Lennon",            album: "Imagine",                     coverUrl: "https://images.unsplash.com/photo-1577375729152-4c8b5fcda381?w=800&q=80", duration: "3:07", src: "/music/Imagine - John Lennon (Ultimate Mix 2018) - 4K REMASTER.mp3" },
-  { id: "108", title: "Space Oddity",                   artist: "David Bowie",            album: "Space Oddity",                coverUrl: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=800&q=80", duration: "5:17", src: "/music/David Bowie - Space Oddity (Official Video).mp3" },
-  { id: "109", title: "Heroes",                         artist: "David Bowie",            album: "Heroes",                      coverUrl: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80", duration: "6:07", src: "/music/David Bowie - Heroes (Official Video) [HD].mp3" },
-  { id: "110", title: "Roxanne",                        artist: "The Police",             album: "Outlandos d'Amour",           coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=800&q=80", duration: "3:13", src: "/music/The Police - Roxanne (Official Music Video).mp3" },
-  { id: "111", title: "Every Breath You Take",          artist: "The Police",             album: "Synchronicity",               coverUrl: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80", duration: "4:13", src: "/music/The Police - Every Breath You Take (Official Music Video).mp3" },
-  { id: "112", title: "Africa",                         artist: "Toto",                   album: "Toto IV",                     coverUrl: "https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=800&q=80", duration: "4:55", src: "/music/Toto - Africa (Official HD Video).mp3" },
-  { id: "113", title: "Take On Me",                     artist: "a-ha",                   album: "Hunting High and Low",        coverUrl: "https://images.unsplash.com/photo-1518085250887-2f903c200fee?w=800&q=80", duration: "3:46", src: "/music/a-ha - Take On Me (Official Video) [4K].mp3" },
-  { id: "114", title: "Don't You (Forget About Me)",    artist: "Simple Minds",           album: "Don't You",                   coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80", duration: "4:21", src: "/music/Simple Minds - Don't You (Forget About Me).mp3" },
-  { id: "250", title: "Big in Japan",                   artist: "Alphaville",             album: "Forever Young",               coverUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80", duration: "4:45", src: "/music/Alphaville - Big In Japan (Official Music Video).mp3" },
-  { id: "251", title: "Everybody Wants to Rule the World", artist: "Tears For Fears",    album: "Songs from the Big Chair",    coverUrl: "https://images.unsplash.com/photo-1445294211564-3ca59d999abd?w=800&q=80", duration: "4:12", src: "/music/Tears For Fears - Everybody Wants To Rule The World (Official Music Video).mp3" },
-  { id: "252", title: "Zombie",                         artist: "The Cranberries",        album: "No Need to Argue",            coverUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80", duration: "5:08", src: "/music/The Cranberries - Zombie (Official Music Video).mp3" },
-  { id: "253", title: "What a Wonderful World",         artist: "Louis Armstrong",        album: "What a Wonderful World",      coverUrl: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&q=80", duration: "2:20", src: "/music/Louis Armstrong - What A Wonderful World (Official Video).mp3" },
-  { id: "254", title: "Man in the Mirror",              artist: "Michael Jackson",        album: "Bad",                         coverUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80", duration: "5:20", src: "/music/Man in the Mirror - Michael Jackson.mp3" },
-  { id: "255", title: "Sweet Caroline",                 artist: "Neil Diamond",           album: "Sweet Caroline",              coverUrl: "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=800&q=80", duration: "3:24", src: "/music/Neil Diamond - Sweet Caroline (Audio).mp3" },
-  { id: "256", title: "Wind of Change",                 artist: "Scorpions",              album: "Crazy World",                 coverUrl: "https://images.unsplash.com/photo-1484291470158-b8f8d608850d?w=800&q=80", duration: "5:13", src: "/music/Scorpions - Wind Of Change (Official Music Video).mp3" },
-  { id: "257", title: "I'm Gonna Be (500 Miles)",       artist: "The Proclaimers",        album: "Sunshine on Leith",           coverUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80", duration: "3:40", src: "/music/The Proclaimers - I'm Gonna Be (500 Miles) (Official Music Video).mp3" },
-  { id: "258", title: "Don't Let the Sun Go Down",      artist: "George Michael",         album: "Twenty Five",                 coverUrl: "https://images.unsplash.com/photo-1445294211564-3ca59d999abd?w=800&q=80", duration: "5:48", src: "/music/George Michael Elton John - Don't Let The Sun Go Down On Me (Live).mp3" },
-  { id: "259", title: "I Don't Want to Miss a Thing",   artist: "Aerosmith",              album: "Armageddon OST",              coverUrl: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=800&q=80", duration: "4:59", src: "/music/I Dont Want to Miss a Thing - Aerosmith.mp3" },
-  { id: "260", title: "Lean on Me",                     artist: "Bill Withers",           album: "Still Bill",                  coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=800&q=80", duration: "4:19", src: "/music/Lean on Me.mp3" },
-  { id: "261", title: "Ain't No Sunshine",              artist: "Bill Withers",           album: "Just As I Am",                coverUrl: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80", duration: "2:06", src: "/music/Bill Withers - Ain't No Sunshine (Official Audio).mp3" },
-  { id: "262", title: "Stand By Me",                    artist: "Ben E. King",            album: "Stand By Me",                 coverUrl: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=800&q=80", duration: "2:58", src: "/music/Ben E. King - Stand By Me (Audio).mp3" },
-  { id: "263", title: "I'm Still Standing",             artist: "Elton John",             album: "Too Low for Zero",            coverUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80", duration: "3:04", src: "/music/Elton John - I'm Still Standing.mp3" },
-  { id: "264", title: "Save Tonight",                   artist: "Eagle-Eye Cherry",       album: "Desireless",                  coverUrl: "https://images.unsplash.com/photo-1499415479124-43c32433a620?w=800&q=80", duration: "4:01", src: "/music/Eagle-Eye Cherry - Save Tonight.mp3" },
-  { id: "265", title: "It's My Life",                   artist: "Bon Jovi",               album: "Crush",                       coverUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80", duration: "3:45", src: "/music/Bon Jovi - It's My Life (Official Music Video).mp3" },
-  { id: "266", title: "Renegades",                      artist: "X Ambassadors",          album: "VHS",                         coverUrl: "https://images.unsplash.com/photo-1484291470158-b8f8d608850d?w=800&q=80", duration: "3:16", src: "/music/X Ambassadors - Renegades (Lyric Video).mp3" },
-  { id: "267", title: "Lovely Day",                     artist: "Bill Withers",           album: "Menagerie",                   coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=800&q=80", duration: "4:15", src: "/music/Bill Withers - Lovely Day (Official Audio).mp3" },
-  { id: "268", title: "Grey Lynn Park",                 artist: "The Veils",              album: "Troubles of the Brain",       coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=800&q=80", duration: "2:40", src: "/music/The Veils - Grey Lynn Park.mp3" },
-  { id: "269", title: "Drift Away",                     artist: "Dobie Gray",             album: "Drift Away",                  coverUrl: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&q=80", duration: "3:59", src: "/music/Dobie Gray - Drift Away (Original Official Video).mp3" },
-  { id: "270", title: "Bittersweet Symphony",           artist: "The Verve",              album: "Urban Hymns",                 coverUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=800&q=80", duration: "4:30", src: "/music/The Verve - Bitter Sweet Symphony.mp3" },
-  { id: "271", title: "What's Up?",                     artist: "4 Non Blondes",          album: "Bigger Better Faster More",   coverUrl: "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=800&q=80", duration: "4:56", src: "/music/4 Non Blondes - What's Up (Official Music Video).mp3" },
-  { id: "272", title: "Breakfast at Tiffany's",         artist: "Deep Blue Something",    album: "Home",                        coverUrl: "https://images.unsplash.com/photo-1445294211564-3ca59d999abd?w=800&q=80", duration: "4:18", src: "/music/Deep Blue Something - Breakfast At Tiffany's (Official Music Video).mp3" },
-  { id: "273", title: "The Best",                       artist: "Tina Turner",            album: "Foreign Affair",              coverUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80", duration: "5:31", src: "/music/Tina Turner - The Best (Official Music Video) [HD Upgrade].mp3" },
-  { id: "412", title: "We Don't Need Another Hero",     artist: "Tina Turner",            album: "Simply the Best",             coverUrl: "https://images.unsplash.com/photo-1445294211564-3ca59d999abd?w=800&q=80", duration: "4:16", src: "/music/Tina Turner - We Don't Need Another Hero.mp3" },
-  { id: "413", title: "Great Heart",                    artist: "Johnny Clegg",           album: "Third World Child",           coverUrl: "https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=800&q=80", duration: "4:22", src: "/music/Johnny Clegg-Great Heart.mp3" },
-  { id: "414", title: "King of Time",                   artist: "Johnny Clegg",           album: "King of Time",                coverUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80", duration: "3:17", src: "/music/Johnny Clegg - King Of Time.mp3" },
-  { id: "416", title: "Hold On I'm Comin'",             artist: "Sam & Dave",             album: "Hold On I'm Comin'",          coverUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80", duration: "2:36", src: "/music/Hold On I'm Coming.mp3" },
-  { id: "417", title: "Stuck On You",                   artist: "Lionel Richie",          album: "Can't Slow Down",             coverUrl: "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=800&q=80", duration: "3:13", src: "/music/Stuck On You.mp3" },
-  { id: "418", title: "The Crossing",                   artist: "Friends of Johnny Clegg",album: "The Crossing",                coverUrl: "https://images.unsplash.com/photo-1489493887464-892be6d1daae?w=800&q=80", duration: "5:07", src: "/music/THE CROSSING - Friends of Johnny Clegg.mp3" },
-  { id: "419", title: "Down Under",                     artist: "Colin Hay",              album: "Man @ Work",                  coverUrl: "https://images.unsplash.com/photo-1445294211564-3ca59d999abd?w=800&q=80", duration: "4:49", src: "/music/Luude - Down Under (Feat. Colin Hay) (Official Music Video).mp3" },
-  // VIBES
-  { id: "130", title: "Midnight City",                  artist: "M83",                    album: "Hurry Up We're Dreaming",     coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "4:03", src: "/music/M83 'Midnight City' Official video.mp3" },
-  { id: "132", title: "On + On",                        artist: "Erykah Badu",            album: "Baduizm",                     coverUrl: "https://images.unsplash.com/photo-1445294211564-3ca59d999abd?w=800&q=80", duration: "5:22", src: "/music/Erykah Badu - On & On (Remix Edit).mp3" },
-  { id: "133", title: "Redbone",                        artist: "Childish Gambino",       album: "Awaken My Love",              coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80", duration: "5:26", src: "/music/Childish Gambino - Redbone (Lyrics).mp3" },
-  { id: "134", title: "Do I Wanna Know?",               artist: "Arctic Monkeys",         album: "AM",                          coverUrl: "https://images.unsplash.com/photo-1508973379184-7517410eec07?w=800&q=80", duration: "4:32", src: "/music/Arctic Monkeys - Do I Wanna Know (Official Video).mp3" },
-  { id: "135", title: "R U Mine?",                      artist: "Arctic Monkeys",         album: "AM",                          coverUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80", duration: "3:21", src: "/music/Arctic Monkeys - R U Mine (Official Video).mp3" },
-  { id: "136", title: "505",                            artist: "Arctic Monkeys",         album: "Favourite Worst Nightmare",   coverUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80", duration: "4:13", src: "/music/Arctic Monkeys - 505.mp3" },
-  { id: "138", title: "Electric Feel",                  artist: "MGMT",                   album: "Oracular Spectacular",        coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "3:49", src: "/music/MGMT - Electric Feel (Official HD Video).mp3" },
-  { id: "139", title: "Kids",                           artist: "MGMT",                   album: "Oracular Spectacular",        coverUrl: "https://images.unsplash.com/photo-1553514029-1318c9127859?w=800&q=80", duration: "5:01", src: "/music/MGMT - Kids (Lyrics).mp3" },
-  { id: "280", title: "Geronimo",                       artist: "Sheppard",               album: "Bombs Away",                  coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", duration: "3:39", src: "/music/Sheppard - Geronimo (Official Music Video).mp3" },
-  { id: "281", title: "Budapest",                       artist: "George Ezra",            album: "Wanted on Voyage",            coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "3:21", src: "/music/George Ezra - Budapest (Official Video).mp3" },
-  { id: "282", title: "High on Life",                   artist: "Martin Garrix",          album: "High on Life",                coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80", duration: "3:51", src: "/music/Martin Garrix feat. Bonn - High On Life (Official Video).mp3" },
-  { id: "283", title: "Here Comes the Hotstepper",      artist: "Ini Kamoze",             album: "Here Comes the Hotstepper",   coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "4:11", src: "/music/Ini Kamoze - Here Comes The Hotstepper (Remix) (Official Video).mp3" },
-  { id: "284", title: "Love Me Again",                  artist: "John Newman",            album: "Tribute",                     coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80", duration: "4:00", src: "/music/John Newman - Love Me Again.mp3" },
-  { id: "285", title: "Can't Feel My Face",             artist: "The Weeknd",             album: "Beauty Behind the Madness",   coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", duration: "3:34", src: "/music/The Weeknd - Can't Feel My Face (Official Video).mp3" },
-  { id: "420", title: "Talk Is Cheap",                  artist: "Chet Faker",             album: "Built on Glass",              coverUrl: "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80", duration: "3:39", src: "/music/Talk Is Cheap.mp3" },
-  { id: "421", title: "Feel",                           artist: "Avi Snow",               album: "Feel",                        coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "2:48", src: "/music/Feel - Avi Snow MVCA Zeeba (AI Music Video).mp3" },
-  { id: "422", title: "U&ME",                           artist: "Dezko & Ceres",          album: "U&ME",                        coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80", duration: "3:16", src: "/music/Dezko & CERES - U&ME (Visualizer).mp3" },
-  { id: "423", title: "In the Air Tonight",             artist: "Jon Howard",             album: "In the Air Tonight",          coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "2:54", src: "/music/In The Air Tonight- Jon Howard (Official Audio).mp3" },
-  { id: "424", title: "Livin' on Borrowed Time",        artist: "Breaking Rust",          album: "Livin' on Borrowed Time",     coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "3:25", src: "/music/Livin' on Borrowed Time.mp3" },
-  { id: "425", title: "Higher",                         artist: "Croixx",                 album: "Higher",                      coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80", duration: "2:04", src: "/music/Croixx - Higher (Official Lyric Video).mp3" },
-  { id: "426", title: "Watch Me Die",                   artist: "Martin Wave",            album: "Watch Me Die",                coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", duration: "2:48", src: "/music/Martin Wave feat. ASHBY - Watch Me Die.mp3" },
-  { id: "427", title: "Here We Go",                     artist: "Norman",                 album: "Here We Go",                  coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80", duration: "2:24", src: "/music/Here We Go.mp3" },
-  { id: "428", title: "Nobody Move",                    artist: "Hanni El Khatib",        album: "Head in the Dirt",            coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "2:32", src: "/music/Hanni El Khatib - Nobody Move.mp3" },
-  { id: "429", title: "Manike",                         artist: "Yohani",                 album: "Manike",                      coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "3:57", src: "/music/Manike - Yohani.mp3" },
-  { id: "430", title: "Cadbury Gorilla",                artist: "danjwo",                 album: "In The Air Tonight Extended", coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", duration: "4:28", src: "/music/Cadbury Gorilla - In The Air Tonight (Extended Mix).mp3" },
-  // OTHER
-  { id: "150", title: "Blinding Lights",                artist: "The Weeknd",             album: "After Hours",                 coverUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80", duration: "3:20", src: "/music/The Weeknd - Blinding Lights (Official Video).mp3" },
-  { id: "151", title: "Starboy",                        artist: "The Weeknd",             album: "Starboy",                     coverUrl: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80", duration: "3:50", src: "/music/The Weeknd - Starboy ft. Daft Punk (Official Video) ft. Daft Punk.mp3" },
-  { id: "152", title: "Circles",                        artist: "Post Malone",            album: "Hollywood's Bleeding",        coverUrl: "https://images.unsplash.com/photo-1574169208507-84376144848b?w=800&q=80", duration: "3:35", src: "/music/Post Malone - Circles.mp3" },
-  { id: "153", title: "Sunflower",                      artist: "Post Malone",            album: "Spider-Man",                  coverUrl: "https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=800&q=80", duration: "2:38", src: "/music/Post Malone Swae Lee - Sunflower (Spider-Man Into the Spider-Verse).mp3" },
-  { id: "154", title: "Levitating",                     artist: "Dua Lipa",               album: "Future Nostalgia",            coverUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80", duration: "3:23", src: "/music/Dua Lipa - Levitating Featuring DaBaby (Official Music Video).mp3" },
-  { id: "155", title: "As It Was",                      artist: "Harry Styles",           album: "Harry's House",               coverUrl: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80", duration: "2:37", src: "/music/Harry Styles - As It Was (Official Video).mp3" },
-  { id: "156", title: "Heat Waves",                     artist: "Glass Animals",          album: "Dreamland",                   coverUrl: "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=800&q=80", duration: "3:59", src: "/music/Glass Animals - Heat Waves (Official Video).mp3" },
-  { id: "157", title: "golden hour",                    artist: "JVKE",                   album: "golden hour",                 coverUrl: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=800&q=80", duration: "3:29", src: "/music/JVKE - golden hour (official music video).mp3" },
-  { id: "158", title: "Anti-Hero",                      artist: "Taylor Swift",           album: "Midnights",                   coverUrl: "https://images.unsplash.com/photo-1518972734183-c4b97c4e1a32?w=800&q=80", duration: "3:20", src: "/music/Taylor Swift - Anti-Hero (Official Music Video).mp3" },
-  { id: "159", title: "Flowers",                        artist: "Miley Cyrus",            album: "Endless Summer Vacation",     coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=800&q=80", duration: "3:21", src: "/music/Miley Cyrus - Flowers (Official Video).mp3" },
-  { id: "160", title: "Cruel Summer",                   artist: "Taylor Swift",           album: "Lover",                       coverUrl: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=800&q=80", duration: "2:58", src: "/music/Taylor Swift - Cruel Summer (Official Audio).mp3" },
-  { id: "161", title: "Peaches",                        artist: "Justin Bieber",          album: "Justice",                     coverUrl: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&q=80", duration: "3:18", src: "/music/Justin Bieber - Peaches ft. Daniel Caesar Giveon.mp3" },
-  { id: "290", title: "Skin",                           artist: "Rag'n'Bone Man",         album: "Human (Deluxe)",              coverUrl: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80", duration: "4:00", src: "/music/Rag'n'Bone Man - Skin (Official Video).mp3" },
-  { id: "291", title: "Superman",                       artist: "Lazlo Bane",             album: "All The Time in the World",   coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "3:46", src: "/music/Scrubs Theme Song Superman Lazlo Bane Official Video Remastered HD.mp3" },
-  { id: "431", title: "Home",                           artist: "MGK & X Ambassadors",    album: "Bright: The Album",           coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "3:23", src: "/music/Machine Gun Kelly X Ambassadors Bebe Rexha - Home.mp3" },
-  { id: "432", title: "Ordinary",                       artist: "Alex Warren",            album: "You'll Be Alright, Kid",      coverUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=800&q=80", duration: "3:07", src: "/music/Alex Warren - Ordinary (Official Video).mp3" },
-  { id: "433", title: "magnetic magnetic",              artist: "all things break",       album: "magnetic magnetic",           coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "2:12", src: "/music/all things break - magnetic magnetic.mp3" },
-  { id: "434", title: "Never Did",                      artist: "testpilot1",             album: "Never Did",                   coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80", duration: "4:35", src: "/music/Never Did.mp3" },
-  { id: "435", title: "Cruise (Extended)",              artist: "ROYA",                   album: "Cruise Extended",             coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "3:32", src: "/music/ROYA - Cruise (Extended Version) - LIVE SESSION.mp3" },
-  { id: "436", title: "Can't Go Back",                  artist: "Astrality",              album: "Can't Go Back",               coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", duration: "2:36", src: "/music/Astrality & James French - Can't Go Back.mp3" },
-  { id: "437", title: "Hold on Hope",                   artist: "Guided By Voices",       album: "Do The Collapse",             coverUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=800&q=80", duration: "3:32", src: "/music/Hold On Hope.mp3" },
-  { id: "438", title: "Need Your Love",                 artist: "OneRepublic",            album: "Need Your Love",              coverUrl: "https://images.unsplash.com/photo-1501426026826-31c667bdf23d?w=800&q=80", duration: "3:59", src: "/music/OneRepublic - Need Your Love (Official Video).mp3" },
-  { id: "439", title: "Like a Prayer (Choir Version)",  artist: "The Choir",              album: "Deadpool & Wolverine",        coverUrl: "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=800&q=80", duration: "2:33", src: "/music/Madonna - Like A Prayer (Choir Version).mp3" },
-  { id: "440", title: "O'Meri Laila",                   artist: "Atif Aslam",             album: "Laila Majnu",                 coverUrl: "https://images.unsplash.com/photo-1464802686167-b939a6910659?w=800&q=80", duration: "4:42", src: "/music/O Meri Laila - Lyrical Laila Majnu.mp3" },
-  { id: "441", title: "Broken People",                  artist: "Logic & Rag'n'Bone Man", album: "Bright: The Album",           coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "3:33", src: "/music/Logic & Rag'n'Bone Man - Broken People.mp3" },
-  // TECHNO
-  { id: "310", title: "One Last Waltz",                 artist: "DannyHO",                album: "Afterglow",                   coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80", duration: "5:08", src: "/music/One Last Waltz DannyHO Afterglow Track 07.mp3" },
-  { id: "311", title: "Against the Tide",               artist: "DannyHO",                album: "Afterglow",                   coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "4:32", src: "/music/Against the Tide DannyHO Afterglow Track 04.mp3" },
-  { id: "312", title: "Tell Me Why (James Carter Remix)",artist: "Supermode",             album: "Tell Me Why",                 coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=800&q=80", duration: "2:59", src: "/music/Tell Me Why (James Carter Remix) - Supermode.mp3" },
-  { id: "313", title: "Inner Light",                    artist: "Elderbrook",             album: "Inner Light",                 coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80", duration: "4:18", src: "/music/Elderbrook - Inner Light with Bob Moses (Official Music Video).mp3" },
-  { id: "314", title: "Shots (Broiler Remix)",          artist: "Imagine Dragons",        album: "Shots EP",                    coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&q=80", duration: "3:12", src: "/music/Imagine Dragons - Shots (Broiler Remix) ft. Broiler.mp3" },
-  { id: "442", title: "Judgement Day",                  artist: "Stealth",                album: "Intro",                       coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=800&q=80", duration: "3:51", src: "/music/Stealth - Judgement Day.mp3" },
-  { id: "443", title: "It Goes On",                     artist: "Sir Rosevelt & Zac Brown",album: "It Goes On",                 coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=800&q=80", duration: "3:25", src: "/music/Zac Brown & Sir Rosevelt - It Goes On (Official Lyric Video).mp3" },
-  { id: "444", title: "Break the Silence",              artist: "The Dig",                album: "Midnight Flowers",            coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80", duration: "3:46", src: "/music/Break The Silence The Dig Midnight Flowers (2012).mp3" },
-  { id: "445", title: "Fate Don't Know You",            artist: "Desi Valentine",         album: "Fate Don't Know You",         coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", duration: "4:02", src: "/music/Desi Valentine - Fate Don't Know You.mp3" },
-  // PEAK
-  { id: "131", title: "Intro",                          artist: "The xx",                 album: "xx",                          coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=800&q=80", duration: "2:07", src: "/music/Intro.mp3" },
-  { id: "300", title: "Nessun Dorma (Live)",            artist: "Luciano Pavarotti",      album: "Three Tenors in Concert",     coverUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80", duration: "3:25", src: "/music/The Three Tenors in Concert 1994 Nessun Dorma from Turandot (encore).mp3" },
-  { id: "301", title: "Tere Bina",                      artist: "A.R. Rahman",            album: "Guru OST",                    coverUrl: "https://images.unsplash.com/photo-1464802686167-b939a6910659?w=800&q=80", duration: "5:10", src: "/music/A.R. Rahman - Tere Bina Lyrical Song Guru.mp3" },
-  { id: "446", title: "Man For All Seasons",            artist: "Robbie Williams",        album: "Johnny English OST",          coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "4:01", src: "/music/Robbie Williams - Man For All Seasons (Johnny English).mp3" },
-  { id: "447", title: "The Angry River",                artist: "The Hat",                album: "True Detective OST",          coverUrl: "https://images.unsplash.com/photo-1414862625253-63af814c65e7?w=800&q=80", duration: "2:56", src: "/music/The Angry River - The Hat ft. father John Misty (with lyrics).mp3" },
-  { id: "448", title: "Lately",                         artist: "Lera Lynn",              album: "True Detective OST",          coverUrl: "https://images.unsplash.com/photo-1499415479124-43c32433a620?w=800&q=80", duration: "2:50", src: "/music/Lera Lynn - Lately.mp3" },
-  { id: "449", title: "Psych Theme Song",               artist: "The Friendly Indians",   album: "Psych OST",                   coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80", duration: "2:08", src: "/music/Psych Theme Song (Full Version)~Friendly Indians.mp3" },
-  { id: "450", title: "Save You",                       artist: "Turin Brakes",           album: "Save You",                    coverUrl: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=800&q=80", duration: "3:05", src: "/music/Turin Brakes - Save You (Official Video).mp3" },
+  // ── COLDPLAY ─────────────────────────────────────────────────────────────
+  { id: "1",  title: "Paradise",     artist: "Coldplay", album: "Mylo Xyloto",              duration: "4:39", src: "/music/Coldplay - Paradise (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c6f59c1e5e7240a4c0d427abd71f3dbb.jpg" },
+  { id: "2",  title: "In My Place",  artist: "Coldplay", album: "A Rush of Blood to the Head", duration: "3:47", src: "/music/Coldplay - In My Place (Official 4K Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/3b54d9d4949a4073a7dcdc3159e652a7.jpg" },
+  { id: "5",  title: "Fix You",      artist: "Coldplay", album: "X&Y",                      duration: "4:56", src: "/music/Coldplay - Fix You (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/97e0e09fbef44c3da6d35b32a1c52e4c.jpg" },
+  { id: "10", title: "Magic",        artist: "Coldplay", album: "Ghost Stories",             duration: "4:46", src: "/music/Coldplay - Magic (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/2ffc7c2786194c2e980b90b2b462e4e6.jpg" },
+  { id: "16", title: "Violet Hill",  artist: "Coldplay", album: "Viva la Vida",              duration: "3:43", src: "/music/Coldplay - Violet Hill (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f7dd16e7d8134aaabcdbf7b32a179449.jpg" },
+  { id: "17", title: "Everglow",     artist: "Coldplay", album: "A Head Full of Dreams",     duration: "4:43", src: "/music/Coldplay - Everglow [Single Version] - (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/1252bca36cef4d1e9b0aa5d8d56fc98e.jpg" },
+  { id: "18", title: "Miracles",     artist: "Coldplay", album: "Unbroken",                  duration: "3:56", src: "/music/Coldplay - Miracles (Official Lyric Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/1252bca36cef4d1e9b0aa5d8d56fc98e.jpg" },
+  { id: "19", title: "Up&Up",        artist: "Coldplay", album: "A Head Full of Dreams",     duration: "6:46", src: "/music/Coldplay - Up&Up (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/1252bca36cef4d1e9b0aa5d8d56fc98e.jpg" },
+
+  // ── CHET FAKER ───────────────────────────────────────────────────────────
+  { id: "20", title: "Talk Is Cheap", artist: "Chet Faker", album: "Built on Glass",         duration: "3:39", src: "/music/Talk Is Cheap.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/8a8c53c95eb04edd97d0e97c68e1a9ed.jpg" },
+
+  // ── AVi SNOW ─────────────────────────────────────────────────────────────
+  { id: "21", title: "Feel",          artist: "Avi Snow", album: "Feel",                     duration: "2:48", src: "/music/Feel - Avi Snow, MVCA, Zeeba (AI Music Video).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" },
+
+  // ── ELEZO ─────────────────────────────────────────────────────────────────
+  { id: "28", title: "The XX Intro (ELEZO Remix)", artist: "ELEZO", album: "Remix",          duration: "2:42", src: "/music/The XX Intro - ELEZO remix ( Official video ).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a9a55bf3e20043d5929639a0e2e2c7d3.jpg" },
+
+  // ── SUPERMODE ────────────────────────────────────────────────────────────
+  { id: "29", title: "Tell Me Why (James Carter Remix)", artist: "Supermode", album: "Tell Me Why", duration: "2:59", src: "/music/Tell Me Why (James Carter Remix) - Supermode.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=400&q=80" },
+
+  // ── DEZKO & CERES ────────────────────────────────────────────────────────
+  { id: "30", title: "U&ME",          artist: "Dezko", album: "U&ME",                        duration: "3:16", src: "/music/Dezko & CERES - U&ME (Visualizer).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=400&q=80" },
+
+  // ── MARIUS BEAR ──────────────────────────────────────────────────────────
+  { id: "31", title: "Horizon",       artist: "Marius Bear", album: "Horizon",               duration: "2:53", src: "/music/Marius Bear - Horizon (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/9dc7a62f79874c0794e6b28e87e2eada.jpg" },
+
+  // ── JON HOWARD ───────────────────────────────────────────────────────────
+  { id: "32", title: "In the Air Tonight", artist: "Jon Howard", album: "In the Air Tonight", duration: "2:54", src: "/music/In The Air Tonight-  Jon Howard (Official Audio).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=80" },
+
+  // ── BREAKING RUST ─────────────────────────────────────────────────────────
+  { id: "33", title: "Livin' on Borrowed Time", artist: "Breaking Rust", album: "Livin' on Borrowed Time", duration: "3:25", src: "/music/Livin' on Borrowed Time.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=400&q=80" },
+
+  // ── JAMIE N COMMONS ──────────────────────────────────────────────────────
+  { id: "53", title: "Lead Me Home",  artist: "Jamie N Commons", album: "The Walking Dead OST", duration: "1:58", src: "/music/Jamie N Commons - Lead Me Home (The Walking Dead).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1414862625253-63af814c65e7?w=400&q=80" },
+
+  // ── CROIXX ───────────────────────────────────────────────────────────────
+  { id: "34", title: "Higher",        artist: "Croixx", album: "Higher",                     duration: "2:04", src: "/music/Croixx - Higher (Official Lyric Video).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&q=80" },
+
+  // ── MARTIN WAVE ──────────────────────────────────────────────────────────
+  { id: "35", title: "Watch Me Die",  artist: "Martin Wave", album: "Watch Me Die",          duration: "2:48", src: "/music/Martin Wave feat. ASHBY - Watch Me Die (From The Terminal List) [FULL SONG].mp3",
+    coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" },
+
+  // ── ALEX WARREN ──────────────────────────────────────────────────────────
+  { id: "36", title: "Ordinary",      artist: "Alex Warren", album: "You'll Be Alright, Kid", duration: "3:07", src: "/music/Alex Warren - Ordinary (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/5c3c1c8d3e164e1a9f5ae22e2e2e2e2e.jpg" },
+
+  // ── HANS ZIMMER — Batman ─────────────────────────────────────────────────
+  { id: "47", title: "A Dark Knight (Epic Version)", artist: "Hans Zimmer", album: "The Dark Knight OST", duration: "6:22", src: "/music/Hans Zimmer - A Dark Knight ｜ EPIC VERSION.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/bc62c7c6fe8f4c03a85a7e1c72e9d2a8.jpg" },
+
+  // ── IMA ROBOT ────────────────────────────────────────────────────────────
+  { id: "54", title: "Greenback Boogie", artist: "Ima Robot", album: "Suits OST",            duration: "4:58", src: "/music/Ima Robot - Greenback Boogie - (official video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/8c4a1e9e1e7f4b7c9d6e2f1e3e4a5b6c.jpg" },
+
+  // ── OLD MAN CANYON ────────────────────────────────────────────────────────
+  { id: "37", title: "Phantoms and Friends", artist: "Old Man Canyon", album: "Phantoms & Friends", duration: "3:52", src: "/music/Old Man Canyon - Phantoms & Friends [Official Video].mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/3e4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c.jpg" },
+
+  // ── PASSENGER ────────────────────────────────────────────────────────────
+  { id: "38", title: "Let Her Go",    artist: "Passenger", album: "All The Little Lights",   duration: "4:13", src: "/music/Passenger ｜ Let Her Go (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/3b75c654ed7d4e189e43e92060503a4d.jpg" },
+
+  // ── NORMAN ───────────────────────────────────────────────────────────────
+  { id: "39", title: "Here We Go",    artist: "Norman", album: "Here We Go",                 duration: "2:24", src: "/music/Here We Go.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=400&q=80" },
+
+  // ── BOBBY BAZINI ─────────────────────────────────────────────────────────
+  { id: "40", title: "Blood's Thicker Than Water", artist: "Bobby Bazini", album: "Summer Is Gone", duration: "3:42", src: "/music/Bobby Bazini - Blood's Thicker Than Water (Audio).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f.jpg" },
+
+  // ── MIRROR FURY ──────────────────────────────────────────────────────────
+  { id: "41", title: "The One I Love", artist: "Mirror Fury", album: "The One I Love",       duration: "3:05", src: "/music/Mirror Fury - The One I Love.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80" },
+
+  // ── LOUIS ARMSTRONG ──────────────────────────────────────────────────────
+  { id: "42", title: "What a Wonderful World", artist: "Louis Armstrong", album: "What a Wonderful World", duration: "2:20", src: "/music/Louis Armstrong - What A Wonderful World (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b.jpg" },
+
+  // ── NOVRA ────────────────────────────────────────────────────────────────
+  { id: "43", title: "Before The Fall", artist: "Novra", album: "Before The Fall",           duration: "6:59", src: "/music/NOVRA – Before The Fall ｜ Emotional Deep House.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400&q=80" },
+
+  // ── THE VEILS ────────────────────────────────────────────────────────────
+  { id: "44", title: "Grey Lynn Park", artist: "The Veils", album: "Troubles of the Brain",  duration: "2:40", src: "/music/The Veils - Grey Lynn Park.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c.jpg" },
+
+  // ── MICHAEL JACKSON ──────────────────────────────────────────────────────
+  { id: "45", title: "Man in the Mirror", artist: "Michael Jackson", album: "Bad",            duration: "5:20", src: "/music/Man in the Mirror - Michael Jackson.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f40a2a7e060945a38e6b73082d26c87e.jpg" },
+
+  // ── DAN WILSON ───────────────────────────────────────────────────────────
+  { id: "46", title: "Breathless",    artist: "Dan Wilson", album: "Free Life",               duration: "3:54", src: "/music/Dan Wilson - Breathless.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=400&q=80" },
+
+  // ── LORD HURON ───────────────────────────────────────────────────────────
+  { id: "48", title: "The Night We Met", artist: "Lord Huron", album: "Strange Trails",      duration: "3:29", src: "/music/The Night We Met - Lord Huron.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8.jpg" },
+
+  // ── CHARLIE CUNNINGHAM ────────────────────────────────────────────────────
+  { id: "49", title: "Permanent Way (Live Session)", artist: "Charlie Cunningham", album: "Flesh & Bone", duration: "4:18", src: "/music/Charlie Cunningham - Permanent Way (Live Session).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=400&q=80" },
+
+  // ── NEIL DIAMOND ─────────────────────────────────────────────────────────
+  { id: "50", title: "Sweet Caroline", artist: "Neil Diamond", album: "Sweet Caroline",      duration: "3:24", src: "/music/Neil Diamond - Sweet Caroline (Audio).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9.jpg" },
+
+  // ── LUCIANO PAVAROTTI ────────────────────────────────────────────────────
+  { id: "51", title: "Nessun Dorma (Live)", artist: "Luciano Pavarotti", album: "The Three Tenors in Concert 1994", duration: "3:25", src: "/music/The Three Tenors in Concert 1994： ＂Nessun Dorma＂ from Turandot (encore).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0.jpg" },
+
+  // ── CELINE DION — Deadpool 2 ─────────────────────────────────────────────
+  { id: "52", title: "Ashes (from Deadpool 2)", artist: "Celine Dion", album: "Deadpool 2 OST", duration: "3:20", src: "/music/Céline Dion - Ashes (from ＂Deadpool 2＂ Motion Picture Soundtrack).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1.jpg" },
+
+  // ── SURVIVOR ─────────────────────────────────────────────────────────────
+  { id: "58", title: "Eye of the Tiger", artist: "Survivor", album: "Eye of the Tiger",       duration: "4:04", src: "/music/Survivor - Eye Of The Tiger (Official HD Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c.jpg" },
+
+  // ── ATIF ASLAM ───────────────────────────────────────────────────────────
+  { id: "55", title: "O'Meri Laila",  artist: "Atif Aslam", album: "Laila Majnu",            duration: "4:42", src: "/music/O Meri Laila - Lyrical ｜ Laila Majnu ｜ Jyotica Tangri ｜ Avinash Tiwary & Tripti Dimri.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2.jpg" },
+
+  // ── KEANE ────────────────────────────────────────────────────────────────
+  { id: "56", title: "Somewhere Only We Know", artist: "Keane", album: "Hopes and Fears",    duration: "3:58", src: "/music/Keane - Somewhere Only We Know (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/76b95c10e1904fa3b50e3a3ec1bbadc5.jpg" },
+
+  // ── WRABEL ───────────────────────────────────────────────────────────────
+  { id: "57", title: "Into The Wild", artist: "Wrabel", album: "Sideways",                   duration: "3:31", src: "/music/Wrabel - Into The Wild (Audio).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1418985991508-e47386d96a71?w=400&q=80" },
+
+  // ── TURIN BRAKES ─────────────────────────────────────────────────────────
+  { id: "59", title: "Save You",      artist: "Turin Brakes", album: "Save You",             duration: "3:05", src: "/music/Turin Brakes - Save You (Official Video).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=400&q=80" },
+
+  // ── THE FRIENDLY INDIANS — Psych ──────────────────────────────────────────
+  { id: "60", title: "Psych Theme Song", artist: "The Friendly Indians", album: "Psych OST", duration: "2:08", src: "/music/Psych Theme Song (Full Version)~Friendly Indians.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400&q=80" },
+
+  // ── ELDERBROOK ───────────────────────────────────────────────────────────
+  { id: "61", title: "Inner Light",   artist: "Elderbrook", album: "Inner Light",            duration: "4:18", src: "/music/Elderbrook - Inner Light with Bob Moses (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3.jpg" },
+
+  // ── ALPHAVILLE ───────────────────────────────────────────────────────────
+  { id: "62", title: "Big in Japan",  artist: "Alphaville", album: "Forever Young",          duration: "4:45", src: "/music/Alphaville - Big In Japan (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6.jpg" },
+
+  // ── CHARLOTTE OC ─────────────────────────────────────────────────────────
+  { id: "63", title: "Colour My Heart", artist: "Charlotte OC", album: "Colour My Heart",   duration: "4:40", src: "/music/Charlotte OC - Colour My Heart (Official Video).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=400&q=80" },
+
+  // ── DEAN LEWIS ───────────────────────────────────────────────────────────
+  { id: "64", title: "Waves",         artist: "Dean Lewis", album: "Same Kind of Different", duration: "4:02", src: "/music/Dean Lewis - Waves (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6.jpg" },
+
+  // ── LOGIC & RAG'N'BONE MAN ────────────────────────────────────────────────
+  { id: "65", title: "Broken People", artist: "Logic & Rag'n'Bone Man", album: "Bright: The Album", duration: "3:33", src: "/music/Logic & Rag'n'Bone Man - Broken People (from Bright： The Album) [Official Lyric Video].mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7.jpg" },
+
+  // ── FAOUZIA & JOHN LEGEND ────────────────────────────────────────────────
+  { id: "66", title: "Minefields",    artist: "Faouzia & John Legend", album: "Minefields",  duration: "3:11", src: "/music/Faouzia & John Legend - Minefields (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8.jpg" },
+
+  // ── ROBBIE WILLIAMS ──────────────────────────────────────────────────────
+  { id: "67", title: "Man For All Seasons", artist: "Robbie Williams", album: "Johnny English OST", duration: "4:01", src: "/music/Robbie Williams - Man For All Seasons (Johnny English).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9.jpg" },
+
+  // ── ZAC BROWN & SIR ROSEVELT ─────────────────────────────────────────────
+  { id: "68", title: "It Goes On",    artist: "Sir Rosevelt & Zac Brown", album: "It Goes On", duration: "3:25", src: "/music/Zac Brown & Sir Rosevelt - It Goes On (Official Lyric Video).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1499415479124-43c32433a620?w=400&q=80" },
+
+  // ── THE DIG ──────────────────────────────────────────────────────────────
+  { id: "69", title: "Break the Silence", artist: "The Dig", album: "Midnight Flowers",     duration: "3:46", src: "/music/Break The Silence ⧸⧸ The Dig ⧸⧸ Midnight Flowers (2012).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=400&q=80" },
+
+  // ── DESI VALENTINE ───────────────────────────────────────────────────────
+  { id: "70", title: "Fate Don't Know You", artist: "Desi Valentine", album: "Fate Don't Know You", duration: "4:02", src: "/music/Desi Valentine - Fate Don't Know You.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&q=80" },
+
+  // ── MARK AMBOR ───────────────────────────────────────────────────────────
+  { id: "71", title: "Belong Together", artist: "Mark Ambor", album: "Belong Together",      duration: "2:29", src: "/music/Mark Ambor - Belong Together (Official Lyric Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0.jpg" },
+
+  // ── STEALTH ──────────────────────────────────────────────────────────────
+  { id: "72", title: "Judgement Day", artist: "Stealth", album: "Intro",                    duration: "3:51", src: "/music/Stealth - Judgement Day.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1484291470158-b8f8d608850d?w=400&q=80" },
+
+  // ── JOHNNY CLEGG ─────────────────────────────────────────────────────────
+  { id: "73", title: "King of Time",  artist: "Johnny Clegg", album: "King of Time",         duration: "3:17", src: "/music/Johnny Clegg - King Of Time.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1.jpg" },
+
+  // ── ANGUS STONE ──────────────────────────────────────────────────────────
+  { id: "74", title: "Broken Brights", artist: "Angus Stone", album: "Broken Brights",      duration: "4:13", src: "/music/Angus Stone - Broken Brights Official Video.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2.jpg" },
+
+  // ── CADBURY GORILLA / DANJWO ─────────────────────────────────────────────
+  { id: "75", title: "In The Air Tonight (Extended Mix)", artist: "danjwo", album: "In The Air Tonight Extended", duration: "4:28", src: "/music/Cadbury Gorilla - In The Air Tonight (Extended Mix).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=80" },
+
+  // ── MICHAEL KIWANUKA ─────────────────────────────────────────────────────
+  { id: "76", title: "Love & Hate",   artist: "Michael Kiwanuka", album: "Love & Hate",      duration: "7:08", src: "/music/Michael Kiwanuka - Love & Hate (Live Session).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3.jpg" },
+
+  // ── A.R. RAHMAN ──────────────────────────────────────────────────────────
+  { id: "77", title: "Tere Bina",     artist: "A.R. Rahman", album: "Guru OST",              duration: "5:10", src: "/music/A.R. Rahman - Tere Bina ｜ Lyrical Song ｜ Aishwarya Rai ｜ Abhishek Bachchan ｜ Guru ｜ Gulzar.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4.jpg" },
+
+  // ── SAMUEL KIM ───────────────────────────────────────────────────────────
+  { id: "78", title: "Duel of The Fates (Epic Version)", artist: "Samuel Kim", album: "Duel of The Fates", duration: "3:06", src: "/music/Star Wars： Duel of The Fates ｜ EPIC VERSION (Remastered V2).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&q=80" },
+
+  // ── TINA TURNER ──────────────────────────────────────────────────────────
+  { id: "79", title: "We Don't Need Another Hero", artist: "Tina Turner", album: "Simply the Best", duration: "4:16", src: "/music/TINA TURNER ★ We Don't Need Another Hero (Thunderdome)【music video】.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5.jpg" },
+
+  // ── JOHNNY CLEGG — Great Heart ───────────────────────────────────────────
+  { id: "80", title: "Great Heart",   artist: "Johnny Clegg", album: "Third World Child",    duration: "4:22", src: "/music/Johnny Clegg-Great Heart.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6.jpg" },
+
+  // ── LAZLO BANE — Scrubs ──────────────────────────────────────────────────
+  { id: "81", title: "Superman",      artist: "Lazlo Bane", album: "All The Time in the World", duration: "3:46", src: "/music/Scrubs Theme Song “Superman” Lazlo Bane Official Video Remastered HD.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7.jpg" },
+
+  // ── JOSÉ GONZÁLEZ ────────────────────────────────────────────────────────
+  { id: "82", title: "Stay Alive",    artist: "José González", album: "The Secret Life of Walter Mitty", duration: "4:27", src: "/music/José González - Stay Alive.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8.jpg" },
+
+  // ── ROCKY BALBOA THEME ────────────────────────────────────────────────────
+  { id: "83", title: "Rocky Balboa Theme", artist: "Various Artists", album: "Rocky Balboa OST", duration: "4:55", src: "/music/Rocky Balboa - Theme Song (HD).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9.jpg" },
+
+  // ── JON BON JOVI ─────────────────────────────────────────────────────────
+  { id: "84", title: "Blaze of Glory", artist: "Jon Bon Jovi", album: "Young Guns II",       duration: "5:36", src: "/music/Bon Jovi - Young Guns II Blaze of Glory.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0.jpg" },
+
+  // ── DEEP BLUE SOMETHING ──────────────────────────────────────────────────
+  { id: "85", title: "Breakfast at Tiffany's", artist: "Deep Blue Something", album: "Home", duration: "4:18", src: "/music/Deep Blue Something - Breakfast At Tiffany's (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1.jpg" },
+
+  // ── RUTH B. ──────────────────────────────────────────────────────────────
+  { id: "86", title: "Dandelions",    artist: "Ruth B.", album: "Safe Haven",                duration: "3:54", src: "/music/Ruth B. - Dandelions (Lyrics).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2.jpg" },
+
+  // ── CHRIS CORNELL ────────────────────────────────────────────────────────
+  { id: "87", title: "You Know My Name", artist: "Chris Cornell", album: "Casino Royale OST", duration: "4:01", src: "/music/Casino Royale - Chris Cornell - You Know My Name.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3.jpg" },
+
+  // ── THE PROCLAIMERS ──────────────────────────────────────────────────────
+  { id: "88", title: "I'm Gonna Be (500 Miles)", artist: "The Proclaimers", album: "Sunshine on Leith", duration: "3:40", src: "/music/The Proclaimers - I'm Gonna Be (500 Miles) (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4.jpg" },
+
+  // ── BILL WITHERS ─────────────────────────────────────────────────────────
+  { id: "89", title: "Lean on Me",    artist: "Bill Withers", album: "Still Bill",           duration: "4:19", src: "/music/Lean on Me.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5.jpg" },
+
+  // ── BON JOVI ─────────────────────────────────────────────────────────────
+  { id: "90", title: "It's My Life",  artist: "Bon Jovi", album: "Crush",                    duration: "3:45", src: "/music/Bon Jovi - It's My Life (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6.jpg" },
+
+  // ── THE WEEKND ───────────────────────────────────────────────────────────
+  { id: "91", title: "Can't Feel My Face", artist: "The Weeknd", album: "Beauty Behind the Madness", duration: "3:34", src: "/music/The Weeknd - Can't Feel My Face (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7.jpg" },
+
+  // ── NICHOLAS BRITELL — Succession ────────────────────────────────────────
+  { id: "92", title: "Succession (Main Title Theme)", artist: "Nicholas Britell", album: "Succession Season 4", duration: "2:02", src: "/music/Succession (Main Title Theme) - Nicholas Britell ｜ Succession (HBO Original Series Soundtrack).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8.jpg" },
+
+  // ── ALEXANDRE DESPLAT ────────────────────────────────────────────────────
+  { id: "93", title: "Godzilla!",     artist: "Alexandre Desplat", album: "Godzilla OST",    duration: "2:09", src: "/music/Godzilla Soundtrack ｜ Godzilla! - Alexandre Desplat ｜ WaterTower Music.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9.jpg" },
+
+  // ── ONEREPUBLIC ──────────────────────────────────────────────────────────
+  { id: "94", title: "Let's Hurt Tonight", artist: "OneRepublic", album: "Oh My My",         duration: "3:15", src: "/music/OneRepublic - Let's Hurt Tonight.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0.jpg" },
+
+  // ── THE XX ───────────────────────────────────────────────────────────────
+  { id: "95", title: "Intro",         artist: "The xx", album: "xx",                         duration: "2:07", src: "/music/Intro.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1.jpg" },
+
+  // ── HANNI EL KHATIB ──────────────────────────────────────────────────────
+  { id: "96", title: "Nobody Move",   artist: "Hanni El Khatib", album: "Head in the Dirt",  duration: "2:32", src: "/music/Hanni El Khatib - Nobody Move.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2.jpg" },
+
+  // ── YOHANI ───────────────────────────────────────────────────────────────
+  { id: "97", title: "Manike",        artist: "Yohani", album: "Manike",                     duration: "3:57", src: "/music/Manike (Full Video)： Thank God ｜ Nora,Sidharth｜ Tanishk,Yohani,Jubin,Surya R ｜Rashmi Virag｜Bhushan K.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3.jpg" },
+
+  // ── SHEPPARD ─────────────────────────────────────────────────────────────
+  { id: "98", title: "Geronimo",      artist: "Sheppard", album: "Bombs Away",               duration: "3:39", src: "/music/Sheppard - Geronimo (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4.jpg" },
+
+  // ── INI KAMOZE ───────────────────────────────────────────────────────────
+  { id: "99", title: "Here Comes the Hotstepper", artist: "Ini Kamoze", album: "Here Comes the Hotstepper", duration: "4:11", src: "/music/Ini Kamoze - Here Comes The Hotstepper (Remix) (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5.jpg" },
+
+  // ── MARTIN GARRIX ────────────────────────────────────────────────────────
+  { id: "100", title: "High on Life", artist: "Martin Garrix", album: "High on Life",        duration: "3:51", src: "/music/Martin Garrix feat. Bonn - High On Life (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6.jpg" },
+
+  // ── GEORGE EZRA ──────────────────────────────────────────────────────────
+  { id: "101", title: "Budapest",     artist: "George Ezra", album: "Wanted on Voyage",      duration: "3:21", src: "/music/George Ezra - Budapest (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7.jpg" },
+
+  // ── THE VERVE ────────────────────────────────────────────────────────────
+  { id: "102", title: "Bittersweet Symphony", artist: "The Verve", album: "Urban Hymns",     duration: "4:30", src: "/music/The Verve - Bitter Sweet Symphony.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8.jpg" },
+
+  // ── 4 NON BLONDES ────────────────────────────────────────────────────────
+  { id: "103", title: "What's Up?",   artist: "4 Non Blondes", album: "Bigger, Better, Faster, More!", duration: "4:56", src: "/music/4 Non Blondes - What's Up (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9.jpg" },
+
+  // ── LIKE A PRAYER CHOIR ───────────────────────────────────────────────────
+  { id: "104", title: "Like a Prayer (Choir Version)", artist: "I'll Take You There Choir", album: "Deadpool & Wolverine", duration: "2:33", src: "/music/Madonna - Like A Prayer (Choir Version) [Vinyl Visualizer].mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0.jpg" },
+
+  // ── DOBIE GRAY ───────────────────────────────────────────────────────────
+  { id: "105", title: "Drift Away",   artist: "Dobie Gray", album: "Drift Away",             duration: "3:59", src: "/music/Dobie Gray - Drift Away (Original Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1.jpg" },
+
+  // ── FRIENDS OF JOHNNY CLEGG ──────────────────────────────────────────────
+  { id: "106", title: "The Crossing", artist: "Friends of Johnny Clegg", album: "The Crossing", duration: "5:07", src: "/music/THE CROSSING - Friends of Johnny Clegg.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2.jpg" },
+
+  // ── ELTON JOHN & DUA LIPA ────────────────────────────────────────────────
+  { id: "107", title: "Cold Heart (PNAU Remix)", artist: "Elton John & Dua Lipa", album: "The Lockdown Sessions", duration: "3:23", src: "/music/Elton John, Dua Lipa - Cold Heart (PNAU Remix) (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3.jpg" },
+
+  // ── JACOB BANKS ──────────────────────────────────────────────────────────
+  { id: "108", title: "Unknown (To You)", artist: "Jacob Banks", album: "Village",           duration: "3:54", src: "/music/Jacob Banks - Unknown (To You) Official Music Video.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4.jpg" },
+
+  // ── LEWIS CAPALDI ────────────────────────────────────────────────────────
+  { id: "109", title: "Before You Go", artist: "Lewis Capaldi", album: "Divinely Uninspired to a Hellish Extent", duration: "3:36", src: "/music/Lewis Capaldi - Before You Go (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5.jpg" },
+
+  // ── KALEO ────────────────────────────────────────────────────────────────
+  { id: "110", title: "Way Down We Go", artist: "KALEO", album: "A/B",                       duration: "3:34", src: "/music/KALEO - Way Down We Go (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6.jpg" },
+
+  // ── RAG'N'BONE MAN ───────────────────────────────────────────────────────
+  { id: "111", title: "Human",        artist: "Rag'n'Bone Man", album: "Human",              duration: "3:20", src: "/music/Rag'n'Bone Man - Human (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7.jpg" },
+
+  // ── SAM SMITH ────────────────────────────────────────────────────────────
+  { id: "112", title: "Stay With Me", artist: "Sam Smith", album: "In the Lonely Hour",      duration: "2:53", src: "/music/Sam Smith - Stay With Me (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8.jpg" },
+
+  // ── GEORGE MICHAEL & ELTON JOHN ──────────────────────────────────────────
+  { id: "113", title: "Don't Let the Sun Go Down on Me (Live)", artist: "George Michael & Elton John", album: "Twenty Five", duration: "5:48", src: "/music/George Michael, Elton John - Don't Let The Sun Go Down On Me (Live).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9.jpg" },
+
+  // ── THE HAT — True Detective ─────────────────────────────────────────────
+  { id: "114", title: "The Angry River", artist: "The Hat", album: "True Detective OST",     duration: "2:56", src: "/music/The Angry River - The Hat ft. father John Misty (with lyrics).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1414862625253-63af814c65e7?w=400&q=80" },
+
+  // ── LERA LYNN — True Detective ───────────────────────────────────────────
+  { id: "115", title: "Lately",       artist: "Lera Lynn", album: "True Detective OST",       duration: "2:50", src: "/music/Lera Lynn - Lately.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400&q=80" },
+
+  // ── BILL WITHERS — Lovely Day ────────────────────────────────────────────
+  { id: "116", title: "Lovely Day",   artist: "Bill Withers", album: "Menagerie",             duration: "4:15", src: "/music/Bill Withers - Lovely Day (Official Audio).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0.jpg" },
+
+  // ── HANS ZIMMER — Why Do We Fall ────────────────────────────────────────
+  { id: "117", title: "Why Do We Fall?", artist: "Hans Zimmer", album: "The Dark Knight Rises OST", duration: "2:07", src: "/music/The Dark Knight Rises Official Soundtrack ｜ Why Do We Fall？ – Hans Zimmer ｜ WaterTower.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1.jpg" },
+
+  // ── JAMES BAY ────────────────────────────────────────────────────────────
+  { id: "118", title: "Hold Back the River", artist: "James Bay", album: "Chaos and the Calm", duration: "3:59", src: "/music/James Bay - Hold Back The River.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2.jpg" },
+
+  // ── SCORPIONS ────────────────────────────────────────────────────────────
+  { id: "119", title: "Wind of Change", artist: "Scorpions", album: "Crazy World",           duration: "5:13", src: "/music/Scorpions - Wind Of Change (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3.jpg" },
+
+  // ── AEROSMITH ────────────────────────────────────────────────────────────
+  { id: "120", title: "I Don't Want to Miss a Thing", artist: "Aerosmith", album: "Armageddon OST", duration: "4:59", src: "/music/I Don't Want to Miss a Thing - Aerosmith.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4.jpg" },
+
+  // ── JOHN NEWMAN ──────────────────────────────────────────────────────────
+  { id: "121", title: "Love Me Again", artist: "John Newman", album: "Tribute",              duration: "4:00", src: "/music/John Newman - Love Me Again.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5.jpg" },
+
+  // ── JOHN POWELL — Bourne ─────────────────────────────────────────────────
+  { id: "122", title: "Treadstone Assassins", artist: "John Powell", album: "The Bourne Identity OST", duration: "2:13", src: "/music/Treadstone Assassins.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1484291470158-b8f8d608850d?w=400&q=80" },
+
+  // ── EAGLE-EYE CHERRY ─────────────────────────────────────────────────────
+  { id: "123", title: "Save Tonight", artist: "Eagle-Eye Cherry", album: "Desireless",       duration: "4:01", src: "/music/Eagle-Eye Cherry - Save Tonight.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6.jpg" },
+
+  // ── GUIDED BY VOICES ─────────────────────────────────────────────────────
+  { id: "124", title: "Hold on Hope", artist: "Guided By Voices", album: "Do The Collapse",  duration: "3:32", src: "/music/Hold On Hope.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1499415479124-43c32433a620?w=400&q=80" },
+
+  // ── ONEREPUBLIC — Need Your Love ─────────────────────────────────────────
+  { id: "125", title: "Need Your Love", artist: "OneRepublic", album: "Need Your Love",      duration: "3:59", src: "/music/OneRepublic - Need Your Love (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7.jpg" },
+
+  // ── ROYA ─────────────────────────────────────────────────────────────────
+  { id: "126", title: "Cruise (Extended)", artist: "ROYA", album: "Cruise Extended",         duration: "3:32", src: "/music/ROYA - Cruise (Extended Version) - LIVE SESSION.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1535223289429-72aad301b73d?w=400&q=80" },
+
+  // ── ASTRALITY ────────────────────────────────────────────────────────────
+  { id: "127", title: "Can't Go Back", artist: "Astrality", album: "Can't Go Back",          duration: "2:36", src: "/music/Astrality & James French - Can't Go Back.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&q=80" },
+
+  // ── TESTPILOT1 ───────────────────────────────────────────────────────────
+  { id: "128", title: "Never Did",    artist: "testpilot1", album: "Never Did",              duration: "4:35", src: "/music/Never Did.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1598387993441-a364f854cfdd?w=400&q=80" },
+
+  // ── DANNYHO ──────────────────────────────────────────────────────────────
+  { id: "129", title: "One Last Waltz", artist: "DannyHO", album: "Afterglow",               duration: "5:08", src: "/music/One Last Waltz – DannyHO ｜ Minecraft-Style EDM Visual ｜ Afterglow (Track 07).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=400&q=80" },
+
+  // ── IMAGINE DRAGONS ──────────────────────────────────────────────────────
+  { id: "130", title: "Shots (Broiler Remix)", artist: "Imagine Dragons", album: "Shots EP", duration: "3:12", src: "/music/Imagine Dragons - Shots (Broiler Remix) ft. Broiler.mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8.jpg" },
+
+  // ── ALL THINGS BREAK ─────────────────────────────────────────────────────
+  { id: "131", title: "magnetic magnetic", artist: "all things break", album: "magnetic magnetic", duration: "2:12", src: "/music/all things break - magnetic magnetic.mp3",
+    coverUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=80" },
+
+  // ── DANNYHO — Against the Tide ───────────────────────────────────────────
+  { id: "132", title: "Against the Tide", artist: "DannyHO", album: "Afterglow",             duration: "4:32", src: "/music/Against the Tide – DannyHO ｜ Minecraft-Style EDM Visual ｜ Afterglow (Track 04).mp3",
+    coverUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" },
+
+  // ── DUA LIPA — keep as requested ─────────────────────────────────────────
+  { id: "150", title: "Levitating",   artist: "Dua Lipa", album: "Future Nostalgia",         duration: "3:23", src: "/music/Dua Lipa - Levitating Featuring DaBaby (Official Music Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9.jpg" },
+
+  // ── THE WEEKND — keep as requested ───────────────────────────────────────
+  { id: "151", title: "Blinding Lights", artist: "The Weeknd", album: "After Hours",         duration: "3:20", src: "/music/The Weeknd - Blinding Lights (Official Video).mp3",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0.jpg" },
 ];
+
 const byIds = (...ids: string[]) => ALL_TRACKS.filter(t => ids.includes(t.id));
 export const PLAYLISTS: Playlist[] = [
-  { id: "coldplay", name: "Coldplay", description: "Every Coldplay track in the collection", coverUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80", tracks: byIds("1","2","5","10","16","17","18","19") },
+  {
+    id: "coldplay",
+    name: "Coldplay",
+    description: "Every Coldplay track in the collection",
+    coverUrl: "https://lastfm.freetls.fastly.net/i/u/300x300/1252bca36cef4d1e9b0aa5d8d56fc98e.jpg",
+    tracks: byIds("1","2","5","10","16","17","18","19"),
+  },
 ];

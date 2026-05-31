@@ -1,26 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import { kv } from "@vercel/kv";
+import type { PlaylistStore } from "../route";
 
-export const dynamic = "force-dynamic";
+const KEY = "playlists";
 
-// On Vercel the filesystem is read-only — writes are accepted but not persisted.
-// Playlist state is managed client-side; this endpoint is a no-op stub.
-
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const { trackIds } = await req.json();
-  if (!Array.isArray(trackIds)) {
-    return NextResponse.json({ error: "trackIds must be an array" }, { status: 400 });
+async function getStore(): Promise<PlaylistStore> {
+  try {
+    const data = await kv.get<PlaylistStore>(KEY);
+    return data ?? {};
+  } catch {
+    return {};
   }
-  return NextResponse.json({ ok: true, id, trackIds });
 }
 
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+// PUT /api/playlists/[id] — update tracks or rename
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  return NextResponse.json({ ok: true, id });
+  const body = await req.json();
+  const store = await getStore();
+
+  if (!store[id]) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (Array.isArray(body.trackIds)) store[id].trackIds = body.trackIds;
+  if (typeof body.name === "string" && body.name.trim()) store[id].name = body.name.trim();
+
+  await kv.set(KEY, store);
+  return NextResponse.json(store[id]);
+}
+
+// DELETE /api/playlists/[id] — remove a playlist
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const store = await getStore();
+
+  if (!store[id]) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  delete store[id];
+  await kv.set(KEY, store);
+  return NextResponse.json({ ok: true });
 }
