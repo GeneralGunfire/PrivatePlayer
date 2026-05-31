@@ -2,6 +2,7 @@
     |-- settings.local.json
 |-- .gitignore
 |-- download-songs.ps1
+|-- fix2.py
 |-- index.html
 |-- monotune.zip
 |-- monotune_extracted
@@ -200,7 +201,7 @@
         |-- Ruth B. - Dandelions (Lyrics).mp3
         |-- Sam Smith - Stay With Me (Official Music Video).mp3
         |-- Scorpions - Wind Of Change (Official Music Video).mp3
-        |-- Scrubs Theme Song “Superman” Lazlo Bane Official Video Remastered HD.mp3
+        |-- Scrubs Theme Song Superman Lazlo Bane Official Video Remastered HD.mp3
         |-- Sheppard - Geronimo (Official Music Video).mp3
         |-- Simple Minds - Don't You (Forget About Me).mp3
         |-- Skinny Love.mp3

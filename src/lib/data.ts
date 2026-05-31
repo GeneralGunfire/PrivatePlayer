@@ -307,7 +307,7 @@ export const ALL_TRACKS: Track[] = [
 
   // ── LAZLO BANE — Scrubs ──────────────────────────────────────────────────
   // Superman / Scrubs — hospital, comedy, everyday hero
-  { id: "81", title: "Superman",      artist: "Lazlo Bane", album: "All The Time in the World", duration: "3:46", src: "/music/Scrubs Theme Song "Superman" Lazlo Bane Official Video Remastered HD.mp3",
+  { id: "81", title: "Superman",      artist: "Lazlo Bane", album: "All The Time in the World", duration: "3:46", src: "/music/Scrubs Theme Song Superman Lazlo Bane Official Video Remastered HD.mp3",
     coverUrl: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&q=80" },
 
   // ── JOSÉ GONZÁLEZ ────────────────────────────────────────────────────────
