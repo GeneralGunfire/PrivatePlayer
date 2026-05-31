@@ -9,7 +9,7 @@ export const TRACK_SRC_MAP: Record<string, string> = {
   "1": "/music/Coldplay%20-%20Paradise%20(Official%20Video).mp3", // Coldplay - Paradise (Official Video).mp3
   "2": "/music/Coldplay%20-%20In%20My%20Place%20(Official%204K%20Video).mp3", // Coldplay - In My Place (Official 4K Video).mp3
   "5": "/music/Coldplay%20-%20Fix%20You%20(Official%20Video).mp3", // Coldplay - Fix You (Official Video).mp3
-  "10": "/music/Coldplay%20-%20Magic%20(Official%20Video).mp3", // Coldplay - Magic (Official Video).mp3
+  "10": "/music/Coldplay%20-%20Magic%20(Official%20Video)%20%5BOfficial%5D.mp3", // Coldplay - Magic (Official Video) [Official].mp3
   "16": "/music/Coldplay%20-%20Violet%20Hill%20(Official%20Video).mp3", // Coldplay - Violet Hill (Official Video).mp3
   "17": "/music/Coldplay%20-%20Everglow%20%5BSingle%20Version%5D%20-%20(Official%20Video).mp3", // Coldplay - Everglow [Single Version] - (Official Video).mp3
   "18": "/music/Coldplay%20-%20Miracles%20(Official%20Lyric%20Video).mp3", // Coldplay - Miracles (Official Lyric Video).mp3
@@ -17,7 +17,7 @@ export const TRACK_SRC_MAP: Record<string, string> = {
   "20": "/music/Talk%20Is%20Cheap.mp3", // Talk Is Cheap.mp3
   "21": "/music/Feel%20-%20Avi%20Snow%2C%20MVCA%2C%20Zeeba%20(AI%20Music%20Video).mp3", // Feel - Avi Snow, MVCA, Zeeba (AI Music Video).mp3
   "28": "/music/The%20XX%20Intro%20-%20ELEZO%20remix%20(%20Official%20video%20).mp3", // The XX Intro - ELEZO remix ( Official video ).mp3
-  "29": "/music/Tell%20Me%20Why%20(James%20Carter%20Remix)%20-%20Supermode.mp3", // Not yet downloaded - will silently skip
+  "29": "/music/Astrality%20%26%20James%20French%20-%20Can%E2%80%99t%20Go%20Back.mp3", // Astrality & James French - Can’t Go Back.mp3
   "30": "/music/Dezko%20%26%20CERES%20-%20U%26ME%20(Visualizer).mp3", // Dezko & CERES - U&ME (Visualizer).mp3
   "31": "/music/Marius%20Bear%20-%20Horizon%20(Official%20Video).mp3", // Marius Bear - Horizon (Official Video).mp3
   "32": "/music/In%20The%20Air%20Tonight-%20%20Jon%20Howard%20(Official%20Audio).mp3", // In The Air Tonight-  Jon Howard (Official Audio).mp3
@@ -69,7 +69,7 @@ export const TRACK_SRC_MAP: Record<string, string> = {
   "78": "/music/Star%20Wars%EF%BC%9A%20Duel%20of%20The%20Fates%20%EF%BD%9C%20EPIC%20VERSION%20(Remastered%20V2).mp3", // Star Wars： Duel of The Fates ｜ EPIC VERSION (Remastered V2).mp3
   "79": "/music/TINA%20TURNER%20%E2%98%85%20We%20Don't%20Need%20Another%20Hero%20(Thunderdome)%E3%80%90music%20video%E3%80%91.mp3", // TINA TURNER ★ We Don't Need Another Hero (Thunderdome)【music video】.mp3
   "80": "/music/Johnny%20Clegg-Great%20Heart.mp3", // Johnny Clegg-Great Heart.mp3
-  "81": "/music/Scrubs%20Theme%20Song%20%E2%80%9CSuperman%E2%80%9D%20Lazlo%20Bane%20Official%20Video%20Remastered%20HD.mp3", // Scrubs Theme Song “Superman” Lazlo Bane Official Video Remastered HD.mp3
+  "81": "/music/Scrubs%20Theme%20Song%20Superman%20Lazlo%20Bane%20Official%20Video%20Remastered%20HD.mp3", // Scrubs Theme Song Superman Lazlo Bane Official Video Remastered HD.mp3
   "82": "/music/Jos%C3%A9%20Gonz%C3%A1lez%20-%20Stay%20Alive.mp3", // José González - Stay Alive.mp3
   "83": "/music/Rocky%20Balboa%20-%20Theme%20Song%20(HD).mp3", // Rocky Balboa - Theme Song (HD).mp3
   "84": "/music/Bon%20Jovi%20-%20Young%20Guns%20II%20Blaze%20of%20Glory.mp3", // Bon Jovi - Young Guns II Blaze of Glory.mp3
@@ -108,7 +108,7 @@ export const TRACK_SRC_MAP: Record<string, string> = {
   "117": "/music/The%20Dark%20Knight%20Rises%20Official%20Soundtrack%20%EF%BD%9C%20Why%20Do%20We%20Fall%EF%BC%9F%20%E2%80%93%20Hans%20Zimmer%20%EF%BD%9C%20WaterTower.mp3", // The Dark Knight Rises Official Soundtrack ｜ Why Do We Fall？ – Hans Zimmer ｜ WaterTower.mp3
   "118": "/music/James%20Bay%20-%20Hold%20Back%20The%20River.mp3", // James Bay - Hold Back The River.mp3
   "119": "/music/Scorpions%20-%20Wind%20Of%20Change%20(Official%20Music%20Video).mp3", // Scorpions - Wind Of Change (Official Music Video).mp3
-  "120": "/music/I%20Don%27t%20Want%20to%20Miss%20a%20Thing%20-%20Aerosmith.mp3", // Not yet downloaded
+  "120": "/music/all%20things%20break%20-%20magnetic%20magnetic.mp3", // all things break - magnetic magnetic.mp3
   "121": "/music/John%20Newman%20-%20Love%20Me%20Again.mp3", // John Newman - Love Me Again.mp3
   "122": "/music/Treadstone%20Assassins.mp3", // Treadstone Assassins.mp3
   "123": "/music/Eagle-Eye%20Cherry%20-%20Save%20Tonight.mp3", // Eagle-Eye Cherry - Save Tonight.mp3
