@@ -26,7 +26,6 @@ function notify(s: UserStore) {
 async function fetchStore(): Promise<UserStore> {
   if (_store) return _store;
   if (_fetching) {
-    // Wait for the in-progress fetch
     return new Promise(resolve => {
       const unsub = () => { _listeners = _listeners.filter(f => f !== unsub); resolve(_store!); };
       _listeners.push(unsub);
@@ -35,7 +34,12 @@ async function fetchStore(): Promise<UserStore> {
   _fetching = true;
   try {
     const r = await fetch("/api/playlists");
-    const data: UserStore = r.ok ? await r.json() : {};
+    const raw: UserStore = r.ok ? await r.json() : {};
+    // Only keep user-created playlists (id starts with "pl_")
+    // This filters out any old built-in playlist IDs stored in Redis
+    const data: UserStore = Object.fromEntries(
+      Object.entries(raw).filter(([id]) => id.startsWith("pl_"))
+    );
     _store = data;
     _fetching = false;
     return data;

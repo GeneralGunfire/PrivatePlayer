@@ -249,9 +249,11 @@
 |-- README.md
 |-- scripts
     |-- audit-covers.js
+    |-- check-data.js
     |-- check-id.js
     |-- fix-covers.js
     |-- fix-map.js
+    |-- gen-covers.js
     |-- gen-src-map.js
 |-- src
     |-- app
@@ -259,6 +261,8 @@
             |-- music-files
                 |-- route.ts
             |-- playlists
+                |-- purge
+                    |-- route.ts
                 |-- route.ts
                 |-- [id]
                     |-- route.ts
