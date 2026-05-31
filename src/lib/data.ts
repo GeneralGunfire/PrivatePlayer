@@ -15,7 +15,7 @@ export const ALL_TRACKS: Track[] = [
   { id: "5",  title: "Fix You",      artist: "Coldplay", album: "X&Y",                      duration: "4:56", src: "/music/Coldplay - Fix You (Official Video).mp3",
     coverUrl: "https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=400&q=80" },
   // Magic — mysterious, dark sparkle, Ghost Stories
-  { id: "10", title: "Magic",        artist: "Coldplay", album: "Ghost Stories",             duration: "4:46", src: "/music/Coldplay - Magic (Official Video).mp3",
+  { id: "10", title: "Magic",        artist: "Coldplay", album: "Ghost Stories",             duration: "4:46", src: "/music/Coldplay - Magic (Official Video) [Official].mp3",
     coverUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&q=80" },
   // Violet Hill — dark, political, war imagery
   { id: "16", title: "Violet Hill",  artist: "Coldplay", album: "Viva la Vida",              duration: "3:43", src: "/music/Coldplay - Violet Hill (Official Video).mp3",

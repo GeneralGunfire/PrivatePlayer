@@ -2,7 +2,6 @@
     |-- settings.local.json
 |-- .gitignore
 |-- download-songs.ps1
-|-- fix2.py
 |-- index.html
 |-- monotune.zip
 |-- monotune_extracted
@@ -78,7 +77,7 @@
         |-- Coldplay - Every Teardrop Is a Waterfall (Official Video).mp3
         |-- Coldplay - Fix You (Official Video).mp3
         |-- Coldplay - In My Place (Official 4K Video).mp3
-        |-- Coldplay - Magic (Official Video).mp3
+        |-- Coldplay - Magic (Official Video) [Official].mp3
         |-- Coldplay - Miracles (Official Lyric Video).mp3
         |-- Coldplay - Paradise (Official Video).mp3
         |-- Coldplay - Shiver (Official Video).mp3
