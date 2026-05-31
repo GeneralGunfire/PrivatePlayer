@@ -3,7 +3,9 @@ import { getRedis } from "@/lib/redis";
 
 // One-time purge of old built-in playlist data from Redis.
 // Keeps only entries with "pl_" prefix (user-created).
-export async function POST() {
+export async function GET() { return purge(); }
+export async function POST() { return purge(); }
+async function purge() {
   try {
     const redis = await getRedis();
     const raw = await redis.get("playlists");
