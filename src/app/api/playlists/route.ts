@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv } from "@vercel/kv";
+import { getRedis } from "@/lib/redis";
 
-// KV key that stores all user playlists
 const KEY = "playlists";
 
 export interface StoredPlaylist {
@@ -15,20 +14,26 @@ export type PlaylistStore = Record<string, StoredPlaylist>;
 
 async function getStore(): Promise<PlaylistStore> {
   try {
-    const data = await kv.get<PlaylistStore>(KEY);
-    return data ?? {};
+    const redis = await getRedis();
+    const raw = await redis.get(KEY);
+    return raw ? (JSON.parse(raw) as PlaylistStore) : {};
   } catch {
     return {};
   }
 }
 
-// GET /api/playlists — return all user playlists
+async function saveStore(store: PlaylistStore) {
+  const redis = await getRedis();
+  await redis.set(KEY, JSON.stringify(store));
+}
+
+// GET /api/playlists
 export async function GET() {
   const store = await getStore();
   return NextResponse.json(store);
 }
 
-// POST /api/playlists — create a new playlist
+// POST /api/playlists — create playlist
 export async function POST(req: NextRequest) {
   const { name } = await req.json();
   if (!name?.trim()) {
@@ -39,6 +44,6 @@ export async function POST(req: NextRequest) {
   const id = `pl_${Date.now()}`;
   store[id] = { id, name: name.trim(), trackIds: [], createdAt: Date.now() };
 
-  await kv.set(KEY, store);
+  await saveStore(store);
   return NextResponse.json(store[id]);
 }

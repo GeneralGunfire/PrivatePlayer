@@ -285,6 +285,7 @@
         |-- data.ts
         |-- player-context.tsx
         |-- playlist-store.ts
+        |-- redis.ts
         |-- resolve-track.ts
         |-- track-src-map.ts
         |-- use-music-files.ts

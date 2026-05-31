@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv } from "@vercel/kv";
+import { getRedis } from "@/lib/redis";
 import type { PlaylistStore } from "../route";
 
 const KEY = "playlists";
 
 async function getStore(): Promise<PlaylistStore> {
   try {
-    const data = await kv.get<PlaylistStore>(KEY);
-    return data ?? {};
+    const redis = await getRedis();
+    const raw = await redis.get(KEY);
+    return raw ? (JSON.parse(raw) as PlaylistStore) : {};
   } catch {
     return {};
   }
 }
 
-// PUT /api/playlists/[id] — update tracks or rename
+async function saveStore(store: PlaylistStore) {
+  const redis = await getRedis();
+  await redis.set(KEY, JSON.stringify(store));
+}
+
+// PUT /api/playlists/[id] — update tracks or name
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -29,11 +35,11 @@ export async function PUT(
   if (Array.isArray(body.trackIds)) store[id].trackIds = body.trackIds;
   if (typeof body.name === "string" && body.name.trim()) store[id].name = body.name.trim();
 
-  await kv.set(KEY, store);
+  await saveStore(store);
   return NextResponse.json(store[id]);
 }
 
-// DELETE /api/playlists/[id] — remove a playlist
+// DELETE /api/playlists/[id]
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -46,6 +52,6 @@ export async function DELETE(
   }
 
   delete store[id];
-  await kv.set(KEY, store);
+  await saveStore(store);
   return NextResponse.json({ ok: true });
 }
