@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ALL_TRACKS, type Playlist, type Track } from "./data";
+import { ALL_TRACKS, PLAYLISTS, type Playlist, type Track } from "./data";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 export interface UserPlaylist {
@@ -81,7 +81,10 @@ export function usePlaylists() {
     return () => { _listeners = _listeners.filter(f => f !== fn); };
   }, []);
 
-  const playlists: Playlist[] = Object.values(store).map(userToPlaylist);
+  const playlists: Playlist[] = [
+    ...PLAYLISTS,
+    ...Object.values(store).map(userToPlaylist),
+  ];
 
   // ── Create playlist ──────────────────────────────────────────────────────
   const createPlaylist = useCallback(async (name: string): Promise<string | null> => {

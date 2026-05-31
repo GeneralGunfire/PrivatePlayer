@@ -460,4 +460,13 @@ export const ALL_TRACKS: Track[] = [
     coverUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80" },
 ];
 
-export const PLAYLISTS: Playlist[] = [];
+const byIds = (...ids: string[]) => ALL_TRACKS.filter(t => ids.includes(t.id));
+export const PLAYLISTS: Playlist[] = [
+  {
+    id: "coldplay",
+    name: "Coldplay",
+    description: "Every Coldplay track in the collection",
+    coverUrl: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=400&q=80",
+    tracks: byIds("1","2","5","10","16","17","18","19"),
+  },
+];

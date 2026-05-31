@@ -67,11 +67,11 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
           }}
         />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-b from-transparent to-black" />
-        <div className="relative z-10 flex flex-col sm:flex-row items-end gap-5 px-6 pt-16 pb-6">
+        <div className="relative z-10 flex flex-col sm:flex-row items-start gap-5 px-6 pt-16 pb-6">
           <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-2xl shrink-0 border border-white/10">
             <img src={playlist.coverUrl} alt={playlist.name} className="w-full h-full object-cover" loading="eager" decoding="async" />
           </div>
-          <div className="pb-1 flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase tracking-[0.25em] text-white/35 mb-2 font-bold">Playlist</p>
 
             {/* Name — editable for user playlists */}
