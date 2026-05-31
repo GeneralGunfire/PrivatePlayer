@@ -83,7 +83,7 @@ export const ALL_TRACKS: Track[] = [
   // ── MARTIN WAVE ──────────────────────────────────────────────────────────
   // Watch Me Die — dark thriller, Terminal List, military tension
   { id: "35", title: "Watch Me Die",  artist: "Martin Wave", album: "Watch Me Die",          duration: "2:48", src: "/music/Martin Wave feat. ASHBY - Watch Me Die (From The Terminal List) [FULL SONG].mp3",
-    coverUrl: "https://images.unsplash.com/photo-1542879434-81e84b0a9f99?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=400&q=80" },
 
   // ── ALEX WARREN ──────────────────────────────────────────────────────────
   // Ordinary — emotional pop, young male singer-songwriter
@@ -118,7 +118,7 @@ export const ALL_TRACKS: Track[] = [
   // ── BOBBY BAZINI ─────────────────────────────────────────────────────────
   // Blood's Thicker Than Water — family, roots, loyalty
   { id: "40", title: "Blood's Thicker Than Water", artist: "Bobby Bazini", album: "Summer Is Gone", duration: "3:42", src: "/music/Bobby Bazini - Blood's Thicker Than Water (Audio).mp3",
-    coverUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191011?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&q=80" },
 
   // ── MIRROR FURY ──────────────────────────────────────────────────────────
   // The One I Love — romantic, intimate
@@ -128,7 +128,7 @@ export const ALL_TRACKS: Track[] = [
   // ── LOUIS ARMSTRONG ──────────────────────────────────────────────────────
   // What a Wonderful World — warm golden nature, flowers, blue sky
   { id: "42", title: "What a Wonderful World", artist: "Louis Armstrong", album: "What a Wonderful World", duration: "2:20", src: "/music/Louis Armstrong - What A Wonderful World (Official Video).mp3",
-    coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80" },
 
   // ── NOVRA ────────────────────────────────────────────────────────────────
   // Before The Fall — deep house, dark ocean, before collapse
@@ -243,7 +243,7 @@ export const ALL_TRACKS: Track[] = [
   // ── ZAC BROWN & SIR ROSEVELT ─────────────────────────────────────────────
   // It Goes On — country, road, life moving forward
   { id: "68", title: "It Goes On",    artist: "Sir Rosevelt & Zac Brown", album: "It Goes On", duration: "3:25", src: "/music/Zac Brown & Sir Rosevelt - It Goes On (Official Lyric Video).mp3",
-    coverUrl: "https://images.unsplash.com/photo-1511232442-83516956c1c7?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=400&q=80" },
 
   // ── THE DIG ──────────────────────────────────────────────────────────────
   // Break the Silence — quiet indie, hush, alone
@@ -251,9 +251,9 @@ export const ALL_TRACKS: Track[] = [
     coverUrl: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400&q=80" },
 
   // ── DESI VALENTINE ───────────────────────────────────────────────────────
-  // Fate Don't Know You — Americana, dusty road, fate
+  // Fate Don't Know You — Americana, campfire, fate
   { id: "70", title: "Fate Don't Know You", artist: "Desi Valentine", album: "Fate Don't Know You", duration: "4:02", src: "/music/Desi Valentine - Fate Don't Know You.mp3",
-    coverUrl: "https://images.unsplash.com/photo-1511232442-83516956c1c7?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400&q=80" },
 
   // ── MARK AMBOR ───────────────────────────────────────────────────────────
   // Belong Together — warm, romantic, couple
@@ -278,7 +278,7 @@ export const ALL_TRACKS: Track[] = [
   // ── CADBURY GORILLA / DANJWO ─────────────────────────────────────────────
   // In The Air Tonight Extended — drums in the dark, tension building
   { id: "75", title: "In The Air Tonight (Extended Mix)", artist: "danjwo", album: "In The Air Tonight Extended", duration: "4:28", src: "/music/Cadbury Gorilla - In The Air Tonight (Extended Mix).mp3",
-    coverUrl: "https://images.unsplash.com/photo-1542879434-81e84b0a9f99?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&q=80" },
 
   // ── MICHAEL KIWANUKA ─────────────────────────────────────────────────────
   // Love & Hate — soulful, 70s soul, warm vinyl
@@ -333,7 +333,7 @@ export const ALL_TRACKS: Track[] = [
   // ── RUTH B. ──────────────────────────────────────────────────────────────
   // Dandelions — dandelion field, blowing seeds, soft summer
   { id: "86", title: "Dandelions",    artist: "Ruth B.", album: "Safe Haven",                duration: "3:54", src: "/music/Ruth B. - Dandelions (Lyrics).mp3",
-    coverUrl: "https://images.unsplash.com/photo-1490750967868-88df5691240e?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=400&q=80" },
 
   // ── CHRIS CORNELL ────────────────────────────────────────────────────────
   // You Know My Name — Bond, Casino Royale, espionage
@@ -348,7 +348,7 @@ export const ALL_TRACKS: Track[] = [
   // ── BILL WITHERS ─────────────────────────────────────────────────────────
   // Lean on Me — community, togetherness, hand on shoulder
   { id: "89", title: "Lean on Me",    artist: "Bill Withers", album: "Still Bill",           duration: "4:19", src: "/music/Lean on Me.mp3",
-    coverUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191011?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&q=80" },
 
   // ── BON JOVI ─────────────────────────────────────────────────────────────
   // It's My Life — rock, living on your own terms, stage
@@ -458,7 +458,7 @@ export const ALL_TRACKS: Track[] = [
   // ── RAG'N'BONE MAN ───────────────────────────────────────────────────────
   // Human — raw, imperfect, soulful man
   { id: "111", title: "Human",        artist: "Rag'n'Bone Man", album: "Human",              duration: "3:20", src: "/music/Rag'n'Bone Man - Human (Official Video).mp3",
-    coverUrl: "https://images.unsplash.com/photo-1504199367641-aba8151af736?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=400&q=80" },
 
   // ── SAM SMITH ────────────────────────────────────────────────────────────
   // Stay With Me — longing, candlelit, intimate bedroom
@@ -513,7 +513,7 @@ export const ALL_TRACKS: Track[] = [
   // ── JOHN POWELL — Bourne ─────────────────────────────────────────────────
   // Treadstone Assassins — spy thriller, dark corridor, suspense
   { id: "122", title: "Treadstone Assassins", artist: "John Powell", album: "The Bourne Identity OST", duration: "2:13", src: "/music/Treadstone Assassins.mp3",
-    coverUrl: "https://images.unsplash.com/photo-1542879434-81e84b0a9f99?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&q=80" },
 
   // ── EAGLE-EYE CHERRY ─────────────────────────────────────────────────────
   // Save Tonight — last night together, fire, candle burning down
@@ -538,7 +538,7 @@ export const ALL_TRACKS: Track[] = [
   // ── ASTRALITY ────────────────────────────────────────────────────────────
   // Can't Go Back — no turning back, road disappearing
   { id: "127", title: "Can't Go Back", artist: "Astrality", album: "Can't Go Back",          duration: "2:36", src: "/music/Astrality & James French - Can't Go Back.mp3",
-    coverUrl: "https://images.unsplash.com/photo-1511232442-83516956c1c7?w=400&q=80" },
+    coverUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?w=400&q=80" },
 
   // ── TESTPILOT1 ───────────────────────────────────────────────────────────
   // Never Did — introspective, quiet regret
