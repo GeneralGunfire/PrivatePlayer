@@ -34,31 +34,75 @@ function norm(s) {
 }
 
 function bestMatch(title, artist) {
-  const words = [...norm(title).split(" "), ...norm(artist).split(" ")]
-    .filter(w => w.length > 2);
+  const titleNorm = norm(title);
+  const titleWords = titleNorm.split(" ").filter(w => w.length > 2);
+  const artistWords = norm(artist).split(" ").filter(w => w.length > 2);
+  if (!titleWords.length) return { file: null, score: 0 };
+
   let best = null, hi = 0;
   for (const f of files) {
-    const fn = norm(f.replace(/\.mp3$/i, ""));
-    const s  = words.filter(w => fn.includes(w)).length;
+    const fnNorm = norm(f.replace(/\.mp3$/i, ""));
+    const fnWords = fnNorm.split(" ").filter(Boolean);
+
+    if (titleWords.length <= 2) {
+      // Short titles are ambiguous by single word (e.g. "Home", "Bad") —
+      // require the exact title words to appear as a contiguous run of whole
+      // words in the filename (not a substring like "bad" inside "badu").
+      const titleAllWords = titleNorm.split(" ").filter(Boolean);
+      let matchesHere = false;
+      for (let i = 0; i + titleAllWords.length <= fnWords.length; i++) {
+        if (titleAllWords.every((w, j) => fnWords[i + j] === w)) { matchesHere = true; break; }
+      }
+      if (!matchesHere) continue;
+      const artistHits = artistWords.length ? artistWords.filter(w => fnWords.includes(w)).length / artistWords.length : 0;
+      const s = 1 * 0.7 + artistHits * 0.3;
+      if (s > hi) { hi = s; best = f; }
+      continue;
+    }
+
+    const titleHits = titleWords.filter(w => fnWords.includes(w)).length;
+    const titleScore = titleHits / titleWords.length;
+    // Title must match almost entirely — artist match is only a tiebreaker bonus.
+    if (titleScore < 0.8) continue;
+    const artistHits = artistWords.length ? artistWords.filter(w => fnWords.includes(w)).length / artistWords.length : 0;
+    const s = titleScore * 0.7 + artistHits * 0.3;
     if (s > hi) { hi = s; best = f; }
   }
   return { file: best, score: hi };
 }
+
+// ── Known-bad fuzzy matches ─────────────────────────────────
+// These track IDs share a short/common title with an unrelated real file
+// (e.g. "Home" vs "Lead Me Home") and must never auto-resolve to it.
+const REJECT_MATCH = new Set(["232", "242", "262", "270"]);
+
+// ── Manual overrides ─────────────────────────────────────────
+// Verified-correct matches the strict word-boundary scorer can't reach
+// because of small spelling/spacing differences between title and filename.
+const MANUAL_MATCH = {
+  "51": "The Three Tenors in Concert 1994： ＂Nessun Dorma＂ from Turandot (encore).mp3",
+  "55": "O Meri Laila - Lyrical ｜ Laila Majnu ｜ Jyotica Tangri ｜ Avinash Tiwary & Tripti Dimri.mp3",
+  "102": "The Verve - Bitter Sweet Symphony.mp3",
+};
 
 // ── Build map ─────────────────────────────────────────────
 const entries = [];
 const issues  = [];
 
 for (const row of rows) {
-  const { file, score } = bestMatch(row.title, row.artist);
-  if (!file || score < 1) {
-    issues.push(`  // MISSING (score=${score}): ${row.id} — ${row.artist} - ${row.title}`);
+  const { file, score } = MANUAL_MATCH[row.id]
+    ? { file: MANUAL_MATCH[row.id], score: 1 }
+    : REJECT_MATCH.has(row.id)
+      ? { file: null, score: 0 }
+      : bestMatch(row.title, row.artist);
+  if (!file || score < 0.7) {
+    issues.push(`  // MISSING (score=${score.toFixed(2)}): ${row.id} — ${row.artist} - ${row.title}`);
     entries.push(`  // "id":"${row.id}" — NO FILE FOUND for: ${row.artist} - ${row.title}`);
   } else {
     const enc = "/music/" + encodeURIComponent(file);
     entries.push(`  "${row.id}": "${enc}", // ${file}`);
-    if (score < 2) {
-      issues.push(`  // LOW CONFIDENCE (score=${score}): ${row.id} "${row.title}" by ${row.artist} => ${file}`);
+    if (score < 0.85) {
+      issues.push(`  // LOW CONFIDENCE (score=${score.toFixed(2)}): ${row.id} "${row.title}" by ${row.artist} => ${file}`);
     }
   }
 }

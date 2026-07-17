@@ -280,12 +280,15 @@
             |-- page.tsx
     |-- components
         |-- BottomNav.tsx
+        |-- LyricsPanel.tsx
         |-- MiniPlayer.tsx
         |-- PlayerView.tsx
+        |-- QueueDrawer.tsx
         |-- shell.tsx
         |-- TrackMenu.tsx
         |-- ui
             |-- button.tsx
+        |-- Visualizer.tsx
     |-- lib
         |-- data.ts
         |-- player-context.tsx

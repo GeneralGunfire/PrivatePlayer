@@ -2,10 +2,13 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat } from "lucide-react";
+import { ChevronDown, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Download, ListMusic, Mic2 } from "lucide-react";
 import { usePlayer } from "@/lib/player-context";
 import { cn } from "@/lib/utils";
 import TrackMenu from "@/components/TrackMenu";
+import Visualizer from "@/components/Visualizer";
+import QueueDrawer from "@/components/QueueDrawer";
+import LyricsPanel from "@/components/LyricsPanel";
 
 function fmt(s: number) {
   if (!s || !isFinite(s)) return "0:00";
@@ -161,8 +164,11 @@ export default function PlayerView() {
   const {
     currentTrack, isPlaying, isLoading, togglePlay, next, prev, closePlayer,
     shuffle, toggleShuffle, repeat, toggleRepeat,
-    progress, seek, currentTime,
+    progress, seek, currentTime, analyser, downloadCurrent,
   } = usePlayer();
+
+  const [queueOpen, setQueueOpen] = useState(false);
+  const [lyricsOpen, setLyricsOpen] = useState(false);
 
   if (!currentTrack) return null;
 
@@ -208,12 +214,39 @@ export default function PlayerView() {
 
         <div className="text-center">
           <p className="text-[9px] uppercase tracking-[0.45em] text-white/25 font-black mb-0.5">Now Playing</p>
-          <p className="text-[11px] font-bold tracking-tight uppercase text-white/55 truncate max-w-[200px]">
+          <p className="text-[11px] font-bold tracking-tight uppercase text-white/55 truncate max-w-50">
             {currentTrack.album}
           </p>
         </div>
 
-        <div className="w-10 h-10 flex items-center justify-center">
+        <div className="flex items-center gap-1">
+          <motion.button
+            onClick={() => setLyricsOpen(true)}
+            whileTap={{ scale: 0.86 }}
+            transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Lyrics"
+          >
+            <Mic2 size={16} />
+          </motion.button>
+          <motion.button
+            onClick={() => setQueueOpen(true)}
+            whileTap={{ scale: 0.86 }}
+            transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Queue"
+          >
+            <ListMusic size={16} />
+          </motion.button>
+          <motion.button
+            onClick={downloadCurrent}
+            whileTap={{ scale: 0.86 }}
+            transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+            aria-label="Download"
+          >
+            <Download size={16} />
+          </motion.button>
           <TrackMenu trackId={currentTrack.id} />
         </div>
       </div>
@@ -269,6 +302,13 @@ export default function PlayerView() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Reactive visualizer strip */}
+        <Visualizer
+          analyser={analyser}
+          isPlaying={isPlaying && !isLoading}
+          className="w-60 md:w-68 h-10 mt-4"
+        />
 
         {/* Track info */}
         <AnimatePresence mode="wait">
@@ -367,6 +407,14 @@ export default function PlayerView() {
           </CtrlBtn>
         </div>
       </div>
+
+      <QueueDrawer open={queueOpen} onClose={() => setQueueOpen(false)} />
+      <LyricsPanel
+        track={currentTrack}
+        currentTime={currentTime}
+        open={lyricsOpen}
+        onClose={() => setLyricsOpen(false)}
+      />
     </motion.div>
   );
 }
