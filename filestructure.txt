@@ -353,6 +353,7 @@
             |-- page.tsx
     |-- components
         |-- BottomNav.tsx
+        |-- CenterVisualizer.tsx
         |-- EdgeGlow.tsx
         |-- LyricsPanel.tsx
         |-- MiniPlayer.tsx

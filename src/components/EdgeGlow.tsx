@@ -60,8 +60,8 @@ export default function EdgeGlow({
         if (energy < 0.02) continue;
 
         const y = i * bandHeight;
-        const glowWidth = w * (0.15 + energy * 0.85);
-        const alpha = 0.08 + energy * 0.55;
+        const glowWidth = w * (0.25 + energy * 1.1);
+        const alpha = 0.18 + energy * 0.75;
 
         const grad = fromLeft
           ? ctx.createLinearGradient(0, 0, glowWidth, 0)
@@ -113,9 +113,9 @@ export default function EdgeGlow({
   }, [analyser, isPlaying, color]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0" aria-hidden>
-      <canvas ref={leftRef} className="absolute left-0 top-0 h-full w-40" />
-      <canvas ref={rightRef} className="absolute right-0 top-0 h-full w-40" />
+    <div className="absolute inset-0 pointer-events-none" aria-hidden>
+      <canvas ref={leftRef} className="absolute left-0 top-0 h-full w-56" />
+      <canvas ref={rightRef} className="absolute right-0 top-0 h-full w-56" />
     </div>
   );
 }

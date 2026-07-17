@@ -7,6 +7,7 @@ import { usePlayer } from "@/lib/player-context";
 import { cn } from "@/lib/utils";
 import TrackMenu from "@/components/TrackMenu";
 import EdgeGlow from "@/components/EdgeGlow";
+import CenterVisualizer from "@/components/CenterVisualizer";
 import QueueDrawer from "@/components/QueueDrawer";
 import LyricsPanel from "@/components/LyricsPanel";
 
@@ -172,9 +173,6 @@ export default function PlayerView() {
 
   if (!currentTrack) return null;
 
-  const bgSrc = currentTrack.coverUrl.replace(/\?.*/, "") + "?w=600&q=55&auto=format";
-  const discSrc = currentTrack.coverUrl.replace(/\?.*/, "") + "?w=400&q=80&auto=format";
-
   return (
     <motion.div
       initial={{ y: "100%" }}
@@ -193,22 +191,8 @@ export default function PlayerView() {
       style={{ willChange: "transform" }}
       className="fixed inset-0 z-[100] flex flex-col px-6 pt-10 pb-8 overflow-hidden touch-none"
     >
-      {/* Background */}
-      <div className="absolute inset-0 -z-10">
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={currentTrack.id}
-            src={bgSrc}
-            alt=""
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full h-full object-cover"
-            style={{ filter: "blur(48px) saturate(1.2) brightness(0.28)", willChange: "opacity" }}
-            loading="eager" decoding="async"
-          />
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-black/60" />
-      </div>
+      {/* Background — flat near-black so the edge glow and center visualizer are the only light */}
+      <div className="absolute inset-0 -z-10 bg-[#060606]" />
 
       <EdgeGlow analyser={analyser} isPlaying={isPlaying && !isLoading} />
 
@@ -262,39 +246,14 @@ export default function PlayerView() {
         </div>
       </div>
 
-      {/* Artwork + title */}
+      {/* Visualizer + title — no album artwork, per user preference */}
       <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-        <div className="relative w-64 h-64 md:w-72 md:h-72">
-          {/* Ambient glow — opacity only, GPU layer */}
-          <motion.div
-            animate={{ opacity: isPlaying ? [0.15, 0.34, 0.15] : 0.08 }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-            style={{ willChange: "opacity" }}
-            className="absolute inset-[-24px] rounded-[2.5rem] bg-white/10 blur-2xl pointer-events-none"
+        <div className="relative w-full h-40 md:h-48">
+          <CenterVisualizer
+            analyser={analyser}
+            isPlaying={isPlaying && !isLoading}
+            className="w-full h-full"
           />
-
-          {/* Cover card — gentle breathing scale instead of a spin, since
-              arbitrary cover photography doesn't read well cropped to a circle */}
-          <motion.div
-            animate={{ scale: isPlaying && !isLoading ? [1, 1.015, 1] : 1 }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="relative z-10 w-full h-full rounded-[2rem] overflow-hidden shadow-[0_20px_70px_rgba(0,0,0,0.85)] border border-white/12"
-            style={{ willChange: "transform" }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={currentTrack.id}
-                src={discSrc}
-                alt={currentTrack.title}
-                initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="w-full h-full object-cover"
-                loading="eager" decoding="async"
-              />
-            </AnimatePresence>
-            {/* Subtle top sheen for depth */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/25 pointer-events-none" />
-          </motion.div>
 
           {/* Loading overlay — only visible while buffering */}
           <AnimatePresence>
@@ -302,7 +261,7 @@ export default function PlayerView() {
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="absolute inset-0 rounded-[2rem] bg-black/55 flex items-center justify-center z-30"
+                className="absolute inset-0 flex items-center justify-center z-30"
               >
                 <LoadingBars />
               </motion.div>
