@@ -243,6 +243,52 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     advanceQueue(-1);
   }, [advanceQueue]);
 
+  // ── Media Session — lock-screen / notification transport controls ──
+  // Without this, mobile browsers treat the tab as a plain background
+  // page once the screen locks and are far more aggressive about
+  // suspending it, which is what caused playback to stop or stutter.
+  // Registering action handlers tells the OS this is an active media
+  // session it should keep alive and route hardware/lock-screen
+  // play-pause-skip controls into.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
+    const ms = navigator.mediaSession;
+    ms.setActionHandler("play",  () => audioRef.current?.play().catch(() => {}));
+    ms.setActionHandler("pause", () => audioRef.current?.pause());
+    ms.setActionHandler("previoustrack", () => prev());
+    ms.setActionHandler("nexttrack",     () => next());
+    ms.setActionHandler("seekto", (details) => {
+      const a = audioRef.current;
+      if (a && details.seekTime != null) a.currentTime = details.seekTime;
+    });
+    return () => {
+      ms.setActionHandler("play", null);
+      ms.setActionHandler("pause", null);
+      ms.setActionHandler("previoustrack", null);
+      ms.setActionHandler("nexttrack", null);
+      ms.setActionHandler("seekto", null);
+    };
+  }, [next, prev]);
+
+  // Keep lock-screen metadata (title/artist/artwork) in sync with the track.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("mediaSession" in navigator) || !currentTrack) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentTrack.title,
+      artist: currentTrack.artist,
+      album: currentTrack.album,
+      artwork: [
+        { src: currentTrack.coverUrl, sizes: "400x400", type: "image/jpeg" },
+      ],
+    });
+  }, [currentTrack]);
+
+  // Keep the lock-screen playback-state indicator (play vs. pause icon) in sync.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
+    navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+  }, [isPlaying]);
+
   const seek = useCallback((pct: number) => {
     const a = audioRef.current;
     if (!a?.duration) return;

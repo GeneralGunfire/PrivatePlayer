@@ -7,16 +7,13 @@
  */
 
 /**
- * Title+artist pairs known to fuzzy-match a real but unrelated file
- * (e.g. "Home" by Passenger vs. "Lead Me Home" by Jamie N Commons).
- * These have no audio file in /music/ yet — never guess for them.
+ * Title+artist pairs known to fuzzy-match a real but unrelated file when no
+ * exact-enough file exists for them (e.g. a short title like "Home" landing
+ * on someone else's "Lead Me Home"). Add an entry here only for a track that
+ * currently has no real audio file — once one exists, TRACK_SRC_MAP should
+ * reference it explicitly and this fallback resolver won't be consulted.
  */
-const REJECT_PAIRS = new Set([
-  "love me|lil tecca",
-  "home|passenger",
-  "hold on|ill peach",
-  "home|good neighbours",
-]);
+const REJECT_PAIRS = new Set<string>([]);
 
 /** Normalise a string for fuzzy comparison */
 export function normalise(s: string) {

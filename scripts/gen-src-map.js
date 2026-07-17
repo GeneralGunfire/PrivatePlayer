@@ -73,16 +73,24 @@ function bestMatch(title, artist) {
 
 // ── Known-bad fuzzy matches ─────────────────────────────────
 // These track IDs share a short/common title with an unrelated real file
-// (e.g. "Home" vs "Lead Me Home") and must never auto-resolve to it.
-const REJECT_MATCH = new Set(["232", "242", "262", "270"]);
+// and must never auto-resolve to it. (Now that real files exist for the
+// actual songs, they're wired up explicitly via MANUAL_MATCH below instead.)
+const REJECT_MATCH = new Set([]);
 
 // ── Manual overrides ─────────────────────────────────────────
 // Verified-correct matches the strict word-boundary scorer can't reach
-// because of small spelling/spacing differences between title and filename.
+// because of small spelling/spacing differences between title and filename,
+// or because the title is too short/common for the scorer to trust safely.
 const MANUAL_MATCH = {
   "51": "The Three Tenors in Concert 1994： ＂Nessun Dorma＂ from Turandot (encore).mp3",
   "55": "O Meri Laila - Lyrical ｜ Laila Majnu ｜ Jyotica Tangri ｜ Avinash Tiwary & Tripti Dimri.mp3",
   "102": "The Verve - Bitter Sweet Symphony.mp3",
+  "232": "Lil Tecca - Love Me (Official Music Video).mp3",
+  "242": "Passenger ｜ Home (Official Album Audio).mp3",
+  "262": "ill peach - HOLD ON.mp3",
+  "270": "Good Neighbours - Home (Lyric Video).mp3",
+  "217": "Hold On, I'm Coming.mp3",
+  "37": "Old Man Canyon - Phantoms & Friends [Official Video].mp3",
 };
 
 // ── Build map ─────────────────────────────────────────────

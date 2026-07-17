@@ -6,7 +6,7 @@ import { ChevronDown, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Downl
 import { usePlayer } from "@/lib/player-context";
 import { cn } from "@/lib/utils";
 import TrackMenu from "@/components/TrackMenu";
-import Visualizer from "@/components/Visualizer";
+import EdgeGlow from "@/components/EdgeGlow";
 import QueueDrawer from "@/components/QueueDrawer";
 import LyricsPanel from "@/components/LyricsPanel";
 
@@ -181,8 +181,17 @@ export default function PlayerView() {
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={SLIDE}
+      drag="y"
+      dragDirectionLock
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={{ top: 0, bottom: 0.55 }}
+      onDragEnd={(_, info) => {
+        // Swipe down far enough, or flick down fast enough, minimizes the player —
+        // mirrors the gesture in Spotify/Apple Music's now-playing sheets.
+        if (info.offset.y > 120 || info.velocity.y > 700) closePlayer();
+      }}
       style={{ willChange: "transform" }}
-      className="fixed inset-0 z-[100] flex flex-col px-6 pt-10 pb-8 overflow-hidden"
+      className="fixed inset-0 z-[100] flex flex-col px-6 pt-10 pb-8 overflow-hidden touch-none"
     >
       {/* Background */}
       <div className="absolute inset-0 -z-10">
@@ -201,6 +210,8 @@ export default function PlayerView() {
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
+      <EdgeGlow analyser={analyser} isPlaying={isPlaying && !isLoading} />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6 shrink-0">
         <motion.button
@@ -212,40 +223,40 @@ export default function PlayerView() {
           <ChevronDown size={20} strokeWidth={2.5} />
         </motion.button>
 
-        <div className="text-center">
+        <div className="text-center min-w-0 px-2">
           <p className="text-[9px] uppercase tracking-[0.45em] text-white/25 font-black mb-0.5">Now Playing</p>
-          <p className="text-[11px] font-bold tracking-tight uppercase text-white/55 truncate max-w-50">
+          <p className="text-[11px] font-bold tracking-tight uppercase text-white/55 truncate max-w-36">
             {currentTrack.album}
           </p>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 shrink-0">
           <motion.button
             onClick={() => setLyricsOpen(true)}
             whileTap={{ scale: 0.86 }}
             transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
-            className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Lyrics"
           >
-            <Mic2 size={16} />
+            <Mic2 size={15} />
           </motion.button>
           <motion.button
             onClick={() => setQueueOpen(true)}
             whileTap={{ scale: 0.86 }}
             transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
-            className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Queue"
           >
-            <ListMusic size={16} />
+            <ListMusic size={15} />
           </motion.button>
           <motion.button
             onClick={downloadCurrent}
             whileTap={{ scale: 0.86 }}
             transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
-            className="w-9 h-9 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-white/50 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Download"
           >
-            <Download size={16} />
+            <Download size={15} />
           </motion.button>
           <TrackMenu trackId={currentTrack.id} />
         </div>
@@ -253,41 +264,37 @@ export default function PlayerView() {
 
       {/* Artwork + title */}
       <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-        <div className="relative">
+        <div className="relative w-64 h-64 md:w-72 md:h-72">
           {/* Ambient glow — opacity only, GPU layer */}
           <motion.div
-            animate={{ opacity: isPlaying ? [0.1, 0.28, 0.1] : 0.06 }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ opacity: isPlaying ? [0.15, 0.34, 0.15] : 0.08 }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
             style={{ willChange: "opacity" }}
-            className="absolute inset-[-20px] rounded-full bg-white/10 blur-xl pointer-events-none"
+            className="absolute inset-[-24px] rounded-[2.5rem] bg-white/10 blur-2xl pointer-events-none"
           />
 
-          {/* Disc */}
-          <div
-            className="w-60 h-60 md:w-68 md:h-68 relative z-10 rounded-full"
-            style={{
-              animation: "spin-disc 26s linear infinite",
-              animationPlayState: isPlaying && !isLoading ? "running" : "paused",
-              willChange: "transform",
-            }}
+          {/* Cover card — gentle breathing scale instead of a spin, since
+              arbitrary cover photography doesn't read well cropped to a circle */}
+          <motion.div
+            animate={{ scale: isPlaying && !isLoading ? [1, 1.015, 1] : 1 }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="relative z-10 w-full h-full rounded-[2rem] overflow-hidden shadow-[0_20px_70px_rgba(0,0,0,0.85)] border border-white/12"
+            style={{ willChange: "transform" }}
           >
-            <div className="absolute inset-0 rounded-full shadow-[0_16px_60px_rgba(0,0,0,0.8)]" />
-            <div className="w-full h-full p-1.5 bg-white/6 rounded-full border border-white/12">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={currentTrack.id}
-                  src={discSrc}
-                  alt={currentTrack.title}
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="w-full h-full object-cover rounded-full"
-                  loading="eager" decoding="async"
-                />
-              </AnimatePresence>
-            </div>
-            {/* Center spindle */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-black/80 border border-white/20 z-20" />
-          </div>
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentTrack.id}
+                src={discSrc}
+                alt={currentTrack.title}
+                initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full h-full object-cover"
+                loading="eager" decoding="async"
+              />
+            </AnimatePresence>
+            {/* Subtle top sheen for depth */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/25 pointer-events-none" />
+          </motion.div>
 
           {/* Loading overlay — only visible while buffering */}
           <AnimatePresence>
@@ -295,20 +302,13 @@ export default function PlayerView() {
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="absolute inset-0 rounded-full bg-black/55 flex items-center justify-center z-30"
+                className="absolute inset-0 rounded-[2rem] bg-black/55 flex items-center justify-center z-30"
               >
                 <LoadingBars />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-
-        {/* Reactive visualizer strip */}
-        <Visualizer
-          analyser={analyser}
-          isPlaying={isPlaying && !isLoading}
-          className="w-60 md:w-68 h-10 mt-4"
-        />
 
         {/* Track info */}
         <AnimatePresence mode="wait">
@@ -329,8 +329,12 @@ export default function PlayerView() {
         </AnimatePresence>
       </div>
 
-      {/* Controls */}
-      <div className="space-y-4 bg-white/5 border border-white/8 p-5 rounded-[1.75rem] mt-6 shrink-0 backdrop-blur-xl">
+      {/* Controls — stop pointer events here from starting the sheet-close drag,
+          so scrubbing/tapping buttons never gets misread as a swipe-to-minimize */}
+      <div
+        className="space-y-4 bg-white/5 border border-white/8 p-5 rounded-[1.75rem] mt-6 shrink-0 backdrop-blur-xl touch-pan-x"
+        onPointerDownCapture={e => e.stopPropagation()}
+      >
         <Scrubber
           progress={progress}
           currentTime={currentTime}

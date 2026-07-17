@@ -42,7 +42,7 @@ export default function QueueDrawer({ open, onClose }: { open: boolean; onClose:
               const toIndex = newIds.indexOf(oldIds[fromIndex]);
               reorderQueue(fromIndex, toIndex);
             }}
-            className="flex-1 overflow-y-auto scrollbar-none space-y-1"
+            className="flex-1 overflow-y-auto scrollbar-none space-y-1 touch-pan-y"
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             {queue.map((track, i) => {

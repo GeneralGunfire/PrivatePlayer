@@ -34,24 +34,61 @@ function parseLrc(lrc: string): LrcLine[] {
   return lines.sort((a, b) => a.time - b.time);
 }
 
+// Strip parenthetical/bracketed remix, version, and feature tags that
+// rarely appear in lrclib's own track titles (e.g. "(Epic Version)",
+// "(James Carter Remix)", "[Official Video]") so the search query matches
+// the underlying song instead of this specific YouTube upload's title.
+function cleanTitle(title: string): string {
+  return title
+    .replace(/[([][^)\]]*(?:remix|version|edit|mix|video|audio|lyrics?|official|extended|feat\.?|ft\.)[^)\]]*[)\]]/gi, "")
+    .replace(/\s+-\s+(?:.*\b(?:remix|version|edit)\b.*)$/i, "")
+    .trim() || title;
+}
+
+function cleanArtist(artist: string): string {
+  return artist.split(/[,&]| and | feat\.?| ft\.?/i)[0].trim();
+}
+
+interface SearchResult {
+  syncedLyrics?: string | null;
+  plainLyrics?: string | null;
+  trackName?: string;
+  artistName?: string;
+  duration?: number;
+}
+
 async function fetchLyrics(track: Track): Promise<LyricsResult | null> {
   const key = `${track.artist}|${track.title}`;
   if (cache.has(key)) return cache.get(key)!;
 
+  const title = cleanTitle(track.title);
+  const artist = cleanArtist(track.artist);
+
   try {
-    const params = new URLSearchParams({
-      track_name: track.title,
-      artist_name: track.artist.split(/[,&]| and | feat\.?/i)[0].trim(),
-    });
-    const r = await fetch(`https://lrclib.net/api/get?${params}`);
-    if (!r.ok) throw new Error("not found");
-    const data = await r.json();
-    const result: LyricsResult = {
-      synced: data.syncedLyrics ? parseLrc(data.syncedLyrics) : null,
-      plain: data.plainLyrics ?? null,
-    };
-    cache.set(key, result);
-    return result;
+    // lrclib's /api/get requires a near-exact title/artist/duration match and
+    // 404s constantly on messy real-world metadata — /api/search is fuzzy and
+    // returns ranked candidates, which fits this library's YouTube-derived titles.
+    const params = new URLSearchParams({ track_name: title, artist_name: artist });
+    const r = await fetch(`https://lrclib.net/api/search?${params}`);
+    if (!r.ok) throw new Error("search failed");
+    const results: SearchResult[] = await r.json();
+
+    // Prefer a result with synced lyrics; otherwise take the first with any lyrics.
+    const best =
+      results.find(x => x.syncedLyrics) ??
+      results.find(x => x.plainLyrics) ??
+      null;
+
+    const result: LyricsResult = best
+      ? {
+          synced: best.syncedLyrics ? parseLrc(best.syncedLyrics) : null,
+          plain: best.plainLyrics ?? null,
+        }
+      : { synced: null, plain: null };
+
+    const found = result.synced || result.plain ? result : null;
+    cache.set(key, found);
+    return found;
   } catch {
     cache.set(key, null);
     return null;
@@ -119,7 +156,7 @@ export default function LyricsPanel({
 
           <div
             ref={containerRef}
-            className="flex-1 overflow-y-auto scrollbar-none"
+            className="flex-1 overflow-y-auto scrollbar-none touch-pan-y"
             onClick={e => e.stopPropagation()}
           >
             {result === undefined ? (
