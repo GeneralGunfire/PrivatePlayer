@@ -37,7 +37,6 @@ export function Crossfader({ value, onChange }: CrossfaderProps) {
     <div className="flex w-full flex-col items-center gap-2">
       <div className="flex w-full items-center justify-between text-[10px] font-bold uppercase tracking-widest">
         <span className="text-accent-bright">A</span>
-        <span className="text-white/30">Crossfader</span>
         <span className="text-white">B</span>
       </div>
       <div

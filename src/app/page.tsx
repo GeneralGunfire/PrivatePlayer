@@ -59,36 +59,6 @@ export default function Home() {
         </p>
       </header>
 
-      {/* Featured Banner */}
-      <section className="relative h-56 rounded-3xl overflow-hidden group glass">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=75&auto=format"
-            alt="Featured"
-            className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
-            loading="eager" decoding="async"
-          />
-        </div>
-        <div className="absolute inset-0 bg-linear-to-r from-black via-black/30 to-transparent" />
-        <div className="absolute bottom-6 left-6">
-          <span className="px-3 py-1 bg-accent/25 backdrop-blur-md border border-accent/40 rounded-full text-[10px] uppercase tracking-[0.2em] mb-3 inline-block font-bold text-accent-bright">
-            Featured
-          </span>
-          <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-1 leading-none">Coldplay</h2>
-          <p className="text-white/50 text-xs font-medium">
-            {playlists.find(p => p.id === "coldplay")?.tracks.length ?? 0} Tracks
-          </p>
-        </div>
-        <motion.div whileTap={{ scale: 0.9 }} transition={TAP} className="absolute right-6 bottom-6">
-          <Link
-            href="/playlist/coldplay"
-            className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-xl"
-          >
-            <Play size={20} fill="currentColor" className="ml-0.5" />
-          </Link>
-        </motion.div>
-      </section>
-
       {/* Playlists */}
       <section>
         <div className="flex justify-between items-end mb-5">

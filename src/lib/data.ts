@@ -28,6 +28,9 @@ export interface Playlist { id: string; name: string; description?: string; cove
  * needs one real network round trip to populate it.
  */
 
+// Used only if a track has no cover of its own AND the whole library has
+// no cover art to borrow from (an all-untagged library) — should be rare
+// in practice since most files here have real embedded art.
 const FALLBACK_COVER = "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80";
 
 function formatDuration(seconds: number | null): string {
@@ -50,7 +53,7 @@ async function fetchLibrary(): Promise<Track[]> {
     const json = await res.json();
     const raw: {
       id: string; title: string; artist: string; album: string;
-      durationSeconds: number | null; src: string;
+      durationSeconds: number | null; src: string; coverUrl: string | null;
     }[] = json.tracks ?? [];
     return raw.map((t) => ({
       id: t.id,
@@ -59,10 +62,10 @@ async function fetchLibrary(): Promise<Track[]> {
       album: t.album,
       duration: formatDuration(t.durationSeconds),
       src: t.src,
-      // No real cover art endpoint on this site yet (Udaan's has
-      // audio_library_read_cover for embedded pictures) — a stable
-      // placeholder rather than none, same look every load.
-      coverUrl: FALLBACK_COVER,
+      // Real embedded cover art extracted at build time; tracks with none
+      // of their own borrow one from another track that has it (matches
+      // Udaan's own private-player behavior — see build-library.mjs).
+      coverUrl: t.coverUrl ?? FALLBACK_COVER,
     }));
   } catch {
     return [];
@@ -108,22 +111,12 @@ if (typeof window !== "undefined") {
 }
 
 /**
- * "Featured Coldplay" — resolved by artist match against whatever the real
- * library actually contains, rather than a hardcoded list of numeric track
- * ids (which broke the moment ids became filename-derived, and would have
- * silently pointed at the wrong tracks if left in place). Empty until the
- * library has loaded; recomputed each time PLAYLISTS is read.
+ * No built-in/featured playlists (the old "Featured Coldplay" auto-playlist
+ * was removed per explicit request) — every playlist a user sees is one
+ * they created themselves. Kept as a function (not a plain []) so callers
+ * that expect this shape keep working if a real built-in playlist is ever
+ * reintroduced.
  */
 export function builtInPlaylists(): Playlist[] {
-  const coldplayTracks = ALL_TRACKS.filter((t) => t.artist.toLowerCase().includes("coldplay"));
-  if (coldplayTracks.length === 0) return [];
-  return [
-    {
-      id: "coldplay",
-      name: "Coldplay",
-      description: "Every Coldplay track in the collection",
-      coverUrl: coldplayTracks[0]?.coverUrl ?? FALLBACK_COVER,
-      tracks: coldplayTracks,
-    },
-  ];
+  return [];
 }
