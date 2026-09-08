@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, Plus, Check, Loader2, X, Download } from "lucide-react";
+import { MoreHorizontal, Plus, Check, Loader2, X, Download, Heart } from "lucide-react";
 import { usePlaylists } from "@/lib/use-playlists";
+import { useFavorites } from "@/lib/use-favorites";
 import { ALL_TRACKS } from "@/lib/data";
-import { TRACK_SRC_MAP } from "@/lib/track-src-map";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -17,6 +17,8 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
   const [pending, setPending] = useState<string | null>(null);
   const menuRef               = useRef<HTMLDivElement>(null);
   const { playlists, toggleTrack } = usePlaylists();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorited = isFavorite(trackId);
 
   // Only show user-created playlists (not built-in Coldplay) in the add menu
   const userPlaylists = playlists.filter(p => p.id.startsWith("pl_"));
@@ -43,7 +45,7 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
   const handleDownload = () => {
     const track = ALL_TRACKS.find(t => t.id === trackId);
     if (!track) return;
-    const url = TRACK_SRC_MAP[track.id] ?? track.src;
+    const url = track.src;
     const link = document.createElement("a");
     link.href = url;
     link.download = `${track.artist} - ${track.title}.mp3`;
@@ -84,6 +86,16 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
               <X size={12} />
             </button>
           </div>
+
+          <button
+            onClick={() => { toggleFavorite(trackId); setOpen(false); }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/8 active:bg-white/12 transition-colors text-left"
+          >
+            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", favorited ? "bg-accent/20" : "bg-white/5")}>
+              <Heart size={14} className={favorited ? "text-accent-bright" : "text-white/60"} fill={favorited ? "currentColor" : "none"} />
+            </div>
+            <span className="flex-1 text-sm font-medium">{favorited ? "Remove from Favorites" : "Add to Favorites"}</span>
+          </button>
 
           <button
             onClick={handleDownload}

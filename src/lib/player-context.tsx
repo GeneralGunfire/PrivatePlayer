@@ -2,8 +2,9 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import type { Track } from "@/lib/data";
-import { ALL_TRACKS } from "@/lib/data";
-import { TRACK_SRC_MAP } from "@/lib/track-src-map";
+import { onLibraryLoaded } from "@/lib/data";
+import { ensureMasterBus } from "@/lib/dj/audioGraph";
+import { createDeckChain, getDeckDefaults, type EffectChain, type ParamValues } from "@/lib/dj/dsp";
 
 interface PlayerCtx {
   queue:         Track[];
@@ -32,12 +33,27 @@ interface PlayerCtx {
   removeFromQueue: (index: number) => void;
   setSleepTimer: (minutes: number | null) => void;
   downloadCurrent: () => void;
+  /** DJ board (Deck A side) — the deck's own effect chain (EQ, filter
+   *  sweep, color/time effects), applied on the shared master bus so it
+   *  sums correctly with Deck B. Genuinely inert at getDeckDefaults(), so
+   *  normal playback outside the DJ board is untouched by this existing. */
+  djEffects: ParamValues;
+  setDjEffects: (patch: Partial<ParamValues>) => void;
+  resetDjEffects: () => void;
+  /** Crossfader multiplier for Deck A's own output, 0-1 — see
+   *  DjEffectsPanel's own crossfader math. Always 1 outside the DJ board. */
+  setOutputMultiplier: (factor: number) => void;
 }
 
 const Ctx = createContext<PlayerCtx | null>(null);
 
 function resolveUrl(track: Track): string {
-  return TRACK_SRC_MAP[track.id] ?? track.src;
+  // /api/library already returns the exact, correctly URL-encoded src for
+  // every track it lists (see that route's own doc comment) — the fuzzy
+  // filename-matching TRACK_SRC_MAP/resolve-track.ts layer this used to go
+  // through existed only to bridge hand-typed metadata to real files,
+  // which a live tag scan no longer needs.
+  return track.src;
 }
 
 // Silent background preloader
@@ -61,7 +77,7 @@ function preload(track: Track) {
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [queue,        setQueue]        = useState<Track[]>(ALL_TRACKS);
+  const [queue,        setQueue]        = useState<Track[]>([]);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying,    setIsPlaying]    = useState(false);
   const [isLoading,    setIsLoading]    = useState(false);
@@ -73,6 +89,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [sleepTimerEndsAt, setSleepTimerEndsAt] = useState<number | null>(null);
   const [analyser,     setAnalyser]     = useState<AnalyserNode | null>(null);
+  const [djEffects,    setDjEffectsState] = useState<ParamValues>(getDeckDefaults());
 
   const shuffleRef      = useRef(shuffle);     shuffleRef.current      = shuffle;
   const repeatRef       = useRef(repeat);      repeatRef.current       = repeat;
@@ -80,9 +97,27 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const currentTrackRef = useRef(currentTrack); currentTrackRef.current = currentTrack;
   const sleepTimeoutRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioCtxRef      = useRef<AudioContext | null>(null);
+  const djChainRef       = useRef<EffectChain | null>(null);
+  const deckGainRef      = useRef<GainNode | null>(null);
+  const djEffectsRef     = useRef<ParamValues>(getDeckDefaults());
+  djEffectsRef.current = djEffects;
 
   // Throttle timeupdate to avoid excessive React re-renders
   const lastUpdateRef = useRef(0);
+
+  // Seed the default queue with the full library once the live scan
+  // resolves — the queue starts empty now (no more static ALL_TRACKS
+  // array to initialize state with), and only if nothing has already
+  // picked a specific queue (e.g. selecting a track from Search before
+  // this fires) does this default apply.
+  useEffect(() => {
+    return onLibraryLoaded((tracks) => {
+      if (queueRef.current.length === 0) {
+        queueRef.current = tracks;
+        setQueue(tracks);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const a = new Audio();
@@ -116,22 +151,41 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Lazily wire up a Web Audio analyser the first time playback starts.
-  // AudioContext must be created/resumed from a user gesture, so this
-  // can't happen at mount — it happens on first tryPlay() below.
+  // Lazily wires the playback element into the SHARED master bus (see
+  // lib/dj/audioGraph.ts) the first time playback starts — AudioContext
+  // must be created/resumed from a user gesture, so this can't happen at
+  // mount. This used to build its own private AudioContext straight to
+  // `ctx.destination`, which worked for the visualizer alone but gave
+  // the DJ board nowhere to route Deck A's effect chain or crossfader
+  // multiplier through. Joining the shared bus instead means: this is
+  // still the ONLY place `createMediaElementSource` is ever called on
+  // this element (that call can only happen once per element, ever), the
+  // analyser this exposes is unchanged in shape, and normal playback
+  // outside the DJ board sounds identical — the chain is constructed at
+  // getDeckDefaults(), which is genuinely inert (verified the same way
+  // Udaan's own desktop deck chain is).
   const ensureAnalyser = useCallback(() => {
     const a = audioRef.current;
     if (!a || audioCtxRef.current) return;
     try {
-      const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const ctx = new Ctx();
+      const bus = ensureMasterBus();
+      if (!bus) return;
+      const ctx = bus.ctx;
       const source = ctx.createMediaElementSource(a);
+      const djChain = createDeckChain(ctx);
+      djChain.apply(djEffectsRef.current, ctx.currentTime);
       const node = ctx.createAnalyser();
       node.fftSize = 256;
       node.smoothingTimeConstant = 0.75;
-      source.connect(node);
-      node.connect(ctx.destination);
+      const deckGain = ctx.createGain();
+      deckGain.gain.value = 1;
+      source.connect(djChain.input);
+      djChain.output.connect(node);
+      node.connect(deckGain);
+      deckGain.connect(bus.input);
       audioCtxRef.current = ctx;
+      djChainRef.current = djChain;
+      deckGainRef.current = deckGain;
       setAnalyser(node);
     } catch {
       // Web Audio unavailable (e.g. very old browser) — visualizer just won't render.
@@ -344,6 +398,33 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => () => { if (sleepTimeoutRef.current) clearTimeout(sleepTimeoutRef.current); }, []);
 
+  // ── DJ board (Deck A side) ──────────────────────────────────
+  const setDjEffects = useCallback((patch: Partial<ParamValues>) => {
+    setDjEffectsState((prev) => {
+      const next: ParamValues = { ...prev };
+      for (const [key, value] of Object.entries(patch)) {
+        if (value !== undefined) next[key] = value;
+      }
+      const chain = djChainRef.current;
+      const ctx = audioCtxRef.current;
+      if (chain && ctx) chain.apply(next, ctx.currentTime);
+      return next;
+    });
+  }, []);
+
+  const resetDjEffects = useCallback(() => {
+    setDjEffectsState(getDeckDefaults());
+    const chain = djChainRef.current;
+    const ctx = audioCtxRef.current;
+    if (chain && ctx) chain.apply(getDeckDefaults(), ctx.currentTime);
+  }, []);
+
+  const setOutputMultiplier = useCallback((factor: number) => {
+    const node = deckGainRef.current;
+    const ctx = audioCtxRef.current;
+    if (node && ctx) node.gain.setTargetAtTime(Math.min(1, Math.max(0, factor)), ctx.currentTime, 0.02);
+  }, []);
+
   // ── Download ───────────────────────────────────────────────
   const downloadCurrent = useCallback(() => {
     const track = currentTrackRef.current;
@@ -403,6 +484,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       openPlayer:    () => setIsPlayerOpen(true),
       closePlayer:   () => setIsPlayerOpen(false),
       playAt, reorderQueue, removeFromQueue, setSleepTimer, downloadCurrent,
+      djEffects, setDjEffects, resetDjEffects, setOutputMultiplier,
     }}>
       {children}
     </Ctx.Provider>

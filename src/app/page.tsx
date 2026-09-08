@@ -1,31 +1,50 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
+import { Play, Heart } from "lucide-react";
 import Link from "next/link";
-import { ALL_TRACKS } from "@/lib/data";
+import type { Track } from "@/lib/data";
 import { usePlayer } from "@/lib/player-context";
 import { usePlaylists } from "@/lib/use-playlists";
+import { useFavorites } from "@/lib/use-favorites";
+import { useLibrary } from "@/lib/use-library";
 import { usePaged } from "@/lib/use-paged";
 import TrackMenu from "@/components/TrackMenu";
 import { cn } from "@/lib/utils";
 
 const TAP = { type: "spring" as const, damping: 14, stiffness: 500, mass: 0.4 };
 
+type Filter = "all" | "favorites";
+
 export default function Home() {
   const { selectTrack, openPlayer, currentTrack, isPlaying } = usePlayer();
   const { playlists } = usePlaylists();
-  const { items, hasMore, remaining, loadMore, total } = usePaged(ALL_TRACKS);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { tracks: allTracks } = useLibrary();
+  const [filter, setFilter] = useState<Filter>("all");
 
-  const greet = () => {
+  const source = useMemo(
+    () => (filter === "favorites" ? allTracks.filter((t) => isFavorite(t.id)) : allTracks),
+    [filter, isFavorite, allTracks],
+  );
+  const { items, hasMore, remaining, loadMore } = usePaged(source);
+
+  // Computed client-side only, after mount — the server (build-time
+  // prerender) and the browser can land on different hours (or the static
+  // page can simply be served long after it was built), so evaluating
+  // `new Date().getHours()` directly during render produced mismatched
+  // server/client HTML and a real React hydration error. A stable
+  // "Welcome back" placeholder on the very first paint avoids that; the
+  // real time-of-day greeting swaps in a moment later once mounted.
+  const [greeting, setGreeting] = useState("Welcome back");
+  useEffect(() => {
     const h = new Date().getHours();
-    if (h < 12) return "Good Morning";
-    if (h < 18) return "Good Afternoon";
-    return "Good Evening";
-  };
+    setGreeting(h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening");
+  }, []);
 
-  const handleTrack = (track: typeof ALL_TRACKS[0]) => {
-    selectTrack(track, ALL_TRACKS);
+  const handleTrack = (track: Track) => {
+    selectTrack(track, source);
     openPlayer();
   };
 
@@ -34,9 +53,9 @@ export default function Home() {
 
       {/* Header */}
       <header>
-        <h1 className="text-4xl font-bold uppercase italic tracking-tighter mb-2">{greet()}</h1>
+        <h1 className="text-4xl font-bold uppercase italic tracking-tighter mb-2">{greeting}</h1>
         <p className="text-white/35 text-[10px] font-bold uppercase tracking-widest">
-          {total} songs &middot; {playlists.length} playlists
+          {allTracks.length} songs &middot; {playlists.length} playlists
         </p>
       </header>
 
@@ -52,7 +71,7 @@ export default function Home() {
         </div>
         <div className="absolute inset-0 bg-linear-to-r from-black via-black/30 to-transparent" />
         <div className="absolute bottom-6 left-6">
-          <span className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] uppercase tracking-[0.2em] mb-3 inline-block font-bold">
+          <span className="px-3 py-1 bg-accent/25 backdrop-blur-md border border-accent/40 rounded-full text-[10px] uppercase tracking-[0.2em] mb-3 inline-block font-bold text-accent-bright">
             Featured
           </span>
           <h2 className="text-4xl font-black uppercase italic tracking-tighter mb-1 leading-none">Coldplay</h2>
@@ -110,60 +129,103 @@ export default function Home() {
         </div>
       </section>
 
-      {/* All Songs */}
+      {/* Songs — All / Favorites */}
       <section>
         <div className="flex justify-between items-end mb-5">
-          <h2 className="text-xl font-bold uppercase tracking-tight">All Songs</h2>
+          <h2 className="text-xl font-bold uppercase tracking-tight">
+            {filter === "favorites" ? "Favorites" : "All Songs"}
+          </h2>
           <Link href="/search" className="text-[10px] text-white/35 uppercase tracking-widest hover:text-white transition-colors font-bold">
             Browse
           </Link>
         </div>
-        <div className="space-y-0.5">
-          {items.map((track, idx) => {
-            const isActive = currentTrack?.id === track.id;
-            const playing  = isActive && isPlaying;
-            return (
-              <motion.div
-                key={track.id}
-                whileTap={{ scale: 0.985 }}
-                transition={TAP}
-                onClick={() => handleTrack(track)}
-                className={cn(
-                  "track-row group px-3 py-2.5 border border-transparent rounded-2xl flex items-center gap-3 cursor-pointer transition-colors duration-150",
-                  isActive
-                    ? "bg-white/10 border-white/12"
-                    : "bg-white/4 hover:bg-white/8 hover:border-white/8 active:bg-white/12"
-                )}
-              >
-                <span className="text-[10px] font-mono text-white/20 hidden md:block w-5 text-right shrink-0">
-                  {String(idx + 1).padStart(2, "0")}
-                </span>
-                <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-white/5">
-                  <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                  {playing && (
-                    <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
-                      <span className="flex items-end gap-px h-4">
-                        <span className="w-0.5 bg-white rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
-                        <span className="w-0.5 bg-white rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
-                        <span className="w-0.5 bg-white rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className={cn("font-bold text-sm truncate uppercase tracking-tight", isActive ? "text-white" : "text-white/90")}>{track.title}</h4>
-                  <p className="text-[10px] text-white/35 font-bold uppercase tracking-widest truncate mt-0.5">{track.artist}</p>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className="text-[10px] font-mono tracking-widest text-white/25 group-hover:text-white/50 transition-colors">
-                    {track.duration}
-                  </span>
-                  <TrackMenu trackId={track.id} />
-                </div>
-              </motion.div>
-            );
-          })}
+
+        <div className="flex gap-2 mb-5">
+          {(["all", "favorites"] as const).map((f) => (
+            <motion.button
+              key={f}
+              whileTap={{ scale: 0.95 }}
+              transition={TAP}
+              onClick={() => setFilter(f)}
+              className={cn(
+                "px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors",
+                filter === f
+                  ? "bg-accent text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                  : "bg-white/6 text-white/45 hover:bg-white/10 hover:text-white/70",
+              )}
+            >
+              {f === "all" ? "All" : "Favorites"}
+            </motion.button>
+          ))}
         </div>
+
+        {source.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <Heart size={26} className="text-white/20" />
+            <p className="text-white/40 text-sm">No favorites yet</p>
+            <p className="text-white/25 text-xs max-w-[220px]">
+              Tap the heart on any song to pin it here.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-0.5">
+            {items.map((track, idx) => {
+              const isActive = currentTrack?.id === track.id;
+              const playing  = isActive && isPlaying;
+              const favorited = isFavorite(track.id);
+              return (
+                <motion.div
+                  key={track.id}
+                  whileTap={{ scale: 0.985 }}
+                  transition={TAP}
+                  onClick={() => handleTrack(track)}
+                  className={cn(
+                    "track-row group px-3 py-2.5 border border-transparent rounded-2xl flex items-center gap-3 cursor-pointer transition-colors duration-150",
+                    isActive
+                      ? "bg-accent/20 border-accent/30"
+                      : "bg-white/4 hover:bg-white/8 hover:border-white/8 active:bg-white/12"
+                  )}
+                >
+                  <span className="text-[10px] font-mono text-white/20 hidden md:block w-5 text-right shrink-0">
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-white/5">
+                    <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                    {playing && (
+                      <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+                        <span className="flex items-end gap-px h-4">
+                          <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                          <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
+                          <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className={cn("font-bold text-sm truncate uppercase tracking-tight", isActive ? "text-white" : "text-white/90")}>{track.title}</h4>
+                    <p className="text-[10px] text-white/35 font-bold uppercase tracking-widest truncate mt-0.5">{track.artist}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleFavorite(track.id); }}
+                      aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                      className={cn(
+                        "w-8 h-8 flex items-center justify-center rounded-full transition-colors",
+                        favorited ? "text-accent-bright" : "text-white/25 hover:text-white/60 hover:bg-white/8",
+                      )}
+                    >
+                      <Heart size={15} fill={favorited ? "currentColor" : "none"} />
+                    </button>
+                    <span className="text-[10px] font-mono tracking-widest text-white/25 group-hover:text-white/50 transition-colors hidden sm:inline">
+                      {track.duration}
+                    </span>
+                    <TrackMenu trackId={track.id} />
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
         {hasMore && (
           <motion.button

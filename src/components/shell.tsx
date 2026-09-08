@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { usePlayer } from "@/lib/player-context";
 import BottomNav from "@/components/BottomNav";
 import MiniPlayer from "@/components/MiniPlayer";
@@ -8,6 +9,12 @@ import PlayerView from "@/components/PlayerView";
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const { currentTrack, isPlayerOpen } = usePlayer();
+  const pathname = usePathname();
+  // The DJ board is its own full-screen fixed overlay (own header, own
+  // transport per deck) — showing the mini-player/nav underneath it would
+  // just be a second, conflicting transport bar stacked on top of the
+  // mixer's own.
+  const isDjBoard = pathname === "/dj";
 
   return (
     <>
@@ -25,18 +32,22 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* Mini player — fixed, above content, below full player */}
-      <AnimatePresence>
-        {currentTrack && !isPlayerOpen && <MiniPlayer />}
-      </AnimatePresence>
+      {!isDjBoard && (
+        <>
+          {/* Mini player — fixed, above content, below full player */}
+          <AnimatePresence>
+            {currentTrack && !isPlayerOpen && <MiniPlayer />}
+          </AnimatePresence>
 
-      {/* Bottom nav — fixed, always on top of content */}
-      <BottomNav />
+          {/* Bottom nav — fixed, always on top of content */}
+          <BottomNav />
 
-      {/* Full player — fixed, topmost */}
-      <AnimatePresence>
-        {isPlayerOpen && <PlayerView />}
-      </AnimatePresence>
+          {/* Full player — fixed, topmost */}
+          <AnimatePresence>
+            {isPlayerOpen && <PlayerView />}
+          </AnimatePresence>
+        </>
+      )}
     </>
   );
 }

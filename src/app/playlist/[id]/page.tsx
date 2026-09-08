@@ -4,7 +4,7 @@ import { use, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, Shuffle, Clock3, ListMusic, Pencil, Trash2, Check, X } from "lucide-react";
-import { PLAYLISTS } from "@/lib/data";
+import { builtInPlaylists } from "@/lib/data";
 import { usePlayer } from "@/lib/player-context";
 import { usePlaylists } from "@/lib/use-playlists";
 import { usePaged } from "@/lib/use-paged";
@@ -21,7 +21,7 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
   const playlist = playlists.find(p => p.id === id);
 
   // Only 404 for non-Coldplay built-in playlists that don't exist
-  const isBuiltIn = PLAYLISTS.some(p => p.id === id);
+  const isBuiltIn = builtInPlaylists().some(p => p.id === id);
   if (!playlist && !isBuiltIn) notFound();
   if (!playlist) notFound();
 
@@ -180,9 +180,9 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                       <Play className="w-3.5 h-3.5 fill-white text-white" />
                     ) : playing ? (
                       <span className="flex items-end gap-px h-3.5 w-3.5">
-                        <span className="flex-1 rounded-sm bg-white" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
-                        <span className="flex-1 rounded-sm bg-white" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
-                        <span className="flex-1 rounded-sm bg-white" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                        <span className="flex-1 rounded-sm bg-accent-bright" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                        <span className="flex-1 rounded-sm bg-accent-bright" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
+                        <span className="flex-1 rounded-sm bg-accent-bright" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
                       </span>
                     ) : (
                       <span className={cn("text-[11px] font-mono font-bold", isActive ? "text-white" : "text-white/25")}>{i + 1}</span>

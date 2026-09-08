@@ -3,8 +3,9 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Search as SearchIcon, Play, Pause } from "lucide-react";
-import { ALL_TRACKS } from "@/lib/data";
+import type { Track } from "@/lib/data";
 import { usePlayer } from "@/lib/player-context";
+import { useLibrary } from "@/lib/use-library";
 import { usePaged } from "@/lib/use-paged";
 import TrackMenu from "@/components/TrackMenu";
 import { cn } from "@/lib/utils";
@@ -14,25 +15,26 @@ const TAP = { type: "spring" as const, damping: 14, stiffness: 500, mass: 0.4 };
 export default function Search() {
   const [query, setQuery] = useState("");
   const { currentTrack, isPlaying, selectTrack, togglePlay, openPlayer } = usePlayer();
+  const { tracks: allTracks } = useLibrary();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return ALL_TRACKS;
-    return ALL_TRACKS.filter(t =>
+    if (!q) return allTracks;
+    return allTracks.filter(t =>
       t.title.toLowerCase().includes(q) ||
       t.artist.toLowerCase().includes(q) ||
       t.album.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, allTracks]);
 
   const { items, hasMore, remaining, loadMore } = usePaged(filtered);
 
-  const handleTrack = (track: typeof ALL_TRACKS[0]) => {
+  const handleTrack = (track: Track) => {
     if (currentTrack?.id === track.id) togglePlay();
     else { selectTrack(track, filtered); openPlayer(); }
   };
 
-  const featured = ALL_TRACKS.slice(0, 4);
+  const featured = allTracks.slice(0, 4);
   const showFeatured = query.trim() === "";
 
   return (
@@ -112,7 +114,7 @@ export default function Search() {
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/25 font-bold mb-4">
           {query
             ? `${filtered.length} result${filtered.length !== 1 ? "s" : ""}`
-            : `All tracks · ${ALL_TRACKS.length}`}
+            : `All tracks · ${allTracks.length}`}
         </h2>
 
         {filtered.length === 0 ? (
@@ -134,7 +136,7 @@ export default function Search() {
                     className={cn(
                       "track-row group flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer transition-colors duration-150 border border-transparent",
                       isActive
-                        ? "bg-white/10 border-white/12"
+                        ? "bg-accent/20 border-accent/30"
                         : "bg-white/4 hover:bg-white/8 hover:border-white/8 active:bg-white/12"
                     )}
                   >
@@ -151,9 +153,9 @@ export default function Search() {
                       {playing && (
                         <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
                           <span className="flex items-end gap-px h-4">
-                            <span className="w-0.5 bg-white rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
-                            <span className="w-0.5 bg-white rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
-                            <span className="w-0.5 bg-white rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                            <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                            <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
+                            <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
                           </span>
                         </div>
                       )}

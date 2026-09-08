@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ALL_TRACKS, PLAYLISTS, type Playlist, type Track } from "./data";
+import { ALL_TRACKS, builtInPlaylists, type Playlist, type Track } from "./data";
+import { useLibrary } from "./use-library";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 export interface UserPlaylist {
@@ -67,8 +68,19 @@ function userToPlaylist(u: UserPlaylist): Playlist {
 
 // ── Hook ───────────────────────────────────────────────────────────────────
 export function usePlaylists() {
-  const [store, setStore] = useState<UserStore>(_store ?? {});
-  const [loading, setLoading] = useState(!_store);
+  // Both start deterministic on first render (empty/true) rather than
+  // seeded from module-level state — same hydration-mismatch reasoning as
+  // useLibrary() itself: _store can already be populated by the time this
+  // mounts if another usePlaylists() call resolved first in the same
+  // client session, and the server never has it populated at all.
+  const [store, setStore] = useState<UserStore>({});
+  const [loading, setLoading] = useState(true);
+  // Re-render once the live library scan resolves — idsToTracks and
+  // builtInPlaylists() both read the module-level ALL_TRACKS synchronously,
+  // so `playlists` below must not be trusted until libraryLoading is false
+  // (see the guard on builtInPlaylists() itself, same reasoning as
+  // useLibrary()'s own doc comment on the eager-fetch hydration race).
+  const { loading: libraryLoading } = useLibrary();
 
   useEffect(() => {
     const fn = (s: UserStore) => setStore({ ...s });
@@ -82,7 +94,7 @@ export function usePlaylists() {
   }, []);
 
   const playlists: Playlist[] = [
-    ...PLAYLISTS,
+    ...(libraryLoading ? [] : builtInPlaylists()),
     ...Object.values(store).map(userToPlaylist),
   ];
 
@@ -141,5 +153,12 @@ export function usePlaylists() {
     });
   }, []);
 
-  return { playlists, loading, createPlaylist, renamePlaylist, deletePlaylist, toggleTrack };
+  return {
+    playlists,
+    loading: loading || libraryLoading,
+    createPlaylist,
+    renamePlaylist,
+    deletePlaylist,
+    toggleTrack,
+  };
 }

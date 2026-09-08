@@ -4,6 +4,14 @@
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Udaan's own accent (--p-accent in Udaan's tokens.css) — used for the
+     "this is active/selected/playing" language across the app, replacing
+     the plain white fill that used to carry that meaning. White stays
+     reserved for primary text and the one big play button, so accent
+     reads as its own distinct signal rather than competing with it. */
+  --color-accent: #2c4a6e;
+  --color-accent-hover: #365a84;
+  --color-accent-bright: #3d648f;
 }
 
 body {
