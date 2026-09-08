@@ -48,8 +48,8 @@ interface PlayerCtx {
 const Ctx = createContext<PlayerCtx | null>(null);
 
 function resolveUrl(track: Track): string {
-  // /api/library already returns the exact, correctly URL-encoded src for
-  // every track it lists (see that route's own doc comment) — the fuzzy
+  // library.json already returns the exact, correctly URL-encoded src for
+  // every track it lists (see data.ts's doc comment) — the fuzzy
   // filename-matching TRACK_SRC_MAP/resolve-track.ts layer this used to go
   // through existed only to bridge hand-typed metadata to real files,
   // which a live tag scan no longer needs.

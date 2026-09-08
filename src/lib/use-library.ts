@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ensureLibraryLoaded, onLibraryLoaded, type Track } from "./data";
 
 /**
- * Reactive view of the live-scanned library (see data.ts / /api/library).
+ * Reactive view of the live-scanned library (see data.ts / /library.json).
  * Components that need to re-render once the async scan resolves use this;
  * code that only needs a synchronous snapshot after the app has already
  * loaded (TrackMenu, use-playlists' idsToTracks) can keep reading the

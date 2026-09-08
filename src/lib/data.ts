@@ -2,13 +2,24 @@ export interface Track { id: string; title: string; artist: string; album: strin
 export interface Playlist { id: string; name: string; description?: string; coverUrl: string; tracks: Track[]; }
 
 /**
- * Library — sourced live from /api/library, which reads real ID3/Vorbis/etc.
- * tags out of public/music/ via music-metadata (see that route's own doc
- * comment). Replaces a hand-maintained 199-entry array that had already
- * drifted from the 191 real files on disk, and existed only because nothing
- * read real tag data — the exact gap Udaan's own Rust backend (`lofty`)
- * already closed on the desktop side. "Same songs as Udaan" means the same
- * source of truth: the folder's real tags, not a second hand-typed catalog.
+ * Library — sourced from /library.json, a static file written at build time
+ * by scripts/build-library.mjs (reads real ID3/Vorbis/etc. tags out of
+ * public/music/ via music-metadata). Replaces a hand-maintained 199-entry
+ * array that had already drifted from the 191 real files on disk, and
+ * existed only because nothing read real tag data — the exact gap Udaan's
+ * own Rust backend (`lofty`) already closed on the desktop side. "Same
+ * songs as Udaan" means the same source of truth: the folder's real tags,
+ * not a second hand-typed catalog.
+ *
+ * This used to be a per-request API route (src/app/api/library/route.ts)
+ * that scanned public/music/ on every call. On Vercel, Next.js's file
+ * tracer followed those file reads into public/music/ and bundled the
+ * entire 1.3GB of mp3s into that route's serverless function, which
+ * exceeded Vercel's function size limit and failed the deploy. The music
+ * folder's contents are fixed at deploy time anyway (adding a track means
+ * a new git push and redeploy), so scanning once at build time and serving
+ * the result as a static JSON asset removes the serverless function
+ * entirely — same data, no per-request work, no function to bundle mp3s into.
  *
  * Eager-fetched once at module load (same pattern use-music-files.ts used
  * for its file list) and cached, so every page that reads ALL_TRACKS after
@@ -35,7 +46,7 @@ let listeners: Array<(tracks: Track[]) => void> = [];
 
 async function fetchLibrary(): Promise<Track[]> {
   try {
-    const res = await fetch("/api/library");
+    const res = await fetch("/library.json");
     const json = await res.json();
     const raw: {
       id: string; title: string; artist: string; album: string;
