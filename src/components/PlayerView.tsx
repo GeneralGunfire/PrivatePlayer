@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Download, ListMusic, Mic2 } from "lucide-react";
 import { usePlayer } from "@/lib/player-context";
+import { useAudioLevel } from "@/lib/use-audio-level";
 import { cn } from "@/lib/utils";
 import TrackMenu from "@/components/TrackMenu";
 import EdgeGlow from "@/components/EdgeGlow";
@@ -17,9 +18,9 @@ function fmt(s: number) {
 }
 
 // ── Scrubber ──────────────────────────────────────────────
-function Scrubber({ progress, currentTime, duration, onSeek, disabled }: {
+function Scrubber({ progress, currentTime, duration, onSeek, disabled, level = 0 }: {
   progress: number; currentTime: number; duration: string;
-  onSeek: (pct: number) => void; disabled?: boolean;
+  onSeek: (pct: number) => void; disabled?: boolean; level?: number;
 }) {
   const trackRef   = useRef<HTMLDivElement>(null);
   const [drag, setDrag]         = useState(false);
@@ -70,7 +71,9 @@ function Scrubber({ progress, currentTime, duration, onSeek, disabled }: {
       >
         {/* Rail */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-white/12">
-          {/* Fill */}
+          {/* Fill — glow tracks the same live audio level the visualizer
+              bars and play button react to, so this reads as one
+              connected system rather than a plain static progress bar. */}
           <div
             className="absolute left-0 top-0 h-full bg-white rounded-full"
             style={{
@@ -78,6 +81,7 @@ function Scrubber({ progress, currentTime, duration, onSeek, disabled }: {
               transform: `scaleX(${pct / 100})`,
               transformOrigin: "left center",
               transition: drag ? "none" : "transform 0.08s linear",
+              boxShadow: `0 0 ${4 + level * 10}px rgba(61,100,143,${0.3 + level * 0.5})`,
             }}
           />
         </div>
@@ -170,6 +174,7 @@ export default function PlayerView() {
 
   const [queueOpen, setQueueOpen] = useState(false);
   const [lyricsOpen, setLyricsOpen] = useState(false);
+  const level = useAudioLevel(analyser, isPlaying && !isLoading);
 
   if (!currentTrack) return null;
 
@@ -209,9 +214,11 @@ export default function PlayerView() {
 
         <div className="text-center min-w-0 px-2">
           <p className="text-[9px] uppercase tracking-[0.45em] text-white/25 font-black mb-0.5">Now Playing</p>
-          <p className="text-[11px] font-bold tracking-tight uppercase text-white/55 truncate max-w-36">
-            {currentTrack.album}
-          </p>
+          {currentTrack.album && (
+            <p className="text-[11px] font-bold tracking-tight uppercase text-white/55 truncate max-w-36">
+              {currentTrack.album}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-0.5 shrink-0">
@@ -246,9 +253,15 @@ export default function PlayerView() {
         </div>
       </div>
 
-      {/* Visualizer + title — no album artwork, per user preference */}
+      {/* Visualizer + title — no album artwork, per user preference. The
+          visualizer previously stretched to fill ALL remaining vertical
+          space (flex-1) while its bars stayed bottom-anchored inside that
+          box — so most of that space just rendered as empty canvas above
+          the bars. Centering this whole block in the available space
+          instead, with the visualizer capped to a height its bars
+          actually use, means there's no dead void left over. */}
       <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-        <div className="relative w-full h-40 md:h-48">
+        <div className="relative w-full h-48 md:h-56 shrink-0">
           <CenterVisualizer
             analyser={analyser}
             isPlaying={isPlaying && !isLoading}
@@ -275,7 +288,7 @@ export default function PlayerView() {
             key={currentTrack.id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="mt-8 text-center px-4 w-full"
+            className="mt-6 text-center px-4 w-full"
             style={{ willChange: "transform, opacity" }}
           >
             <h1 className="text-3xl md:text-[2rem] font-black uppercase italic tracking-tighter leading-none mb-2 truncate">
@@ -298,6 +311,7 @@ export default function PlayerView() {
           progress={progress}
           currentTime={currentTime}
           duration={currentTrack.duration}
+          level={level}
           onSeek={seek}
           disabled={isLoading}
         />
@@ -317,13 +331,19 @@ export default function PlayerView() {
               <SkipBack size={24} fill="currentColor" />
             </motion.button>
 
-            {/* Play / Pause — main button */}
+            {/* Play / Pause — main button. Glow radius/opacity tracks the
+                same live audio level the visualizer bars read, so the
+                button reads as part of the same reactive system instead
+                of a static control sitting next to a separate canvas. */}
             <motion.button
               onClick={togglePlay}
               whileTap={{ scale: 0.88 }}
               transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
-              style={{ willChange: "transform" }}
-              className="w-[66px] h-[66px] bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_35px_rgba(255,255,255,0.22)] hover:shadow-[0_0_45px_rgba(255,255,255,0.35)] transition-shadow"
+              style={{
+                willChange: "transform, box-shadow",
+                boxShadow: `0 0 ${35 + level * 30}px rgba(255,255,255,${0.22 + level * 0.28})`,
+              }}
+              className="w-[66px] h-[66px] bg-white text-black rounded-full flex items-center justify-center transition-shadow duration-100"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {isLoading ? (

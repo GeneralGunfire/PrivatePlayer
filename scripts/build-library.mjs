@@ -115,7 +115,14 @@ async function scanLibrary() {
           fileName,
           title: common.title?.trim() || parsed.title || fallbackTitle,
           artist: common.artist?.trim() || common.artists?.[0]?.trim() || parsed.artist || "Unknown Artist",
-          album: common.album?.trim() || "Unknown Album",
+          // Empty rather than "Unknown Album" — almost none of this
+          // library's files carry real album tags (YouTube-audio rips,
+          // no ID3 data at all), so that placeholder was showing up on
+          // nearly every track across the UI as repetitive noise. An
+          // empty string lets each render site simply omit the album
+          // when there's nothing real to show, same as `common.album`
+          // being absent in the first place.
+          album: common.album?.trim() || "",
           durationSeconds: meta.format.duration ?? null,
           ownCoverUrl,
           src: `/music/${encodeURIComponent(fileName)}`,
@@ -126,7 +133,7 @@ async function scanLibrary() {
           fileName,
           title: parsed.title || fallbackTitle,
           artist: parsed.artist || "Unknown Artist",
-          album: "Unknown Album",
+          album: "",
           durationSeconds: null,
           ownCoverUrl: null,
           src: `/music/${encodeURIComponent(fileName)}`,

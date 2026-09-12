@@ -55,11 +55,14 @@ export default function Home() {
       <header>
         <h1 className="text-4xl font-bold uppercase italic tracking-tighter mb-2">{greeting}</h1>
         <p className="text-white/35 text-[10px] font-bold uppercase tracking-widest">
-          {allTracks.length} songs &middot; {playlists.length} playlists
+          {allTracks.length} songs{playlists.length > 0 ? ` · ${playlists.length} playlists` : ""}
         </p>
       </header>
 
-      {/* Playlists */}
+      {/* Playlists — hidden entirely when empty rather than showing a
+          header over nothing; /library already has its own proper empty
+          state ("No playlists yet") for the case where that's useful. */}
+      {playlists.length > 0 && (
       <section>
         <div className="flex justify-between items-end mb-5">
           <h2 className="text-xl font-bold uppercase tracking-tight">Playlists</h2>
@@ -98,6 +101,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Songs — All / Favorites */}
       <section>

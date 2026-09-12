@@ -1,14 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
   <defs>
-    <linearGradient id="bgcov6" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2a0d1a" />
-      <stop offset="1" stop-color="#6e2c4a" />
-    </linearGradient>
-    <linearGradient id="gcov6" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6e2c4a" />
-      <stop offset="1" stop-color="#2a0d1a" />
+    <linearGradient id="gcov6" x1="0.883" y1="0.179" x2="0.117" y2="0.821">
+      <stop offset="0" stop-color="#1c1405" />
+      <stop offset="0.55" stop-color="#7a5c1a" />
+      <stop offset="1" stop-color="#c9a13d" />
     </linearGradient>
   </defs>
-  <rect width="400" height="400" fill="url(#bgcov6)" />
-  <circle cx="166" cy="254" r="112" fill="url(#gcov6)" opacity="0.5" /><rect x="72.11696570703452" y="131.77824542770276" width="122" height="16" rx="8" fill="url(#gcov6)" opacity="0.35" transform="rotate(222 133.11696570703452 139.77824542770276)" /><rect x="165.92928342064448" y="102.01370743592479" width="65" height="16" rx="8" fill="url(#gcov6)" opacity="0.5" transform="rotate(269 198.42928342064448 110.01370743592479)" /><rect x="220.74058203047855" y="129.4807466586902" width="88" height="16" rx="8" fill="url(#gcov6)" opacity="0.6499999999999999" transform="rotate(316 264.74058203047855 137.4807466586902)" /><rect x="234.37665812791164" y="196.71023606186495" width="111" height="16" rx="8" fill="url(#gcov6)" opacity="0.35" transform="rotate(3 289.87665812791164 204.71023606186495)" />
+  <rect width="400" height="400" fill="url(#gcov6)" />
 </svg>

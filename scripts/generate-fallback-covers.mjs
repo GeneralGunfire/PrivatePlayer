@@ -1,4 +1,4 @@
-// Generates a small fixed pool of stylized cover-art SVGs, once, checked
+// Generates a small fixed pool of gradient cover-art SVGs, once, checked
 // into git (public/covers-fallback/*.svg — NOT gitignored, unlike the
 // per-track library.json/covers/ build output, since this pool is stable
 // hand-authored art rather than something regenerated every build).
@@ -11,6 +11,13 @@
 // the closest honest equivalent: real generated art, not one flat
 // placeholder repeated 202 times, that build-library.mjs assigns to
 // cover-less tracks the same deterministic way it would borrow a real one.
+//
+// v3 — v1 (flat two-stop dark gradient + faint bars) was muddy/invisible.
+// v2 (bright geometric motifs — rings/bursts/bands/orbits) was explicitly
+// rejected as unprofessional. This pass: plain, clean multi-stop
+// gradients only — no shapes, lines, or icons — varied by angle and hue
+// per index so the pool still reads as distinct at a glance, closer to
+// how Spotify/Apple Music generate a placeholder cover from a color pair.
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,68 +25,58 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(__dirname, "..", "public", "covers-fallback");
 
-// Variations on the site's own accent (#2c4a6e / #365a84 / #3d648f) plus a
-// few analogous dark tones, so these read as "part of this app" rather
-// than generic stock gradients.
-const PALETTES = [
-  ["#0d1b2a", "#2c4a6e"],
-  ["#1b1033", "#4a2c6e"],
-  ["#0a2a24", "#2c6e5a"],
-  ["#2a1a0d", "#6e4a2c"],
-  ["#1a0d2a", "#5a2c6e"],
-  ["#0d2a1f", "#2c6e4a"],
-  ["#2a0d1a", "#6e2c4a"],
-  ["#0d1a2a", "#2c5a6e"],
-  ["#221a2a", "#5a3d6e"],
-  ["#1a2a0d", "#4a6e2c"],
-  ["#2a0d2a", "#6e2c6e"],
-  ["#0d2a2a", "#2c6e6e"],
+// Three-stop gradients, each a believable tonal family (not random hue
+// pairs) so they read as designed rather than generated noise. Angles
+// vary per entry too, so adjacent covers in a list don't all lean the
+// same direction.
+const GRADIENTS = [
+  { stops: ["#0d1b2a", "#2c4a6e", "#3d648f"], angle: 135 }, // app accent blue
+  { stops: ["#150a24", "#3d2a6e", "#6a4fc9"], angle: 120 }, // violet
+  { stops: ["#06201a", "#1f5c46", "#3ea885"], angle: 145 }, // emerald
+  { stops: ["#241505", "#7a4a1a", "#c97f3d"], angle: 130 }, // amber
+  { stops: ["#200a14", "#6e2c4a", "#c9527f"], angle: 150 }, // rose
+  { stops: ["#0a1a1e", "#1f5c66", "#3ea8b8"], angle: 125 }, // teal
+  { stops: ["#1c1405", "#7a5c1a", "#c9a13d"], angle: 140 }, // gold
+  { stops: ["#12081f", "#3d2a6e", "#5c4fc9"], angle: 115 }, // indigo
+  { stops: ["#200a0a", "#6e2c2c", "#c9524f"], angle: 135 }, // red
+  { stops: ["#081f14", "#1f5c33", "#3ea85e"], angle: 150 }, // green
+  { stops: ["#1c0a20", "#5c2a6e", "#a84fc9"], angle: 120 }, // magenta
+  { stops: ["#0a1420", "#294a6e", "#4a7fbf"], angle: 145 }, // deep blue
 ];
 
-// Abstract geometric motifs (rotated bars / arcs), not literal icons —
-// each combined with its palette gives a distinct silhouette at
-// thumbnail size, which is what actually reads as "different cover" in a
-// scrolling list rather than the exact gradient hue.
-function motif(index, id) {
-  const seed = index * 37;
-  const bars = Array.from({ length: 4 }, (_, i) => {
-    const angle = (seed + i * 47) % 360;
-    const x = 200 + Math.cos((angle * Math.PI) / 180) * 90;
-    const y = 200 + Math.sin((angle * Math.PI) / 180) * 90;
-    const w = 60 + ((seed + i * 23) % 80);
-    return `<rect x="${x - w / 2}" y="${y - 8}" width="${w}" height="16" rx="8" fill="url(#g${id})" opacity="${0.35 + (i % 3) * 0.15}" transform="rotate(${angle} ${x} ${y})" />`;
-  }).join("");
-  const cx = 100 + ((seed * 3) % 200);
-  const cy = 100 + ((seed * 7) % 200);
-  const r = 70 + (seed % 60);
-  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#g${id})" opacity="0.5" />${bars}`;
-}
+const SIZE = 400;
 
 function svgFor(index) {
-  const [c1, c2] = PALETTES[index % PALETTES.length];
+  const { stops, angle } = GRADIENTS[index % GRADIENTS.length];
   const id = `cov${index}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  const rad = (angle * Math.PI) / 180;
+  // Project the angle onto the 0..1 gradientUnits box so gradient
+  // direction genuinely varies per cover, not just its colors.
+  const dx = Math.cos(rad) * 0.5;
+  const dy = Math.sin(rad) * 0.5;
+  const x1 = (0.5 - dx).toFixed(3);
+  const y1 = (0.5 - dy).toFixed(3);
+  const x2 = (0.5 + dx).toFixed(3);
+  const y2 = (0.5 + dy).toFixed(3);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
   <defs>
-    <linearGradient id="bg${id}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${c1}" />
-      <stop offset="1" stop-color="${c2}" />
-    </linearGradient>
-    <linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${c2}" />
-      <stop offset="1" stop-color="${c1}" />
+    <linearGradient id="g${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">
+      <stop offset="0" stop-color="${stops[0]}" />
+      <stop offset="0.55" stop-color="${stops[1]}" />
+      <stop offset="1" stop-color="${stops[2]}" />
     </linearGradient>
   </defs>
-  <rect width="400" height="400" fill="url(#bg${id})" />
-  ${motif(index, id)}
+  <rect width="${SIZE}" height="${SIZE}" fill="url(#g${id})" />
 </svg>`;
 }
 
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
-  for (let i = 0; i < PALETTES.length; i++) {
+  for (let i = 0; i < GRADIENTS.length; i++) {
     await writeFile(path.join(OUT_DIR, `${i}.svg`), svgFor(i));
   }
-  console.log(`[generate-fallback-covers] wrote ${PALETTES.length} covers to public/covers-fallback/`);
+  console.log(`[generate-fallback-covers] wrote ${GRADIENTS.length} covers to public/covers-fallback/`);
 }
 
 main();

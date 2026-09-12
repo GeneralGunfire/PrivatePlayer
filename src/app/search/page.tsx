@@ -165,7 +165,7 @@ export default function Search() {
                         {track.title}
                       </h4>
                       <p className="text-[10px] text-white/35 font-bold uppercase tracking-widest truncate mt-0.5">
-                        {track.artist} · {track.album}
+                        {track.artist}{track.album ? ` · ${track.album}` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
