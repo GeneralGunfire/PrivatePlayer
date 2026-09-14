@@ -2,20 +2,17 @@
 
 import { useEffect, useRef } from "react";
 
-const BAR_COUNT = 40;
-// Below this level a bar is treated as silent and not drawn at all — an
-// earlier version floored every bar's height so idle/loading state always
-// showed a flat row across the bottom, which read as dull grey debris
-// rather than "nothing playing yet."
-const SILENCE_THRESHOLD = 0.015;
+const BAR_COUNT = 32;
+// Below this a bar is drawn at 0 height rather than floored to a minimum
+// — a floor meant every bar had *some* height even at total silence,
+// which at low levels made adjacent bars' minimum stubs touch and read
+// as one solid connected strip instead of distinct bars.
+const SILENCE_THRESHOLD = 0.01;
+// Fraction of the canvas given to the reflection below the bars, and how
+// far that reflection fades out.
+const REFLECTION_HEIGHT = 0.32;
+const REFLECTION_GAP = 0.04;
 
-/**
- * Bottom-anchored bar visualizer, flat white on black — no gradient, no
- * glow bloom. Matches the app's monochrome direction: hierarchy comes
- * from opacity, not color, so the bars use a single white fill whose
- * opacity tracks loudness (quiet = faint, loud = fully opaque) instead of
- * a colored gradient climbing the bar height.
- */
 export default function CenterVisualizer({
   analyser,
   isPlaying,
@@ -67,34 +64,62 @@ export default function CenterVisualizer({
           let sum = 0;
           for (let j = 0; j < binsPerBar; j++) sum += bins[i * binsPerBar + j] ?? 0;
           const avg = sum / binsPerBar / 255;
-          smoothed[i] += (avg - smoothed[i]) * 0.35;
+          // Slower attack/faster release than before (0.22 vs the old
+          // 0.35) — the old rate snapped hard enough between frames that
+          // neighboring bars could visibly jump past each other at the
+          // top edge for a frame, reading as "overlap." This settles
+          // smoothly instead.
+          smoothed[i] += (avg - smoothed[i]) * 0.22;
         }
       } else {
-        for (let i = 0; i < BAR_COUNT; i++) smoothed[i] *= 0.88;
+        for (let i = 0; i < BAR_COUNT; i++) smoothed[i] *= 0.9;
       }
 
-      const gap = width * 0.012;
-      const barWidth = (width - gap * (BAR_COUNT - 1)) / BAR_COUNT;
+      // Bar geometry — gap and width both derived from the same unit so
+      // (barWidth + gap) * BAR_COUNT - gap exactly equals the canvas
+      // width with no rounding slop that could leave bars overlapping
+      // by a fractional pixel at certain widths.
+      const unit = width / (BAR_COUNT + (BAR_COUNT - 1) * 0.28);
+      const barWidth = unit;
+      const gap = unit * 0.28;
+      const r = Math.min(barWidth / 2, 3 * dpr);
+
+      const barsAreaHeight = height * (1 - REFLECTION_HEIGHT - REFLECTION_GAP);
+      const reflectionTop = height * (1 - REFLECTION_HEIGHT);
 
       for (let i = 0; i < BAR_COUNT; i++) {
-        const level = Math.min(1, smoothed[i] * 1.8);
+        const level = Math.min(1, smoothed[i] * 1.9);
         if (level < SILENCE_THRESHOLD) continue;
 
-        const barHeight = Math.max(level * height, barWidth * 0.6);
+        const barHeight = level * barsAreaHeight;
         const x = i * (barWidth + gap);
-        const y = height - barHeight;
+        const y = barsAreaHeight - barHeight;
+        const opacity = 0.4 + level * 0.6;
 
-        // Opacity, not color, carries loudness — 35% at a bare whisper up
-        // to fully opaque white at peak, same "hierarchy through opacity"
-        // rule as the rest of the app's monochrome surfaces.
-        ctx2d.fillStyle = `rgba(255,255,255,${0.35 + level * 0.65})`;
-
-        const r = Math.min(barWidth / 2, 3 * dpr);
+        // Main bar
+        ctx2d.fillStyle = `rgba(255,255,255,${opacity})`;
         ctx2d.beginPath();
         if (typeof ctx2d.roundRect === "function") {
           ctx2d.roundRect(x, y, barWidth, barHeight, r);
         } else {
           ctx2d.rect(x, y, barWidth, barHeight);
+        }
+        ctx2d.fill();
+
+        // Reflection — same bar mirrored below the gap, height capped to
+        // the reflection band and fading to transparent with a gradient
+        // rather than a flat dim copy, so it reads as a surface
+        // reflection rather than a second bar.
+        const reflHeight = Math.min(barHeight, height * REFLECTION_HEIGHT);
+        const reflGrad = ctx2d.createLinearGradient(0, reflectionTop, 0, reflectionTop + reflHeight);
+        reflGrad.addColorStop(0, `rgba(255,255,255,${opacity * 0.35})`);
+        reflGrad.addColorStop(1, "rgba(255,255,255,0)");
+        ctx2d.fillStyle = reflGrad;
+        ctx2d.beginPath();
+        if (typeof ctx2d.roundRect === "function") {
+          ctx2d.roundRect(x, reflectionTop, barWidth, reflHeight, r);
+        } else {
+          ctx2d.rect(x, reflectionTop, barWidth, reflHeight);
         }
         ctx2d.fill();
       }

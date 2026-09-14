@@ -24,25 +24,24 @@ export default function Library() {
   };
 
   return (
-    <div className="pb-52 pt-8 px-6 space-y-8 max-w-2xl mx-auto">
-      <header className="flex items-end justify-between">
+    <div className="pb-52 pt-8 px-6 max-w-2xl mx-auto">
+      <header className="flex items-end justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight">Library</h1>
-          <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mt-1.5">
+          <h1 className="text-[28px] font-semibold tracking-[-0.01em]">Library</h1>
+          <p className="text-white/40 text-sm mt-1">
             {playlists.length} playlist{playlists.length !== 1 ? "s" : ""}
           </p>
         </div>
         <motion.button
-          whileTap={{ scale: 0.88 }} transition={TAP}
+          whileTap={{ scale: 0.92 }} transition={TAP}
           onClick={() => setCreating(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-widest"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white text-black text-[13px] font-medium"
         >
-          <Plus size={14} strokeWidth={3} />
+          <Plus size={15} strokeWidth={2.5} />
           New
         </motion.button>
       </header>
 
-      {/* Create playlist modal */}
       <AnimatePresence>
         {creating && (
           <motion.div
@@ -50,9 +49,9 @@ export default function Library() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.15 }}
-            className="bg-white/6 border border-white/12 rounded-2xl p-4 space-y-3"
+            className="bg-white/6 rounded-xl p-4 space-y-3 mb-8"
           >
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white/40">Playlist Name</p>
+            <p className="text-[13px] text-white/50">Playlist name</p>
             <input
               autoFocus
               type="text"
@@ -60,21 +59,21 @@ export default function Library() {
               onChange={e => setName(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") handleCreate(); if (e.key === "Escape") setCreating(false); }}
               placeholder="My Playlist"
-              className="w-full bg-white/8 border border-white/15 rounded-xl px-4 py-3 text-sm font-medium placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-colors"
+              className="w-full bg-white/8 rounded-lg px-4 py-3 text-[15px] placeholder:text-white/25 focus:outline-none transition-colors"
             />
             <div className="flex gap-2">
               <motion.button
-                whileTap={{ scale: 0.95 }} transition={TAP}
+                whileTap={{ scale: 0.97 }} transition={TAP}
                 onClick={handleCreate}
                 disabled={!name.trim() || saving}
-                className="flex-1 py-2.5 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-widest disabled:opacity-40 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-lg bg-white text-black text-[13px] font-medium disabled:opacity-40 flex items-center justify-center gap-2"
               >
                 {saving ? <Loader2 size={14} className="animate-spin" /> : "Create"}
               </motion.button>
               <motion.button
-                whileTap={{ scale: 0.95 }} transition={TAP}
+                whileTap={{ scale: 0.97 }} transition={TAP}
                 onClick={() => { setCreating(false); setName(""); }}
-                className="px-5 py-2.5 rounded-xl bg-white/8 border border-white/10 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-white transition-colors"
+                className="px-5 py-2.5 rounded-lg bg-white/8 text-[13px] text-white/60 hover:text-white transition-colors"
               >
                 Cancel
               </motion.button>
@@ -86,11 +85,11 @@ export default function Library() {
       {/* Playlist grid — cover art hidden on mobile per direction; the
           list falls back to a plain row of name + count on small screens
           rather than an empty tile. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-x-5 sm:gap-y-7">
         {playlists.map(playlist => (
-          <motion.div key={playlist.id} whileTap={{ scale: 0.97 }} transition={TAP}>
-            <Link href={`/playlist/${playlist.id}`} className="flex sm:block items-center gap-3 group px-3 py-2.5 sm:p-0 rounded-xl sm:rounded-none bg-white/4 sm:bg-transparent hover:bg-white/8 sm:hover:bg-transparent transition-colors">
-              <div className="hidden sm:block aspect-square rounded-xl overflow-hidden border border-white/8 group-hover:border-white/20 transition-all duration-300 mb-3 relative">
+          <motion.div key={playlist.id} whileTap={{ scale: 0.98 }} transition={TAP}>
+            <Link href={`/playlist/${playlist.id}`} className="flex sm:block items-center gap-3 group -mx-3 sm:mx-0 px-3 sm:px-0 py-2.5 sm:py-0 rounded-lg hover:bg-white/4 sm:hover:bg-transparent transition-colors">
+              <div className="hidden sm:block aspect-square rounded-lg overflow-hidden mb-3 relative">
                 <img
                   src={playlist.coverUrl}
                   alt={playlist.name}
@@ -98,14 +97,14 @@ export default function Library() {
                   loading="lazy" decoding="async"
                 />
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="w-11 h-11 bg-white text-black rounded-full flex items-center justify-center shadow-xl">
+                  <div className="w-11 h-11 bg-white text-black rounded-full flex items-center justify-center">
                     <Play size={18} fill="currentColor" className="ml-0.5" />
                   </div>
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-sm tracking-tight uppercase truncate">{playlist.name}</h4>
-                <p className="text-[10px] text-white/30 font-bold uppercase tracking-[0.2em] mt-0.5">
+                <h4 className="font-medium text-[15px] truncate">{playlist.name}</h4>
+                <p className="text-[13px] text-white/40 mt-0.5">
                   {playlist.tracks.length} {playlist.tracks.length === 1 ? "track" : "tracks"}
                 </p>
               </div>
@@ -115,9 +114,9 @@ export default function Library() {
       </div>
 
       {playlists.length === 0 && !creating && (
-        <div className="flex flex-col items-center py-16 text-center gap-3">
-          <p className="text-white/20 text-sm font-bold uppercase tracking-widest">No playlists yet</p>
-          <p className="text-white/12 text-xs">Tap New to create your first playlist</p>
+        <div className="flex flex-col items-center py-16 text-center gap-2">
+          <p className="text-white/50 text-sm">No playlists yet</p>
+          <p className="text-white/30 text-[13px]">Tap New to create your first playlist</p>
         </div>
       )}
     </div>

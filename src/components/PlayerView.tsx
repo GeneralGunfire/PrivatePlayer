@@ -116,7 +116,7 @@ function Scrubber({ progress, currentTime, duration, onSeek, disabled, level = 0
         </AnimatePresence>
       </div>
 
-      <div className="flex justify-between text-[10px] font-mono font-bold tracking-widest text-white/30 px-0.5">
+      <div className="flex justify-between text-[12px] font-mono text-white/35 tabular-nums px-0.5">
         <span>{fmt(currentTime)}</span>
         <span>{duration}</span>
       </div>
@@ -210,9 +210,9 @@ export default function PlayerView() {
         </motion.button>
 
         <div className="text-center min-w-0 px-2">
-          <p className="text-[9px] uppercase tracking-[0.45em] text-white/25 font-black mb-0.5">Now Playing</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40">Now playing</p>
           {currentTrack.album && (
-            <p className="text-[11px] font-bold tracking-tight uppercase text-white/55 truncate max-w-36">
+            <p className="text-[13px] text-white/55 truncate max-w-36 mt-0.5">
               {currentTrack.album}
             </p>
           )}
@@ -258,7 +258,7 @@ export default function PlayerView() {
           instead, with the visualizer capped to a height its bars
           actually use, means there's no dead void left over. */}
       <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-        <div className="relative w-full h-36 md:h-44 shrink-0">
+        <div className="relative w-full h-44 md:h-52 shrink-0">
           <CenterVisualizer
             analyser={analyser}
             isPlaying={isPlaying && !isLoading}
@@ -288,10 +288,10 @@ export default function PlayerView() {
             className="mt-6 text-center px-4 w-full"
             style={{ willChange: "transform, opacity" }}
           >
-            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none mb-2 truncate">
+            <h1 className="text-[26px] md:text-[32px] font-semibold tracking-[-0.01em] leading-tight mb-1.5 truncate">
               {currentTrack.title}
             </h1>
-            <p className="text-xs text-white/40 font-bold uppercase tracking-[0.25em]">
+            <p className="text-[15px] text-white/50">
               {currentTrack.artist}
             </p>
           </motion.div>

@@ -20,8 +20,8 @@ export default function QueueDrawer({ open, onClose }: { open: boolean; onClose:
         >
           <div className="flex items-center justify-between mb-6 shrink-0" onClick={e => e.stopPropagation()}>
             <div>
-              <p className="text-[9px] uppercase tracking-[0.45em] text-white/25 font-black mb-0.5">Up Next</p>
-              <p className="text-[13px] font-bold tracking-tight">{queue.length} tracks</p>
+              <h2 className="text-[20px] font-semibold tracking-[-0.01em]">Up next</h2>
+              <p className="text-[13px] text-white/40 mt-0.5">{queue.length} tracks</p>
             </div>
             <button
               onClick={onClose}
@@ -71,10 +71,10 @@ export default function QueueDrawer({ open, onClose }: { open: boolean; onClose:
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className={cn("text-sm font-bold truncate", isCurrent ? "text-white" : "text-white/85")}>
+                      <p className={cn("text-[15px] font-medium truncate", isCurrent ? "text-white" : "text-white/85")}>
                         {track.title}
                       </p>
-                      <p className="text-[11px] text-white/35 font-medium truncate">{track.artist}</p>
+                      <p className="text-[13px] text-white/40 truncate">{track.artist}</p>
                     </div>
                   </button>
 
