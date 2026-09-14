@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import Link from "next/link";
 import type { Track } from "@/lib/data";
 import { usePlayer } from "@/lib/player-context";
@@ -17,6 +17,12 @@ const TAP = { type: "spring" as const, damping: 14, stiffness: 500, mass: 0.4 };
 
 type Filter = "all" | "favorites";
 
+/**
+ * Home — no time-of-day greeting. "Good Evening" over a stat line was
+ * called out directly as the thing making pages feel like a generic app
+ * template; a plain count line does the same informational job without
+ * performing a greeting nobody asked for.
+ */
 export default function Home() {
   const { selectTrack, openPlayer, currentTrack, isPlaying } = usePlayer();
   const { playlists } = usePlaylists();
@@ -30,83 +36,54 @@ export default function Home() {
   );
   const { items, hasMore, remaining, loadMore } = usePaged(source);
 
-  // Computed client-side only, after mount — the server (build-time
-  // prerender) and the browser can land on different hours (or the static
-  // page can simply be served long after it was built), so evaluating
-  // `new Date().getHours()` directly during render produced mismatched
-  // server/client HTML and a real React hydration error. A stable
-  // "Welcome back" placeholder on the very first paint avoids that; the
-  // real time-of-day greeting swaps in a moment later once mounted.
-  const [greeting, setGreeting] = useState("Welcome back");
-  useEffect(() => {
-    const h = new Date().getHours();
-    setGreeting(h < 12 ? "Good Morning" : h < 18 ? "Good Afternoon" : "Good Evening");
-  }, []);
-
   const handleTrack = (track: Track) => {
     selectTrack(track, source);
     openPlayer();
   };
 
   return (
-    <div className="pb-52 pt-8 px-6 space-y-10 max-w-2xl mx-auto">
-
-      {/* Header */}
-      <header>
-        <h1 className="text-4xl font-bold uppercase italic tracking-tighter mb-2">{greeting}</h1>
-        <p className="text-white/35 text-[10px] font-bold uppercase tracking-widest">
+    <div className="pb-52 pt-6 px-6 space-y-8 max-w-2xl mx-auto">
+      <header className="flex items-baseline justify-between">
+        <h1 className="text-2xl font-black uppercase tracking-tight">Your Music</h1>
+        <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">
           {allTracks.length} songs{playlists.length > 0 ? ` · ${playlists.length} playlists` : ""}
         </p>
       </header>
 
-      {/* Playlists — hidden entirely when empty rather than showing a
-          header over nothing; /library already has its own proper empty
-          state ("No playlists yet") for the case where that's useful. */}
       {playlists.length > 0 && (
-      <section>
-        <div className="flex justify-between items-end mb-5">
-          <h2 className="text-xl font-bold uppercase tracking-tight">Playlists</h2>
-          <Link href="/library" className="text-[10px] text-white/35 uppercase tracking-widest hover:text-white transition-colors font-bold">
-            See All
-          </Link>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-3 -mx-6 px-6 scrollbar-none">
-          {playlists.map(playlist => (
-            <motion.div
-              key={playlist.id}
-              whileTap={{ scale: 0.94 }}
-              transition={TAP}
-              className="shrink-0 w-36"
-            >
-              <Link href={`/playlist/${playlist.id}`} className="block group">
-                <div className="relative aspect-square rounded-2xl overflow-hidden mb-2.5 border border-white/10 group-hover:border-white/25 transition-colors">
-                  <img
-                    src={playlist.coverUrl}
-                    alt={playlist.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 grayscale group-hover:grayscale-0"
-                    loading="lazy" decoding="async"
-                  />
-                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="w-9 h-9 bg-white text-black rounded-full flex items-center justify-center shadow-lg">
-                      <Play size={16} fill="currentColor" className="ml-0.5" />
-                    </div>
+        <section>
+          <div className="flex justify-between items-end mb-4">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-white/60">Playlists</h2>
+            <Link href="/library" className="text-[10px] text-white/35 uppercase tracking-widest hover:text-white transition-colors font-bold">
+              See All
+            </Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-3 -mx-6 px-6 scrollbar-none">
+            {playlists.map(playlist => (
+              <motion.div key={playlist.id} whileTap={{ scale: 0.94 }} transition={TAP} className="shrink-0 w-32 sm:w-36">
+                <Link href={`/playlist/${playlist.id}`} className="block group">
+                  <div className="relative aspect-square rounded-xl overflow-hidden mb-2.5 border border-white/10 group-hover:border-white/25 transition-colors hidden sm:block">
+                    <img
+                      src={playlist.coverUrl}
+                      alt={playlist.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy" decoding="async"
+                    />
                   </div>
-                </div>
-                <h3 className="font-bold tracking-tight truncate uppercase text-xs">{playlist.name}</h3>
-                <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest mt-0.5">
-                  {playlist.tracks.length} tracks
-                </p>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+                  <h3 className="font-bold tracking-tight truncate uppercase text-xs">{playlist.name}</h3>
+                  <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest mt-0.5">
+                    {playlist.tracks.length} tracks
+                  </p>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
       )}
 
-      {/* Songs — All / Favorites */}
       <section>
-        <div className="flex justify-between items-end mb-5">
-          <h2 className="text-xl font-bold uppercase tracking-tight">
+        <div className="flex justify-between items-end mb-4">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-white/60">
             {filter === "favorites" ? "Favorites" : "All Songs"}
           </h2>
           <Link href="/search" className="text-[10px] text-white/35 uppercase tracking-widest hover:text-white transition-colors font-bold">
@@ -124,7 +101,7 @@ export default function Home() {
               className={cn(
                 "px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors",
                 filter === f
-                  ? "bg-accent text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                  ? "bg-white text-black"
                   : "bg-white/6 text-white/45 hover:bg-white/10 hover:text-white/70",
               )}
             >
@@ -154,27 +131,38 @@ export default function Home() {
                   transition={TAP}
                   onClick={() => handleTrack(track)}
                   className={cn(
-                    "track-row group px-3 py-2.5 border border-transparent rounded-2xl flex items-center gap-3 cursor-pointer transition-colors duration-150",
+                    "track-row group px-3 py-2.5 border border-transparent rounded-xl flex items-center gap-3 cursor-pointer transition-colors duration-150",
                     isActive
-                      ? "bg-accent/20 border-accent/30"
+                      ? "bg-white/8 border-white/15"
                       : "bg-white/4 hover:bg-white/8 hover:border-white/8 active:bg-white/12"
                   )}
                 >
                   <span className="text-[10px] font-mono text-white/20 hidden md:block w-5 text-right shrink-0">
                     {String(idx + 1).padStart(2, "0")}
                   </span>
-                  <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-white/5">
+                  {/* Cover hidden on mobile per explicit direction — covers
+                      are generated placeholder art, not real album art, so
+                      they're not worth the space on a small screen; desktop
+                      keeps them since there's room to spare. */}
+                  <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-white/5 hidden sm:block">
                     <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     {playing && (
                       <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
                         <span className="flex items-end gap-px h-4">
-                          <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                          <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
                           <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
-                          <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                          <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
                         </span>
                       </div>
                     )}
                   </div>
+                  {playing && (
+                    <span className="flex items-end gap-px h-3.5 sm:hidden shrink-0">
+                      <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                      <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
+                      <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                    </span>
+                  )}
                   <div className="flex-1 min-w-0">
                     <h4 className={cn("font-bold text-sm truncate uppercase tracking-tight", isActive ? "text-white" : "text-white/90")}>{track.title}</h4>
                     <p className="text-[10px] text-white/35 font-bold uppercase tracking-widest truncate mt-0.5">{track.artist}</p>
@@ -185,7 +173,7 @@ export default function Home() {
                       aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
                       className={cn(
                         "w-8 h-8 flex items-center justify-center rounded-full transition-colors",
-                        favorited ? "text-accent-bright" : "text-white/25 hover:text-white/60 hover:bg-white/8",
+                        favorited ? "text-accent-2-bright" : "text-white/25 hover:text-white/60 hover:bg-white/8",
                       )}
                     >
                       <Heart size={15} fill={favorited ? "currentColor" : "none"} />
@@ -205,7 +193,7 @@ export default function Home() {
           <motion.button
             whileTap={{ scale: 0.97 }} transition={TAP}
             onClick={loadMore}
-            className="w-full mt-3 py-3.5 rounded-2xl border border-white/10 bg-white/4 hover:bg-white/8 active:bg-white/12 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/45 hover:text-white/75"
+            className="w-full mt-3 py-3.5 rounded-xl border border-white/10 bg-white/4 hover:bg-white/8 active:bg-white/12 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/45 hover:text-white/75"
           >
             Show {Math.min(remaining, 10)} more &middot; {remaining} remaining
           </motion.button>

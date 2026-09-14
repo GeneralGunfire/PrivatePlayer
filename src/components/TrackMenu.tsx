@@ -20,7 +20,8 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorited = isFavorite(trackId);
 
-  // Only show user-created playlists (not built-in Coldplay) in the add menu
+  // Only show user-created playlists in the add menu (there are no
+  // built-in ones any more — every playlist here is user-created).
   const userPlaylists = playlists.filter(p => p.id.startsWith("pl_"));
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
 
       {open && (
         <div
-          className="fixed right-4 w-60 rounded-2xl border border-white/12 bg-[#111]/95 backdrop-blur-xl shadow-2xl overflow-hidden z-500"
+          className="fixed right-4 w-60 rounded-xl surface shadow-2xl overflow-hidden z-500"
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 100px)" }}
         >
           <div className="flex items-center justify-between px-4 pt-3 pb-2">
@@ -91,8 +92,8 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
             onClick={() => { toggleFavorite(trackId); setOpen(false); }}
             className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/8 active:bg-white/12 transition-colors text-left"
           >
-            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", favorited ? "bg-accent/20" : "bg-white/5")}>
-              <Heart size={14} className={favorited ? "text-accent-bright" : "text-white/60"} fill={favorited ? "currentColor" : "none"} />
+            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", favorited ? "bg-accent-2/20" : "bg-white/5")}>
+              <Heart size={14} className={favorited ? "text-accent-2-bright" : "text-white/60"} fill={favorited ? "currentColor" : "none"} />
             </div>
             <span className="flex-1 text-sm font-medium">{favorited ? "Remove from Favorites" : "Add to Favorites"}</span>
           </button>

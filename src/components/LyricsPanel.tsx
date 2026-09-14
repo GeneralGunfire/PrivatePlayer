@@ -180,7 +180,7 @@ export default function LyricsPanel({
                     key={i}
                     ref={i === activeIndex ? activeLineRef : undefined}
                     className={
-                      "text-xl font-black uppercase italic tracking-tight leading-tight transition-all duration-300 " +
+                      "text-xl font-black uppercase tracking-tight leading-tight transition-all duration-300 " +
                       (i === activeIndex
                         ? "text-white opacity-100 scale-100"
                         : "text-white/25 opacity-70 scale-95")

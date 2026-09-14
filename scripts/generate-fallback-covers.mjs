@@ -12,12 +12,12 @@
 // placeholder repeated 202 times, that build-library.mjs assigns to
 // cover-less tracks the same deterministic way it would borrow a real one.
 //
-// v3 — v1 (flat two-stop dark gradient + faint bars) was muddy/invisible.
-// v2 (bright geometric motifs — rings/bursts/bands/orbits) was explicitly
-// rejected as unprofessional. This pass: plain, clean multi-stop
-// gradients only — no shapes, lines, or icons — varied by angle and hue
-// per index so the pool still reads as distinct at a glance, closer to
-// how Spotify/Apple Music generate a placeholder cover from a color pair.
+// v4 (ground-up rebuild) — restricted to green, blue, black, and white
+// only, per explicit direction; earlier versions used a wide hue wheel
+// (violet/amber/rose/gold/red/magenta) that no longer matches the app's
+// palette. Covers are also now hidden on mobile everywhere they're used
+// (Home, Search, Library, playlist rows/hero) — this pool only ever
+// renders on desktop, where there's room to spare.
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,23 +25,25 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(__dirname, "..", "public", "covers-fallback");
 
-// Three-stop gradients, each a believable tonal family (not random hue
-// pairs) so they read as designed rather than generated noise. Angles
-// vary per entry too, so adjacent covers in a list don't all lean the
-// same direction.
+// Three-stop gradients spanning only green, blue, black, and white — each
+// entry still a believable tonal family (not a random pair) so they read
+// as designed. Angles vary per entry so adjacent covers in a list don't
+// all lean the same direction. A couple of entries lean toward white/grey
+// at one end (rather than every stop being a saturated hue) so the pool
+// doesn't read as a single blue-green gradient repeated with noise.
 const GRADIENTS = [
-  { stops: ["#0d1b2a", "#2c4a6e", "#3d648f"], angle: 135 }, // app accent blue
-  { stops: ["#150a24", "#3d2a6e", "#6a4fc9"], angle: 120 }, // violet
-  { stops: ["#06201a", "#1f5c46", "#3ea885"], angle: 145 }, // emerald
-  { stops: ["#241505", "#7a4a1a", "#c97f3d"], angle: 130 }, // amber
-  { stops: ["#200a14", "#6e2c4a", "#c9527f"], angle: 150 }, // rose
-  { stops: ["#0a1a1e", "#1f5c66", "#3ea8b8"], angle: 125 }, // teal
-  { stops: ["#1c1405", "#7a5c1a", "#c9a13d"], angle: 140 }, // gold
-  { stops: ["#12081f", "#3d2a6e", "#5c4fc9"], angle: 115 }, // indigo
-  { stops: ["#200a0a", "#6e2c2c", "#c9524f"], angle: 135 }, // red
-  { stops: ["#081f14", "#1f5c33", "#3ea85e"], angle: 150 }, // green
-  { stops: ["#1c0a20", "#5c2a6e", "#a84fc9"], angle: 120 }, // magenta
-  { stops: ["#0a1420", "#294a6e", "#4a7fbf"], angle: 145 }, // deep blue
+  { stops: ["#050708", "#3d7ab8", "#5aa3e0"], angle: 135 }, // blue
+  { stops: ["#050708", "#2fae7a", "#45db9c"], angle: 120 }, // green
+  { stops: ["#050708", "#1c3a4a", "#3d7ab8"], angle: 145 }, // deep blue
+  { stops: ["#050708", "#153a2c", "#2fae7a"], angle: 130 }, // deep green
+  { stops: ["#0b0f11", "#2fae7a", "#5aa3e0"], angle: 150 }, // green → blue
+  { stops: ["#050708", "#3d7ab8", "#2fae7a"], angle: 125 }, // blue → green
+  { stops: ["#0b0f11", "#1c3a4a", "#153a2c"], angle: 140 }, // near-black teal
+  { stops: ["#050708", "#4a8bcc", "#e8f4ff"], angle: 115 }, // blue → white
+  { stops: ["#050708", "#38c48a", "#eafff2"], angle: 135 }, // green → white
+  { stops: ["#050708", "#0b0f11", "#1c3a4a"], angle: 150 }, // near-black
+  { stops: ["#050708", "#5aa3e0", "#ffffff"], angle: 120 }, // blue → white, brighter
+  { stops: ["#050708", "#45db9c", "#ffffff"], angle: 145 }, // green → white, brighter
 ];
 
 const SIZE = 400;
@@ -50,8 +52,6 @@ function svgFor(index) {
   const { stops, angle } = GRADIENTS[index % GRADIENTS.length];
   const id = `cov${index}`;
   const rad = (angle * Math.PI) / 180;
-  // Project the angle onto the 0..1 gradientUnits box so gradient
-  // direction genuinely varies per cover, not just its colors.
   const dx = Math.cos(rad) * 0.5;
   const dy = Math.sin(rad) * 0.5;
   const x1 = (0.5 - dx).toFixed(3);

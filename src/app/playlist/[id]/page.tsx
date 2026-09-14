@@ -55,26 +55,18 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
   return (
     <div className="pb-52 pt-0 max-w-2xl mx-auto">
 
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-b-3xl mb-6">
-        <div
-          className="absolute inset-0 scale-110"
-          style={{
-            backgroundImage: `url(${playlist.coverUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "blur(60px) brightness(0.28) saturate(1.6)",
-          }}
-        />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-b from-transparent to-black" />
-        <div className="relative z-10 flex flex-col sm:flex-row items-start gap-5 px-6 pt-16 pb-6">
-          <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-2xl shrink-0 border border-white/10">
+      {/* Header — plain flat surface, no blurred-photo hero backdrop
+          (that treatment, plus the italic display type, was part of
+          what read as a generic templated app rather than something
+          built for this). Cover art hidden on mobile per direction. */}
+      <div className="border-b border-white/8 pt-10 pb-6 px-6">
+        <div className="flex flex-col sm:flex-row items-start gap-5">
+          <div className="hidden sm:block w-28 h-28 rounded-xl overflow-hidden shrink-0 border border-white/10">
             <img src={playlist.coverUrl} alt={playlist.name} className="w-full h-full object-cover" loading="eager" decoding="async" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase tracking-[0.25em] text-white/35 mb-2 font-bold">Playlist</p>
 
-            {/* Name — editable for user playlists */}
             {renaming ? (
               <div className="flex items-center gap-2 mb-2">
                 <input
@@ -82,14 +74,14 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") handleRename(); if (e.key === "Escape") setRenaming(false); }}
-                  className="flex-1 bg-white/10 border border-white/25 rounded-xl px-3 py-1.5 text-xl font-black uppercase italic tracking-tighter text-white focus:outline-none focus:border-white/40"
+                  className="flex-1 bg-white/10 border border-white/25 rounded-xl px-3 py-1.5 text-xl font-black uppercase tracking-tight text-white focus:outline-none focus:border-white/40"
                 />
                 <motion.button whileTap={{ scale: 0.88 }} transition={TAP} onClick={handleRename} className="p-2 rounded-xl bg-white text-black"><Check size={16} /></motion.button>
                 <motion.button whileTap={{ scale: 0.88 }} transition={TAP} onClick={() => setRenaming(false)} className="p-2 rounded-xl bg-white/10 text-white/60"><X size={16} /></motion.button>
               </div>
             ) : (
               <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-4xl font-black uppercase italic tracking-tighter text-white leading-none truncate">
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white leading-none truncate">
                   {playlist.name}
                 </h1>
                 {isUserPlaylist && (
@@ -152,9 +144,9 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
           </div>
         ) : (
           <>
-            <div className="grid items-center gap-3 px-3 pb-2 mb-1 border-b border-white/6" style={{ gridTemplateColumns: "24px 48px 1fr auto" }}>
+            <div className="grid grid-cols-[24px_1fr_auto] sm:grid-cols-[24px_48px_1fr_auto] items-center gap-3 px-3 pb-2 mb-1 border-b border-white/6">
               <span className="text-[10px] text-white/20 font-bold text-center">#</span>
-              <span />
+              <span className="hidden sm:block" />
               <span className="text-[10px] uppercase tracking-[0.18em] text-white/20 font-bold">Title</span>
               <Clock3 className="w-3 h-3 text-white/20" />
             </div>
@@ -167,10 +159,9 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                   key={track.id}
                   whileTap={{ scale: 0.985 }} transition={TAP}
                   className={cn(
-                    "track-row grid items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors duration-150 border border-transparent",
+                    "track-row grid grid-cols-[24px_1fr_auto] sm:grid-cols-[24px_48px_1fr_auto] items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors duration-150 border border-transparent",
                     hovered === i || isActive ? "bg-white/8 border-white/10" : "hover:bg-white/5 active:bg-white/10"
                   )}
-                  style={{ gridTemplateColumns: "24px 48px 1fr auto" }}
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(-1)}
                   onClick={() => { selectTrack(track, playlist.tracks); openPlayer(); }}
@@ -180,15 +171,15 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
                       <Play className="w-3.5 h-3.5 fill-white text-white" />
                     ) : playing ? (
                       <span className="flex items-end gap-px h-3.5 w-3.5">
-                        <span className="flex-1 rounded-sm bg-accent-bright" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                        <span className="flex-1 rounded-sm bg-accent-2-bright" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
                         <span className="flex-1 rounded-sm bg-accent-bright" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
-                        <span className="flex-1 rounded-sm bg-accent-bright" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                        <span className="flex-1 rounded-sm bg-accent-2-bright" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
                       </span>
                     ) : (
                       <span className={cn("text-[11px] font-mono font-bold", isActive ? "text-white" : "text-white/25")}>{i + 1}</span>
                     )}
                   </div>
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/5 shrink-0">
+                  <div className="hidden sm:block w-12 h-12 rounded-lg overflow-hidden bg-white/5 shrink-0">
                     {track.coverUrl
                       ? <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       : <div className="w-full h-full flex items-center justify-center"><ListMusic className="w-5 h-5 text-white/15" /></div>

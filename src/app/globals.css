@@ -4,18 +4,25 @@
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  /* Udaan's own accent (--p-accent in Udaan's tokens.css) — used for the
-     "this is active/selected/playing" language across the app, replacing
-     the plain white fill that used to carry that meaning. White stays
-     reserved for primary text and the one big play button, so accent
-     reads as its own distinct signal rather than competing with it. */
-  --color-accent: #2c4a6e;
-  --color-accent-hover: #365a84;
-  --color-accent-bright: #3d648f;
+  /* Monochrome palette (v3) — black and white carry the whole design.
+     Hierarchy comes from white at different opacities against near-black
+     grounds, not from hue. The two accent tokens are kept (same names, so
+     nothing downstream breaks) but desaturated to near-white: they mark
+     "this is active/playing" a touch brighter than surrounding text,
+     rather than introducing color. */
+  --color-accent: #e8e8e8;
+  --color-accent-hover: #f2f2f2;
+  --color-accent-bright: #ffffff;
+  --color-accent-2: #d4d4d4;
+  --color-accent-2-hover: #e4e4e4;
+  --color-accent-2-bright: #f5f5f5;
+  --color-ink: #060606;
+  --color-surface: #0d0d0d;
+  --color-surface-raised: #141414;
 }
 
 body {
-  background: black;
+  background: var(--color-ink);
   color: white;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -33,25 +40,14 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Glassmorphism — reduced blur values for better mobile perf */
-.glass {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.7);
-}
-.glass-light {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.glass-heavy {
-  background: rgba(255,255,255,0.09);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.18);
+/* Flat surfaces, hairline borders — replaces the old frosted-glass
+   treatment (.glass/.glass-light/.glass-heavy) everywhere. Blur-heavy
+   glassmorphism was one of the things reading as generic/templated;
+   a plain raised surface with a 1px edge is calmer and cheaper to render
+   on mobile besides. */
+.surface {
+  background: var(--color-surface-raised);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 /* Hide scrollbars */

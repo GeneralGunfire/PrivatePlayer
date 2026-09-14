@@ -38,11 +38,10 @@ export default function Search() {
   const showFeatured = query.trim() === "";
 
   return (
-    <div className="pb-52 pt-8 px-6 max-w-2xl mx-auto space-y-8">
+    <div className="pb-52 pt-6 px-6 max-w-2xl mx-auto space-y-8">
 
-      <h1 className="text-4xl font-bold uppercase italic tracking-tighter">All Songs</h1>
+      <h1 className="text-2xl font-black uppercase tracking-tight">Search</h1>
 
-      {/* Search bar */}
       <div className="relative group">
         <SearchIcon
           className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white/55 transition-colors"
@@ -53,7 +52,7 @@ export default function Search() {
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search by title, artist or album"
-          className="w-full h-13 bg-white/5 border border-white/10 rounded-2xl pl-13 pr-5 text-sm font-medium placeholder:text-white/20 focus:outline-none focus:bg-white/8 focus:border-white/22 transition-all"
+          className="w-full h-13 bg-white/5 border border-white/10 rounded-xl pl-13 pr-5 text-sm font-medium placeholder:text-white/20 focus:outline-none focus:bg-white/8 focus:border-white/22 transition-all"
         />
         {query && (
           <button
@@ -65,9 +64,10 @@ export default function Search() {
         )}
       </div>
 
-      {/* Featured cards */}
+      {/* Featured cards — hidden on mobile, no track-cover art there per
+          direction; on mobile this section would just be 4 empty tiles. */}
       {showFeatured && (
-        <section>
+        <section className="hidden sm:block">
           <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/25 font-bold mb-4">Featured</h2>
           <div className="grid grid-cols-2 gap-3">
             {featured.map(track => {
@@ -79,7 +79,7 @@ export default function Search() {
                   whileTap={{ scale: 0.96 }}
                   transition={TAP}
                   onClick={() => handleTrack(track)}
-                  className="relative rounded-2xl overflow-hidden cursor-pointer group aspect-square"
+                  className="relative rounded-xl overflow-hidden cursor-pointer group aspect-square"
                 >
                   <img
                     src={track.coverUrl}
@@ -109,7 +109,6 @@ export default function Search() {
         </section>
       )}
 
-      {/* Track list */}
       <section>
         <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/25 font-bold mb-4">
           {query
@@ -134,16 +133,16 @@ export default function Search() {
                     transition={TAP}
                     onClick={() => handleTrack(track)}
                     className={cn(
-                      "track-row group flex items-center gap-3 px-3 py-2.5 rounded-2xl cursor-pointer transition-colors duration-150 border border-transparent",
+                      "track-row group flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors duration-150 border border-transparent",
                       isActive
-                        ? "bg-accent/20 border-accent/30"
+                        ? "bg-white/8 border-white/15"
                         : "bg-white/4 hover:bg-white/8 hover:border-white/8 active:bg-white/12"
                     )}
                   >
                     <span className="text-[10px] font-mono text-white/20 hidden md:block w-5 text-right shrink-0">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-white/5">
+                    <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-white/5 hidden sm:block">
                       <img
                         src={track.coverUrl}
                         alt={track.title}
@@ -153,13 +152,20 @@ export default function Search() {
                       {playing && (
                         <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
                           <span className="flex items-end gap-px h-4">
-                            <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                            <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
                             <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
-                            <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                            <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
                           </span>
                         </div>
                       )}
                     </div>
+                    {playing && (
+                      <span className="flex items-end gap-px h-3.5 sm:hidden shrink-0">
+                        <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq1 0.8s ease-in-out infinite" }} />
+                        <span className="w-0.5 bg-accent-bright rounded-full" style={{ animation: "eq2 0.8s ease-in-out 0.15s infinite" }} />
+                        <span className="w-0.5 bg-accent-2-bright rounded-full" style={{ animation: "eq3 0.8s ease-in-out 0.07s infinite" }} />
+                      </span>
+                    )}
                     <div className="flex-1 min-w-0">
                       <h4 className={cn("font-bold text-sm truncate uppercase tracking-tight", isActive ? "text-white" : "text-white/90")}>
                         {track.title}
@@ -183,7 +189,7 @@ export default function Search() {
               <motion.button
                 whileTap={{ scale: 0.97 }} transition={TAP}
                 onClick={loadMore}
-                className="w-full mt-3 py-3.5 rounded-2xl border border-white/10 bg-white/4 hover:bg-white/8 active:bg-white/12 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/45 hover:text-white/75"
+                className="w-full mt-3 py-3.5 rounded-xl border border-white/10 bg-white/4 hover:bg-white/8 active:bg-white/12 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/45 hover:text-white/75"
               >
                 Show {Math.min(remaining, 10)} more &middot; {remaining} remaining
               </motion.button>

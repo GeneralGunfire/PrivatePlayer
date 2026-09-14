@@ -22,7 +22,7 @@ export default function MiniPlayer() {
     >
       <div
         onClick={openPlayer}
-        className="relative glass rounded-3xl cursor-pointer overflow-hidden"
+        className="relative surface rounded-2xl cursor-pointer overflow-hidden"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
         {/* Active state flash on press */}
@@ -46,8 +46,8 @@ export default function MiniPlayer() {
         </div>
 
         <div className="flex items-center gap-3 px-3 py-2.5">
-          {/* Spinning disc art */}
-          <div className="relative w-11 h-11 shrink-0">
+          {/* Spinning disc art — hidden on mobile per direction */}
+          <div className="relative w-11 h-11 shrink-0 hidden sm:block">
             <div
               className="w-full h-full"
               style={{

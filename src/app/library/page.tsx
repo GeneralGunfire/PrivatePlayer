@@ -27,15 +27,15 @@ export default function Library() {
     <div className="pb-52 pt-8 px-6 space-y-8 max-w-2xl mx-auto">
       <header className="flex items-end justify-between">
         <div>
-          <h1 className="text-4xl font-bold uppercase italic tracking-tighter">Your Library</h1>
-          <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mt-2">
+          <h1 className="text-2xl font-black uppercase tracking-tight">Library</h1>
+          <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mt-1.5">
             {playlists.length} playlist{playlists.length !== 1 ? "s" : ""}
           </p>
         </div>
         <motion.button
           whileTap={{ scale: 0.88 }} transition={TAP}
           onClick={() => setCreating(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-widest"
         >
           <Plus size={14} strokeWidth={3} />
           New
@@ -83,16 +83,18 @@ export default function Library() {
         )}
       </AnimatePresence>
 
-      {/* Playlist grid */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Playlist grid — cover art hidden on mobile per direction; the
+          list falls back to a plain row of name + count on small screens
+          rather than an empty tile. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
         {playlists.map(playlist => (
-          <motion.div key={playlist.id} whileTap={{ scale: 0.95 }} transition={TAP}>
-            <Link href={`/playlist/${playlist.id}`} className="block group">
-              <div className="aspect-square rounded-3xl overflow-hidden border border-white/8 group-hover:border-white/20 transition-all duration-300 mb-3 relative">
+          <motion.div key={playlist.id} whileTap={{ scale: 0.97 }} transition={TAP}>
+            <Link href={`/playlist/${playlist.id}`} className="flex sm:block items-center gap-3 group px-3 py-2.5 sm:p-0 rounded-xl sm:rounded-none bg-white/4 sm:bg-transparent hover:bg-white/8 sm:hover:bg-transparent transition-colors">
+              <div className="hidden sm:block aspect-square rounded-xl overflow-hidden border border-white/8 group-hover:border-white/20 transition-all duration-300 mb-3 relative">
                 <img
                   src={playlist.coverUrl}
                   alt={playlist.name}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy" decoding="async"
                 />
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -101,10 +103,12 @@ export default function Library() {
                   </div>
                 </div>
               </div>
-              <h4 className="font-bold text-sm tracking-tight uppercase truncate">{playlist.name}</h4>
-              <p className="text-[10px] text-white/30 font-bold uppercase tracking-[0.2em] mt-0.5">
-                {playlist.tracks.length} {playlist.tracks.length === 1 ? "track" : "tracks"}
-              </p>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-bold text-sm tracking-tight uppercase truncate">{playlist.name}</h4>
+                <p className="text-[10px] text-white/30 font-bold uppercase tracking-[0.2em] mt-0.5">
+                  {playlist.tracks.length} {playlist.tracks.length === 1 ? "track" : "tracks"}
+                </p>
+              </div>
             </Link>
           </motion.div>
         ))}

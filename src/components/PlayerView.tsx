@@ -7,7 +7,6 @@ import { usePlayer } from "@/lib/player-context";
 import { useAudioLevel } from "@/lib/use-audio-level";
 import { cn } from "@/lib/utils";
 import TrackMenu from "@/components/TrackMenu";
-import EdgeGlow from "@/components/EdgeGlow";
 import CenterVisualizer from "@/components/CenterVisualizer";
 import QueueDrawer from "@/components/QueueDrawer";
 import LyricsPanel from "@/components/LyricsPanel";
@@ -81,7 +80,7 @@ function Scrubber({ progress, currentTime, duration, onSeek, disabled, level = 0
               transform: `scaleX(${pct / 100})`,
               transformOrigin: "left center",
               transition: drag ? "none" : "transform 0.08s linear",
-              boxShadow: `0 0 ${4 + level * 10}px rgba(61,100,143,${0.3 + level * 0.5})`,
+              boxShadow: `0 0 ${3 + level * 7}px rgba(255,255,255,${0.25 + level * 0.4})`,
             }}
           />
         </div>
@@ -199,8 +198,6 @@ export default function PlayerView() {
       {/* Background — flat near-black so the edge glow and center visualizer are the only light */}
       <div className="absolute inset-0 -z-10 bg-[#060606]" />
 
-      <EdgeGlow analyser={analyser} isPlaying={isPlaying && !isLoading} />
-
       {/* Header */}
       <div className="flex items-center justify-between mb-6 shrink-0">
         <motion.button
@@ -261,7 +258,7 @@ export default function PlayerView() {
           instead, with the visualizer capped to a height its bars
           actually use, means there's no dead void left over. */}
       <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-        <div className="relative w-full h-48 md:h-56 shrink-0">
+        <div className="relative w-full h-36 md:h-44 shrink-0">
           <CenterVisualizer
             analyser={analyser}
             isPlaying={isPlaying && !isLoading}
@@ -291,7 +288,7 @@ export default function PlayerView() {
             className="mt-6 text-center px-4 w-full"
             style={{ willChange: "transform, opacity" }}
           >
-            <h1 className="text-3xl md:text-[2rem] font-black uppercase italic tracking-tighter leading-none mb-2 truncate">
+            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none mb-2 truncate">
               {currentTrack.title}
             </h1>
             <p className="text-xs text-white/40 font-bold uppercase tracking-[0.25em]">
@@ -304,7 +301,7 @@ export default function PlayerView() {
       {/* Controls — stop pointer events here from starting the sheet-close drag,
           so scrubbing/tapping buttons never gets misread as a swipe-to-minimize */}
       <div
-        className="space-y-4 bg-white/5 border border-white/8 p-5 rounded-[1.75rem] mt-6 shrink-0 backdrop-blur-xl touch-pan-x"
+        className="space-y-4 bg-white/5 border border-white/8 p-5 rounded-2xl mt-6 shrink-0 touch-pan-x"
         onPointerDownCapture={e => e.stopPropagation()}
       >
         <Scrubber
@@ -341,7 +338,7 @@ export default function PlayerView() {
               transition={{ type: "spring", damping: 15, stiffness: 500, mass: 0.4 }}
               style={{
                 willChange: "transform, box-shadow",
-                boxShadow: `0 0 ${35 + level * 30}px rgba(255,255,255,${0.22 + level * 0.28})`,
+                boxShadow: `0 0 ${12 + level * 16}px rgba(255,255,255,${0.15 + level * 0.25})`,
               }}
               className="w-[66px] h-[66px] bg-white text-black rounded-full flex items-center justify-center transition-shadow duration-100"
             >

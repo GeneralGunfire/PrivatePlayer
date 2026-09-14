@@ -3,21 +3,18 @@
 import { useEffect, useRef } from "react";
 
 const BAR_COUNT = 40;
+// Below this level a bar is treated as silent and not drawn at all — an
+// earlier version floored every bar's height so idle/loading state always
+// showed a flat row across the bottom, which read as dull grey debris
+// rather than "nothing playing yet."
+const SILENCE_THRESHOLD = 0.015;
 
 /**
- * Large audio-reactive bar visualizer that fills the center of the
- * expanded player in place of album artwork. Bottom-anchored bars rising
- * from a baseline (matching Udaan's own desktop SoundBars.tsx — the
- * pattern this mirrors), driven by the same AnalyserNode as the edge
- * lighting, colored with the app's accent rather than flat white so
- * they stay visible against the black background even at low levels.
- *
- * Previously mirror-symmetric from a center line at near-zero opacity —
- * against a solid black background with no album art anchor, that read
- * as a near-invisible row of dots inside a mostly-empty container.
- * Bottom-anchored bars with a real accent-color gradient and a taller
- * minimum height give the space something to actually show even when
- * quiet.
+ * Bottom-anchored bar visualizer, flat white on black — no gradient, no
+ * glow bloom. Matches the app's monochrome direction: hierarchy comes
+ * from opacity, not color, so the bars use a single white fill whose
+ * opacity tracks loudness (quiet = faint, loud = fully opaque) instead of
+ * a colored gradient climbing the bar height.
  */
 export default function CenterVisualizer({
   analyser,
@@ -40,11 +37,6 @@ export default function CenterVisualizer({
     if (!ctx2d) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    // Canvas gradients can't resolve CSS custom properties directly, so
-    // the accent color is read from the resolved computed style once
-    // (same approach as Udaan's SoundBars.tsx).
-    const accentColor = getComputedStyle(canvas).getPropertyValue("--color-accent-bright").trim() || "#3d648f";
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -69,10 +61,6 @@ export default function CenterVisualizer({
       if (analyser && dataRef.current && isPlaying) {
         analyser.getByteFrequencyData(dataRef.current);
         const bins = dataRef.current;
-        // Bias toward the lower/mid bins (bass+vocal range reads as the
-        // "musical" part of a spectrum) rather than a linear spread
-        // across the full range, most of which is near-silent high
-        // frequency — same reasoning as Udaan's SoundBars.tsx.
         const usableBins = Math.floor(bins.length * 0.5);
         const binsPerBar = Math.max(1, Math.floor(usableBins / BAR_COUNT));
         for (let i = 0; i < BAR_COUNT; i++) {
@@ -82,24 +70,26 @@ export default function CenterVisualizer({
           smoothed[i] += (avg - smoothed[i]) * 0.35;
         }
       } else {
-        for (let i = 0; i < BAR_COUNT; i++) smoothed[i] *= 0.9;
+        for (let i = 0; i < BAR_COUNT; i++) smoothed[i] *= 0.88;
       }
 
-      const gap = width * 0.01;
+      const gap = width * 0.012;
       const barWidth = (width - gap * (BAR_COUNT - 1)) / BAR_COUNT;
 
       for (let i = 0; i < BAR_COUNT; i++) {
-        const level = Math.max(0.05, Math.min(1, smoothed[i] * 1.8));
-        const barHeight = level * height;
+        const level = Math.min(1, smoothed[i] * 1.8);
+        if (level < SILENCE_THRESHOLD) continue;
+
+        const barHeight = Math.max(level * height, barWidth * 0.6);
         const x = i * (barWidth + gap);
         const y = height - barHeight;
 
-        const gradient = ctx2d.createLinearGradient(0, height, 0, 0);
-        gradient.addColorStop(0, accentColor);
-        gradient.addColorStop(1, `color-mix(in srgb, ${accentColor} 55%, white)`);
-        ctx2d.fillStyle = gradient;
+        // Opacity, not color, carries loudness — 35% at a bare whisper up
+        // to fully opaque white at peak, same "hierarchy through opacity"
+        // rule as the rest of the app's monochrome surfaces.
+        ctx2d.fillStyle = `rgba(255,255,255,${0.35 + level * 0.65})`;
 
-        const r = Math.min(barWidth / 2, 4 * dpr);
+        const r = Math.min(barWidth / 2, 3 * dpr);
         ctx2d.beginPath();
         if (typeof ctx2d.roundRect === "function") {
           ctx2d.roundRect(x, y, barWidth, barHeight, r);
