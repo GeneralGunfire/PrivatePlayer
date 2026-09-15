@@ -1,14 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ensureLibraryLoaded, onLibraryLoaded, type Track } from "./data";
+import { useUploadedTracks } from "./use-uploaded-tracks";
 
 /**
- * Reactive view of the live-scanned library (see data.ts / /library.json).
+ * Reactive view of the live-scanned library (see data.ts / /library.json),
+ * merged with any locally-uploaded tracks (see use-uploaded-tracks.ts).
+ * Merged here rather than per-page so every consumer — Home, Search, the
+ * DJ board's deck pickers, playlists — sees uploaded tracks automatically
+ * with no separate wiring.
+ *
  * Components that need to re-render once the async scan resolves use this;
  * code that only needs a synchronous snapshot after the app has already
  * loaded (TrackMenu, use-playlists' idsToTracks) can keep reading the
- * module-level ALL_TRACKS export directly, same as before.
+ * module-level ALL_TRACKS export directly, same as before — that snapshot
+ * intentionally does NOT include uploads, since it's a fire-and-forget
+ * lookup path with no reactive merge step; those call sites only need
+ * tracks that are already playing/queued, which uploaded tracks reach via
+ * their own selectTrack() call, same as any other track.
  *
  * Always starts empty on the FIRST render, full stop — never seeded from
  * the live ALL_TRACKS module value. That module-level array is fetched
@@ -26,6 +36,7 @@ import { ensureLibraryLoaded, onLibraryLoaded, type Track } from "./data";
 export function useLibrary(): { tracks: Track[]; loading: boolean } {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
+  const uploaded = useUploadedTracks();
 
   useEffect(() => {
     ensureLibraryLoaded();
@@ -35,5 +46,7 @@ export function useLibrary(): { tracks: Track[]; loading: boolean } {
     });
   }, []);
 
-  return { tracks, loading };
+  const merged = useMemo(() => [...uploaded.tracks, ...tracks], [uploaded.tracks, tracks]);
+
+  return { tracks: merged, loading: loading || uploaded.loading };
 }

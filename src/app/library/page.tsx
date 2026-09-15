@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Play, Loader2 } from "lucide-react";
+import { Plus, Play, Loader2, Upload, Trash2, Music } from "lucide-react";
 import { usePlaylists } from "@/lib/use-playlists";
+import { usePlayer } from "@/lib/player-context";
+import { useUploadedTracks } from "@/lib/use-uploaded-tracks";
 
 const TAP = { type: "spring" as const, damping: 14, stiffness: 500, mass: 0.4 };
 
 export default function Library() {
   const { playlists, createPlaylist } = usePlaylists();
+  const { tracks: uploadedTracks, uploading, upload, remove } = useUploadedTracks();
+  const { selectTrack, openPlayer } = usePlayer();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -41,6 +46,62 @@ export default function Library() {
           New
         </motion.button>
       </header>
+
+      {/* Upload — stored in IndexedDB (see uploaded-tracks.ts), works
+          fully offline once cached, appears in Home/Search/DJ picker
+          automatically since useLibrary() merges these in. */}
+      <section className="mb-8">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="audio/mpeg,.mp3"
+          multiple
+          className="hidden"
+          onChange={(e) => { if (e.target.files) upload(e.target.files); e.target.value = ""; }}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-white/6 hover:bg-white/9 transition-colors disabled:opacity-60"
+        >
+          {uploading ? <Loader2 size={18} className="animate-spin text-white/60" /> : <Upload size={18} className="text-white/60" />}
+          <span className="text-[15px] font-medium">{uploading ? "Uploading…" : "Upload MP3s"}</span>
+        </button>
+
+        {uploadedTracks.length > 0 && (
+          <div className="mt-3">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40 mb-2">
+              Uploaded · {uploadedTracks.length}
+            </h2>
+            <div>
+              {uploadedTracks.map((track) => (
+                <div
+                  key={track.id}
+                  className="track-row group -mx-3 px-3 py-2.5 flex items-center gap-3 rounded-lg hover:bg-white/4 transition-colors"
+                >
+                  <button
+                    onClick={() => { selectTrack(track, uploadedTracks); openPlayer(); }}
+                    className="flex-1 min-w-0 flex items-center gap-3 text-left"
+                  >
+                    <Music size={16} className="text-white/30 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="font-medium text-[15px] truncate">{track.title}</p>
+                      <p className="text-[13px] text-white/40 truncate">{track.artist}</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => remove(track.id)}
+                    aria-label="Remove upload"
+                    className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-white/25 hover:text-white/70 hover:bg-white/8 transition-colors"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       <AnimatePresence>
         {creating && (
