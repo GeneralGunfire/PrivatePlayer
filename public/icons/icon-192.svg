@@ -1,10 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
   <defs>
-    <linearGradient id="bar-gradient-192" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#8a8a8a" />
+    <linearGradient id="bar-a-192" x1="0" y1="1" x2="0.35" y2="0">
+      <stop offset="0%" stop-color="#5c5c5c" />
+      <stop offset="55%" stop-color="#b8b8b8" />
+      <stop offset="100%" stop-color="#e8e8e8" />
+    </linearGradient>
+    <linearGradient id="bar-b-192" x1="0" y1="1" x2="0.35" y2="0">
+      <stop offset="0%" stop-color="#6e6e6e" />
+      <stop offset="50%" stop-color="#d6d6d6" />
       <stop offset="100%" stop-color="#ffffff" />
     </linearGradient>
+    <linearGradient id="bar-c-192" x1="0" y1="1" x2="0.35" y2="0">
+      <stop offset="0%" stop-color="#525252" />
+      <stop offset="55%" stop-color="#a8a8a8" />
+      <stop offset="100%" stop-color="#dcdcdc" />
+    </linearGradient>
+    <radialGradient id="backdrop-192" cx="0.5" cy="0.38" r="0.75">
+      <stop offset="0%" stop-color="#111111" />
+      <stop offset="100%" stop-color="#040404" />
+    </radialGradient>
   </defs>
-  <rect width="192" height="192" rx="34.56" fill="#060606" />
-  <rect x="46.1" y="61.4" width="23.0" height="80.6" rx="11.5" fill="url(#bar-gradient-192)" /><rect x="84.5" y="11.5" width="23.0" height="130.6" rx="11.5" fill="url(#bar-gradient-192)" /><rect x="122.9" y="46.1" width="23.0" height="96.0" rx="11.5" fill="url(#bar-gradient-192)" />
+  <rect width="192" height="192" rx="34.56" fill="url(#backdrop-192)" />
+  <rect x="51.4" y="65.3" width="16.3" height="61.4" rx="8.2" fill="url(#bar-a-192)" /><rect x="87.8" y="26.9" width="16.3" height="99.8" rx="8.2" fill="url(#bar-b-192)" /><rect x="124.3" y="49.9" width="16.3" height="76.8" rx="8.2" fill="url(#bar-c-192)" />
 </svg>

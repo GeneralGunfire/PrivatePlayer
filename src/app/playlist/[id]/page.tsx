@@ -7,6 +7,7 @@ import { Play, Pause, Shuffle, ListMusic, Pencil, Trash2, Check, X } from "lucid
 import { builtInPlaylists } from "@/lib/data";
 import { usePlayer } from "@/lib/player-context";
 import { usePlaylists } from "@/lib/use-playlists";
+import { useLibrary } from "@/lib/use-library";
 import { usePaged } from "@/lib/use-paged";
 import TrackMenu from "@/components/TrackMenu";
 import { cn } from "@/lib/utils";
@@ -18,11 +19,29 @@ export default function PlaylistPage({ params }: { params: Promise<{ id: string 
   const router = useRouter();
 
   const { playlists, renamePlaylist, deletePlaylist } = usePlaylists();
-  const playlist = playlists.find(p => p.id === id);
-
-  const isBuiltIn = builtInPlaylists().some(p => p.id === id);
-  if (!playlist && !isBuiltIn) notFound();
-  if (!playlist) notFound();
+  // builtInPlaylists() (e.g. "House" — see data.ts) reads the module-level
+  // ALL_TRACKS synchronously and returns [] until the library scan
+  // resolves — on a direct navigation/refresh straight to this URL (not a
+  // client-side Link click from a page that already awaited useLibrary()),
+  // this component's first render(s) can land before that fetch finishes.
+  // Bail out to a loading state rather than resolving "not found yet" into
+  // an actual 404, which used to be a real bug for built-in playlists
+  // specifically (user-created ones don't have this race — see below).
+  const { loading: libraryLoading } = useLibrary();
+  // Built-in playlists never appear in usePlaylists()'s Redis-backed
+  // store, only user-created ones do — this page used to look ONLY in
+  // that store and 404 unconditionally for a built-in id.
+  const playlist = playlists.find(p => p.id === id) ?? builtInPlaylists().find(p => p.id === id);
+  if (!playlist) {
+    if (libraryLoading) {
+      return (
+        <div className="flex items-center justify-center py-24 text-white/40 text-sm">
+          Loading…
+        </div>
+      );
+    }
+    notFound();
+  }
 
   const { currentTrack, isPlaying, selectTrack, togglePlay, openPlayer, shuffle, toggleShuffle } = usePlayer();
   const [renaming, setRenaming] = useState(false);
