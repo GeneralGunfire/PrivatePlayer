@@ -17,7 +17,7 @@
 //     user explicitly pull down every remaining track while online, for
 //     when they genuinely want the whole thing available before going
 //     offline rather than relying on having played everything once.
-const SHELL_CACHE = "pp-shell-v2";
+const SHELL_CACHE = "pp-shell-v3";
 const AUDIO_CACHE = "pp-audio-v1";
 
 const SHELL_ASSETS = [
@@ -116,6 +116,31 @@ function isAudioRequest(url) {
   return url.pathname.startsWith("/music/");
 }
 
+/** Turns a cached full-body Response into a proper 206 Partial Content
+ *  response for the byte range the browser actually asked for — what lets
+ *  seeking on an offline/cached track be instant instead of either
+ *  re-downloading the whole file or failing outright. */
+async function sliceCachedResponseForRange(cachedResponse, rangeHeader) {
+  const buffer = await cachedResponse.arrayBuffer();
+  const totalLength = buffer.byteLength;
+
+  const match = /bytes=(\d*)-(\d*)/.exec(rangeHeader);
+  if (!match) return new Response(buffer, { status: 200, headers: cachedResponse.headers });
+
+  const start = match[1] ? parseInt(match[1], 10) : 0;
+  const end = match[2] ? parseInt(match[2], 10) : totalLength - 1;
+  const safeStart = Math.max(0, Math.min(start, totalLength - 1));
+  const safeEnd = Math.max(safeStart, Math.min(end, totalLength - 1));
+  const slice = buffer.slice(safeStart, safeEnd + 1);
+
+  const headers = new Headers(cachedResponse.headers);
+  headers.set("Content-Range", `bytes ${safeStart}-${safeEnd}/${totalLength}`);
+  headers.set("Content-Length", String(slice.byteLength));
+  headers.set("Accept-Ranges", "bytes");
+
+  return new Response(slice, { status: 206, statusText: "Partial Content", headers });
+}
+
 function isCoverRequest(url) {
   return url.pathname.startsWith("/covers/") || url.pathname.startsWith("/covers-fallback/");
 }
@@ -129,12 +154,33 @@ self.addEventListener("fetch", (event) => {
     // Cache-on-play: serve from cache if present, otherwise fetch and
     // stash a copy for next time. mp3s are immutable once uploaded, so
     // there's no staleness concern with keeping them forever.
+    //
+    // <audio> issues byte-Range requests when seeking/scrubbing — the Cache
+    // API always stores/serves the FULL response body regardless of what
+    // request put it there, and cache.match() on a Range request against a
+    // full-body entry does NOT auto-slice it, it just misses. Left
+    // unhandled, that meant every seek on an offline (or already-cached)
+    // track fell through to a real network fetch — the exact "lag/stutter
+    // while scrubbing" symptom, and a hard failure once actually offline.
+    // Range requests are matched against the cache ignoring the Range
+    // header (ignoreSearch/vary don't apply here, but Range itself isn't
+    // part of Cache API's match key), then sliced into a real 206 Partial
+    // Content response by hand so seeking is instant and works offline.
+    const rangeHeader = event.request.headers.get("range");
     event.respondWith(
       caches.open(AUDIO_CACHE).then(async (cache) => {
-        const cached = await cache.match(event.request);
-        if (cached) return cached;
+        const cached = await cache.match(event.request.url);
+        if (cached) {
+          if (!rangeHeader) return cached;
+          return sliceCachedResponseForRange(cached, rangeHeader);
+        }
         const response = await fetch(event.request);
-        if (response.ok) cache.put(event.request, response.clone());
+        // Only a full 200 response is worth caching — a 206 partial-content
+        // response from a live range request would silently poison the
+        // cache with a truncated file.
+        if (response.ok && response.status === 200) {
+          cache.put(event.request.url, response.clone());
+        }
         return response;
       }),
     );
