@@ -2,9 +2,13 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import type { Track } from "@/lib/data";
-import { onLibraryLoaded } from "@/lib/data";
+import { onLibraryLoaded, ALL_TRACKS } from "@/lib/data";
 import { ensureMasterBus } from "@/lib/dj/audioGraph";
 import { createDeckChain, getDeckDefaults, type EffectChain, type ParamValues } from "@/lib/dj/dsp";
+
+/** Where the currently-playing track/position is checkpointed — see the
+ *  backgrounding-resilience effects below for why. */
+const PLAYBACK_STATE_KEY = "pp.playback-state";
 
 interface PlayerCtx {
   queue:         Track[];
@@ -246,6 +250,50 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     loadAndPlay(resolveUrl(track));
   }, [loadAndPlay]);
 
+  // Restores whatever was checkpointed by the saveState effect above,
+  // loaded-but-paused rather than auto-played — both because mobile
+  // browsers block unprompted autoplay outside a real user gesture (an
+  // auto play() call here would just silently fail) and because "the app
+  // reloaded and immediately started blasting audio" would be its own bad
+  // surprise. This is what turns "iOS discarded the page and playback is
+  // just gone" into "reopen the app, the right track and position are
+  // already loaded, tap play" — the state itself survives even when the
+  // page process doesn't.
+  useEffect(() => {
+    return onLibraryLoaded(() => {
+      if (currentTrackRef.current) return; // something already selected first
+      try {
+        const raw = localStorage.getItem(PLAYBACK_STATE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw) as { trackId: string; positionSeconds: number; savedAt: number };
+        // Ignore anything older than a day — a stale checkpoint from days
+        // ago resuming mid-song on next launch would be more confusing
+        // than just starting fresh.
+        if (!saved.trackId || Date.now() - saved.savedAt > 24 * 60 * 60 * 1000) return;
+        const track = ALL_TRACKS.find((t) => t.id === saved.trackId);
+        if (!track) return;
+
+        const a = audioRef.current;
+        if (!a) return;
+        setCurrentTrack(track);
+        currentTrackRef.current = track;
+        a.src = resolveUrl(track);
+        a.load();
+        const onLoaded = () => {
+          a.removeEventListener("loadedmetadata", onLoaded);
+          if (Number.isFinite(saved.positionSeconds) && saved.positionSeconds > 0) {
+            a.currentTime = saved.positionSeconds;
+            setCurrentTime(saved.positionSeconds);
+            if (a.duration) setProgress((saved.positionSeconds / a.duration) * 100);
+          }
+        };
+        a.addEventListener("loadedmetadata", onLoaded);
+      } catch {
+        // Corrupt/unreadable checkpoint — just don't restore anything.
+      }
+    });
+  }, []);
+
   const advanceQueue = useCallback((dir: 1 | -1) => {
     const q   = queueRef.current;
     const cur = currentTrackRef.current;
@@ -342,6 +390,110 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined" || !("mediaSession" in navigator)) return;
     navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
   }, [isPlaying]);
+
+  // ── Backgrounding resilience ──────────────────────────────────
+  // Two distinct, real mobile problems, both from the same root cause:
+  // playback here runs through a full Web Audio graph (createMediaElementSource
+  // -> DJ effect chain -> analyser -> shared master bus), and browsers —
+  // iOS Safari especially — throttle or fully suspend that processing once
+  // the tab is backgrounded/screen-locked, then resume it lazily, which is
+  // exactly "staticky and takes a while to stabilize, stuttery" on wake.
+  // Under real memory pressure with no signal that this tab is doing
+  // something worth keeping alive, iOS can go further and discard the
+  // whole page, which reloads-from-scratch on return and drops playback
+  // entirely — the second reported bug.
+  //
+  // Screen Wake Lock keeps the screen (and by extension the page) alive
+  // while actively playing — it's not a guarantee against iOS's own tab
+  // eviction under severe memory pressure (no web API can fully prevent
+  // that), but it is a real, standard signal that measurably reduces how
+  // aggressively mobile browsers background/kill an active-media tab, and
+  // costs nothing when unsupported — it silently no-ops rather than throwing.
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("wakeLock" in navigator)) return;
+
+    async function acquire() {
+      try {
+        wakeLockRef.current = await (navigator as Navigator & { wakeLock: WakeLock }).wakeLock.request("screen");
+      } catch {
+        // Not available right now (e.g. tab not visible, battery saver) —
+        // playback itself is unaffected either way.
+      }
+    }
+
+    if (isPlaying) {
+      void acquire();
+    } else {
+      wakeLockRef.current?.release().catch(() => {});
+      wakeLockRef.current = null;
+    }
+
+    return () => {
+      wakeLockRef.current?.release().catch(() => {});
+      wakeLockRef.current = null;
+    };
+  }, [isPlaying]);
+
+  // Re-request the wake lock on return to the tab — the OS/browser
+  // releases it automatically the moment a tab is backgrounded (that's by
+  // design, not a bug to work around), so coming back needs to re-acquire
+  // it rather than assuming the original request is still held.
+  //
+  // Proactively resuming a suspended AudioContext the instant the tab
+  // becomes visible again (rather than waiting for the next play()/state
+  // change to trigger it) is what actually fixes "takes a while to
+  // stabilize" — the context was very likely suspended by the browser
+  // while backgrounded regardless of isPlaying, and resuming it eagerly on
+  // return means real audio processing has already recovered before the
+  // user's ear would otherwise catch it still settling.
+  useEffect(() => {
+    function onVisibilityChange() {
+      if (document.visibilityState !== "visible") return;
+      const ctx = audioCtxRef.current;
+      if (ctx?.state === "suspended") void ctx.resume().catch(() => {});
+      if (isPlaying && "wakeLock" in navigator && !wakeLockRef.current) {
+        void (navigator as Navigator & { wakeLock: WakeLock }).wakeLock
+          .request("screen")
+          .then((sentinel) => { wakeLockRef.current = sentinel; })
+          .catch(() => {});
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [isPlaying]);
+
+  // Playback position is checkpointed to localStorage continuously (light
+  // 250ms throttle piggybacking on the timeupdate listener already firing
+  // every ~100ms above — see PLAYBACK_STATE_KEY below) so that even in the
+  // worst case — iOS genuinely discards the page despite the wake lock —
+  // reopening the (reloaded-from-scratch) app restores the same track and
+  // roughly the same position instead of the user perceiving total
+  // playback loss. This is a real, accepted fallback for a failure mode no
+  // web API can fully prevent, not a substitute for actually staying alive.
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    let lastSave = 0;
+    function saveState() {
+      if (!currentTrackRef.current) return;
+      const now = performance.now();
+      if (now - lastSave < 3000) return;
+      lastSave = now;
+      try {
+        localStorage.setItem(PLAYBACK_STATE_KEY, JSON.stringify({
+          trackId: currentTrackRef.current.id,
+          positionSeconds: a!.currentTime,
+          savedAt: Date.now(),
+        }));
+      } catch {
+        // Storage unavailable/full — resuming exactly where the user left
+        // off just won't work this time; playback itself is unaffected.
+      }
+    }
+    a.addEventListener("timeupdate", saveState);
+    return () => a.removeEventListener("timeupdate", saveState);
+  }, []);
 
   const seek = useCallback((pct: number) => {
     const a = audioRef.current;
