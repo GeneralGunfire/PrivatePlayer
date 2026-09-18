@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bar-gradient-512" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#8a8a8a" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+  </defs>
   <rect width="512" height="512" rx="92.16" fill="#060606" />
-  <rect x="125.4" y="194.6" width="35.8" height="174.1" rx="17.9" fill="#ffffff" /><rect x="186.9" y="71.7" width="35.8" height="297.0" rx="17.9" fill="#ffffff" /><rect x="248.3" y="153.6" width="35.8" height="215.0" rx="17.9" fill="#ffffff" /><rect x="309.8" y="30.7" width="35.8" height="337.9" rx="17.9" fill="#ffffff" /><rect x="371.2" y="112.6" width="35.8" height="256.0" rx="17.9" fill="#ffffff" />
+  <rect x="122.9" y="163.8" width="61.4" height="215.0" rx="30.7" fill="url(#bar-gradient-512)" /><rect x="225.3" y="30.7" width="61.4" height="348.2" rx="30.7" fill="url(#bar-gradient-512)" /><rect x="327.7" y="122.9" width="61.4" height="256.0" rx="30.7" fill="url(#bar-gradient-512)" />
 </svg>

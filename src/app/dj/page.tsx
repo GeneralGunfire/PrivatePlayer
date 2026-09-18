@@ -10,6 +10,7 @@ import { createDeckChain, type ParamSpec } from "@/lib/dj/dsp";
 import { DeckStrip, type DeckLike } from "@/components/dj/DeckStrip";
 import { Crossfader } from "@/components/dj/Crossfader";
 import { MasterSection } from "@/components/dj/MasterSection";
+import { MixAssist } from "@/components/dj/MixAssist";
 import { DeckBPicker } from "@/components/dj/DeckBPicker";
 import type { Track } from "@/lib/data";
 
@@ -109,11 +110,17 @@ export default function DjBoardPage() {
       </div>
 
       {/* Mixer bar — always visible regardless of which deck tab is open */}
-      <div className="flex shrink-0 items-center gap-4 border-b border-white/8 px-4 py-3">
+      <div className="flex shrink-0 items-center gap-4 overflow-x-auto border-b border-white/8 px-4 py-3">
         <div className="min-w-0 flex-1">
           <Crossfader value={crossfade} onChange={setCrossfade} />
         </div>
-        <div className="h-12 w-px bg-white/8" />
+        <div className="h-12 w-px shrink-0 bg-white/8" />
+        <MixAssist
+          trackA={player.currentTrack}
+          trackB={deckB.track}
+          onMatchLoudness={(db) => deckB.setDjEffects({ gain: db })}
+        />
+        <div className="h-12 w-px shrink-0 bg-white/8" />
         <MasterSection settings={master.settings} onChange={master.setSettings} />
       </div>
 

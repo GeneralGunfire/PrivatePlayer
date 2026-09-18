@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MicOff } from "lucide-react";
 import type { Track } from "@/lib/data";
@@ -73,7 +73,9 @@ async function fetchLyrics(track: Track): Promise<LyricsResult | null> {
     if (!r.ok) throw new Error("search failed");
     const results: SearchResult[] = await r.json();
 
-    // Prefer a result with synced lyrics; otherwise take the first with any lyrics.
+    // Prefer a result with synced lyrics (as a source of TEXT — the time
+    // tags aren't used for playback-position tracking any more, see this
+    // component's own doc comment below), otherwise any plain lyrics.
     const best =
       results.find(x => x.syncedLyrics) ??
       results.find(x => x.plainLyrics) ??
@@ -95,9 +97,20 @@ async function fetchLyrics(track: Track): Promise<LyricsResult | null> {
   }
 }
 
+/**
+ * Plain, static lyrics — deliberately NOT synced to playback position.
+ * This used to auto-scroll/highlight the "current" line against
+ * `currentTime`, but lrclib's line timings are matched against a
+ * different (often official) recording than this library's actual
+ * YouTube-derived MP3s, so the highlighted line routinely drifted out of
+ * sync with what was actually playing — worse than no sync at all, since
+ * it actively fought the reader trying to track their own place in the
+ * song by scrolling. This renders the full lyric text (synced-source
+ * lines joined plainly, or the plain-lyrics text directly) as one static
+ * block with completely free scrolling and no moving highlight.
+ */
 export default function LyricsPanel({
   track,
-  currentTime,
   open,
   onClose,
 }: {
@@ -107,8 +120,6 @@ export default function LyricsPanel({
   onClose: () => void;
 }) {
   const [result, setResult] = useState<LyricsResult | null | undefined>(undefined);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const activeLineRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -118,19 +129,7 @@ export default function LyricsPanel({
     return () => { cancelled = true; };
   }, [track.id, open]);
 
-  const activeIndex = (() => {
-    if (!result?.synced) return -1;
-    let idx = -1;
-    for (let i = 0; i < result.synced.length; i++) {
-      if (result.synced[i].time <= currentTime) idx = i;
-      else break;
-    }
-    return idx;
-  })();
-
-  useEffect(() => {
-    activeLineRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [activeIndex]);
+  const lyricsText = result?.plain ?? result?.synced?.map(l => l.text).join("\n") ?? null;
 
   return (
     <AnimatePresence>
@@ -155,7 +154,6 @@ export default function LyricsPanel({
           </div>
 
           <div
-            ref={containerRef}
             className="flex-1 overflow-y-auto scrollbar-none touch-pan-y"
             onClick={e => e.stopPropagation()}
           >
@@ -168,31 +166,14 @@ export default function LyricsPanel({
                   ))}
                 </div>
               </div>
-            ) : !result ? (
+            ) : !lyricsText ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-3 text-white/35">
                 <MicOff size={32} strokeWidth={1.5} />
                 <p className="text-sm font-medium">No lyrics found for this track</p>
               </div>
-            ) : result.synced ? (
-              <div className="space-y-5 py-[35vh]">
-                {result.synced.map((line, i) => (
-                  <p
-                    key={i}
-                    ref={i === activeIndex ? activeLineRef : undefined}
-                    className={
-                      "text-xl font-black uppercase tracking-tight leading-tight transition-all duration-300 " +
-                      (i === activeIndex
-                        ? "text-white opacity-100 scale-100"
-                        : "text-white/25 opacity-70 scale-95")
-                    }
-                  >
-                    {line.text || " "}
-                  </p>
-                ))}
-              </div>
             ) : (
               <div className="py-6 whitespace-pre-line text-lg font-bold leading-relaxed text-white/80">
-                {result.plain}
+                {lyricsText}
               </div>
             )}
           </div>

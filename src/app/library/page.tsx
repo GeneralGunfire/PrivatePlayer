@@ -3,17 +3,24 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Play, Loader2, Upload, Trash2, Music } from "lucide-react";
+import { Plus, Play, Loader2, Upload, Trash2, Music, Pin, DownloadCloud, Check } from "lucide-react";
 import { usePlaylists } from "@/lib/use-playlists";
 import { usePlayer } from "@/lib/player-context";
 import { useUploadedTracks } from "@/lib/use-uploaded-tracks";
+import { useLibrary } from "@/lib/use-library";
+import { usePinned } from "@/lib/use-pinned";
+import { useDownloadAll } from "@/lib/use-download-all";
 
 const TAP = { type: "spring" as const, damping: 14, stiffness: 500, mass: 0.4 };
 
 export default function Library() {
   const { playlists, createPlaylist } = usePlaylists();
   const { tracks: uploadedTracks, uploading, upload, remove } = useUploadedTracks();
+  const { tracks: allTracks } = useLibrary();
+  const { pinnedIds, togglePinned } = usePinned();
   const { selectTrack, openPlayer } = usePlayer();
+  const downloadAll = useDownloadAll();
+  const pinnedTracks = allTracks.filter((t) => pinnedIds.has(t.id));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
@@ -102,6 +109,95 @@ export default function Library() {
           </div>
         )}
       </section>
+
+      {/* Offline — House (14 tracks, ~109MB) is precached automatically
+          on install (see sw.js); the rest of the 214-track/~1.5GB library
+          is cache-on-play (works offline once you've listened to it once
+          online) unless you explicitly pull it all down here. This is the
+          one place that big download actually happens — never automatic,
+          always something the user chose while they had a connection. */}
+      <section className="mb-8">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40 mb-2">
+          Offline
+        </h2>
+        <button
+          onClick={downloadAll.startDownload}
+          disabled={downloadAll.downloading}
+          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-white/6 hover:bg-white/9 transition-colors disabled:opacity-90 text-left"
+        >
+          {downloadAll.downloading ? (
+            <Loader2 size={18} className="animate-spin text-white/60 shrink-0" />
+          ) : downloadAll.done > 0 && downloadAll.done === downloadAll.total ? (
+            <Check size={18} className="text-white/60 shrink-0" />
+          ) : (
+            <DownloadCloud size={18} className="text-white/60 shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            <span className="text-[15px] font-medium block">
+              {downloadAll.downloading
+                ? `Downloading… ${downloadAll.done}/${downloadAll.total}`
+                : downloadAll.done > 0 && downloadAll.done === downloadAll.total
+                  ? "Every song is available offline"
+                  : "Download all songs for offline"}
+            </span>
+            {!downloadAll.downloading && downloadAll.done === 0 && (
+              <span className="text-[12px] text-white/40">
+                ~1.5GB · needs a connection now, plays without one later
+              </span>
+            )}
+          </div>
+        </button>
+        {downloadAll.downloading && (
+          <div className="mt-2 h-1 w-full rounded-full bg-white/8 overflow-hidden">
+            <div
+              className="h-full bg-white/60 transition-[width] duration-300"
+              style={{ width: `${downloadAll.total > 0 ? (downloadAll.done / downloadAll.total) * 100 : 0}%` }}
+            />
+          </div>
+        )}
+        {downloadAll.error && (
+          <p className="mt-2 text-[12px] text-red-400">{downloadAll.error}</p>
+        )}
+      </section>
+
+      {/* Pinned — a standing section, always at the top regardless of
+          which playlist/filter you're in, distinct from the Liked Songs
+          heart toggle (use-favorites.ts). "How Deep Is Your Love" ships
+          pinned by default (see use-pinned.ts). */}
+      {pinnedTracks.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/40 mb-2 flex items-center gap-1.5">
+            <Pin size={11} className="fill-current" />
+            Pinned · {pinnedTracks.length}
+          </h2>
+          <div>
+            {pinnedTracks.map((track) => (
+              <div
+                key={track.id}
+                className="track-row group -mx-3 px-3 py-2.5 flex items-center gap-3 rounded-lg hover:bg-white/4 transition-colors"
+              >
+                <button
+                  onClick={() => { selectTrack(track, pinnedTracks); openPlayer(); }}
+                  className="flex-1 min-w-0 flex items-center gap-3 text-left"
+                >
+                  <Music size={16} className="text-white/30 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-[15px] truncate">{track.title}</p>
+                    <p className="text-[13px] text-white/40 truncate">{track.artist}</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => togglePinned(track.id)}
+                  aria-label="Unpin"
+                  className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/8 transition-colors"
+                >
+                  <Pin size={14} className="fill-current" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <AnimatePresence>
         {creating && (

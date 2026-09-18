@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, Plus, Check, Loader2, X, Download, Heart } from "lucide-react";
+import { MoreHorizontal, Plus, Check, Loader2, X, Download, Heart, Pin } from "lucide-react";
 import { usePlaylists } from "@/lib/use-playlists";
 import { useFavorites } from "@/lib/use-favorites";
+import { usePinned } from "@/lib/use-pinned";
 import { ALL_TRACKS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,9 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
   const menuRef               = useRef<HTMLDivElement>(null);
   const { playlists, toggleTrack } = usePlaylists();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { isPinned, togglePinned } = usePinned();
   const favorited = isFavorite(trackId);
+  const pinned = isPinned(trackId);
 
   // Only show user-created playlists in the add menu (there are no
   // built-in ones any more — every playlist here is user-created).
@@ -96,6 +99,16 @@ export default function TrackMenu({ trackId, currentPlaylistId }: Props) {
               <Heart size={14} className={favorited ? "text-accent-2-bright" : "text-white/60"} fill={favorited ? "currentColor" : "none"} />
             </div>
             <span className="flex-1 text-sm font-medium">{favorited ? "Remove from Favorites" : "Add to Favorites"}</span>
+          </button>
+
+          <button
+            onClick={() => { togglePinned(trackId); setOpen(false); }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/8 active:bg-white/12 transition-colors text-left"
+          >
+            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", pinned ? "bg-accent-2/20" : "bg-white/5")}>
+              <Pin size={14} className={pinned ? "text-accent-2-bright" : "text-white/60"} fill={pinned ? "currentColor" : "none"} />
+            </div>
+            <span className="flex-1 text-sm font-medium">{pinned ? "Unpin from Library" : "Pin to Library"}</span>
           </button>
 
           <button

@@ -3,6 +3,7 @@
 import { AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { usePlayer } from "@/lib/player-context";
+import { useSwipeNav } from "@/lib/use-swipe-nav";
 import TopNav from "@/components/TopNav";
 import MiniPlayer from "@/components/MiniPlayer";
 import PlayerView from "@/components/PlayerView";
@@ -15,6 +16,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   // just be a second, conflicting transport bar stacked on top of the
   // mixer's own.
   const isDjBoard = pathname === "/dj";
+  // Swipe left/right between top-level pages — disabled internally while
+  // on /dj (see the hook's own comment); still active while the expanded
+  // PlayerView is open since that view has no competing horizontal drag
+  // gesture of its own to fight.
+  useSwipeNav();
 
   return (
     <>

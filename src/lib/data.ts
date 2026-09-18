@@ -110,13 +110,52 @@ if (typeof window !== "undefined") {
   ensureLibraryLoaded();
 }
 
+// Track IDs are base64url(filename) with padding stripped — see
+// scripts/build-library.mjs. Listed by filename in the comment so this
+// stays readable/editable without having to decode anything by hand.
+const HOUSE_PLAYLIST_TRACK_IDS = [
+  "QmV0dGVyIE9mZiBBbG9uZS5tcDM", // Better Off Alone.mp3
+  "RG9uZSB0ZWxsIGVtLm1wMw", // Done tell em.mp3
+  "RnJlZSBZb3VyIE1pbmQubXAz", // Free Your Mind.mp3
+  "SG93IGRlZXAgaXMgeW91ciBsb3ZlLm1wMw", // How deep is your love.mp3
+  "S2F2a2F6IC0gU3Rhcmx5Lm1wMw", // Kavkaz - Starly.mp3
+  "TWFzc2l2ZSBEcmFrZS5tcDM", // Massive Drake.mp3
+  "TXkgRGVzdGlueS5tcDM", // My Destiny.mp3
+  "TXkgTG92ZSBSb3V0ZSA5NC5tcDM", // My Love Route 94.mp3
+  "U2hvdyBNZSBMb3ZlIFJvYmluIFMubXAz", // Show Me Love Robin S.mp3
+  "U3VnYXIgYW5kIEJyb3duaWVzLm1wMw", // Sugar and Brownies.mp3
+  "VGhlIGNvbG9yIFZpb2xldCBUb3J5IExhbmV6Lm1wMw", // The color Violet Tory Lanez.mp3
+  "V29ybGQsIEhvbGQgb24gQm9iIFNpbmNsYWlyLm1wMw", // World, Hold on Bob Sinclair.mp3
+  "Q2FsdmluIEhhcnJpcywgUmloYW5uYSAtIFRoaXMgSXMgV2hhdCBZb3UgQ2FtZSBGb3IgKE9mZmljaWFsIFZpZGVvKS5tcDM", // This Is What You Came For (Calvin Harris, Rihanna)
+  "QmVsaWV2ZSBNZSBieSBOYXZvcy5tcDM", // Believe Me by Navos
+];
+
 /**
- * No built-in/featured playlists (the old "Featured Coldplay" auto-playlist
- * was removed per explicit request) — every playlist a user sees is one
- * they created themselves. Kept as a function (not a plain []) so callers
- * that expect this shape keep working if a real built-in playlist is ever
- * reintroduced.
+ * One built-in playlist — "House" — baked into the static build rather
+ * than a user-created (Redis-backed) one, per explicit request that it
+ * "should appear on all devices" and be there "when user is installing
+ * app": a built-in playlist ships in the bundle itself (same as the
+ * library, see data.ts's own module comment), so it's there offline and
+ * on first install with no network round trip or per-device account state
+ * required. The old "Featured Coldplay" auto-playlist was removed per an
+ * earlier explicit request, but that was about not auto-generating
+ * playlists from taste — a real one the user asked for by name is a
+ * different thing. User-created playlists (the "pl_" ones from
+ * use-playlists.ts) still work exactly as before, layered on top of this.
  */
 export function builtInPlaylists(): Playlist[] {
-  return [];
+  const tracks = HOUSE_PLAYLIST_TRACK_IDS
+    .map((id) => ALL_TRACKS.find((t) => t.id === id))
+    .filter((t): t is Track => Boolean(t));
+
+  if (tracks.length === 0) return [];
+
+  return [
+    {
+      id: "house",
+      name: "House",
+      coverUrl: tracks[0].coverUrl,
+      tracks,
+    },
+  ];
 }
